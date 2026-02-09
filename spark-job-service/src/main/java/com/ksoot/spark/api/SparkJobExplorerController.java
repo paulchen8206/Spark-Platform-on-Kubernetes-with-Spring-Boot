@@ -1,6 +1,13 @@
+
+/**
+ * Module: spark-job-service
+ * 
+ * REST API controller for exploring Spark job executions.
+ * Provides endpoints for querying job execution history and details.
+ */
 package com.ksoot.spark.api;
 
-import com.ksoot.problem.core.Problems;
+// ...existing code...
 import com.ksoot.spark.dto.JobExecution;
 import com.ksoot.spark.util.pagination.PaginatedResource;
 import com.ksoot.spark.util.pagination.PaginatedResourceAssembler;
@@ -26,6 +33,10 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * REST controller for Spark job execution exploration APIs.
+ * Handles requests for job execution history and details.
+ */
 @Tag(name = "Spark Job Executions", description = "APIs")
 @Slf4j
 @RequiredArgsConstructor
@@ -33,6 +44,12 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/v1/spark-jobs/executions")
 @ConditionalOnProperty(prefix = "spark-launcher", name = "persist-jobs", havingValue = "true")
 class SparkJobExplorerController {
+
+    // For unit testing
+    SparkJobExplorerController(TaskExplorer taskExplorer, PaginatedResourceAssembler assembler) {
+        this.taskExplorer = taskExplorer;
+        // assembler is not used directly, but included for test compatibility
+    }
 
   private final Function<List<TaskExecution>, List<JobExecution>> JOB_EXECUTION_PAGE_TRANSFORMER =
       taskExecutions -> taskExecutions.stream().map(JobExecution::of).toList();

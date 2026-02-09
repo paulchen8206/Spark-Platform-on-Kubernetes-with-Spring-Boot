@@ -1,5 +1,13 @@
+
+/**
+ * Module: spark-batch-sales-report-job
+ * 
+ * Entry point for the Sales Report Spark batch job.
+ * Implements Spring Cloud Task for batch processing.
+ */
 package com.ksoot.spark.sales;
 
+// ...existing code...
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +20,10 @@ import org.springframework.cloud.task.configuration.EnableTask;
 import org.springframework.context.annotation.Bean;
 import org.springframework.kafka.annotation.EnableKafka;
 
+/**
+ * Main class for the Sales Report Spark batch job.
+ * Handles initialization and data population.
+ */
 @Slf4j
 @EnableTask
 @EnableKafka
@@ -19,13 +31,13 @@ import org.springframework.kafka.annotation.EnableKafka;
 public class SalesReportJob {
 
   @Value("${ksoot.hadoop-dll:null}")
-  private String hadoopDll;
+  String hadoopDll;
 
   public static void main(String[] args) {
     SpringApplication.run(SalesReportJob.class, args);
   }
 
-  @Autowired private DataPopulator dataPopulator;
+  @Autowired DataPopulator dataPopulator;
 
   @PostConstruct
   public void init() {

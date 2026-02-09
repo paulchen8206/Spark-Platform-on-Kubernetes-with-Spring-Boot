@@ -268,9 +268,14 @@ This is a Spring Cloud Task feature, for details refer to [documentation](https:
 ## Licence
 Open source [**The MIT License**](http://www.opensource.org/licenses/mit-license.php)
 
+## License
+Open source [**MIT License**](https://opensource.org/licenses/MIT)
+
 ## Author
-[**Rajveer Singh**](https://www.linkedin.com/in/rajveer-singh-589b3950/), In case you find any issues or need any support, please email me at raj14.1984@gmail.com.
-Give it a :star: on [Github](https://github.com/officiallysingh/spring-boot-spark-kubernetes) and a :clap: on [**medium.com**](https://officiallysingh.medium.com/spark-spring-boot-starter-e206def765b9) if you find it helpful.
+[**Rajveer Singh**](https://www.linkedin.com/in/rajveer-singh-589b3950/)  
+Email: raj14.1984@gmail.com  
+If you find any issues or need support, please reach out.  
+Give it a :star: on [GitHub](https://github.com/officiallysingh/spring-boot-spark-kubernetes) and a :clap: on [Medium](https://officiallysingh.medium.com/spark-spring-boot-starter-e206def765b9) if you find it helpful.
 
 ## References
 - [Apache Spark](https://spark.apache.org/docs/3.5.3)

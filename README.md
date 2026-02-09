@@ -357,12 +357,14 @@ On Minikube or Kubernetes you may need to do port forwarding to access it, and i
 **Possible cause**: The error message indicates that your Spark application is trying to access an internal Java class (sun.nio.ch.DirectBuffer) in the java.base module, which is not exported to Spark’s unnamed module. This issue arises because Java modules introduced in JDK 9 restrict access to internal APIs.  
 **Solution**: Add VM option `--add-exports java.base/sun.nio.ch=ALL-UNNAMED`
 
-## Licence
-Open source [**The MIT License**](http://www.opensource.org/licenses/mit-license.php)
+## License
+Open source [**MIT License**](https://opensource.org/licenses/MIT)
 
 ## Author
-[**Rajveer Singh**](https://www.linkedin.com/in/rajveer-singh-589b3950/), In case you find any issues or need any support, please email me at raj14.1984@gmail.com.
-Give it a :star: on [Github](https://github.com/officiallysingh/spring-boot-spark-kubernetes) and a :clap: on [**medium.com**](https://officiallysingh.medium.com/spark-spring-boot-starter-e206def765b9) if you find it helpful.
+[**Rajveer Singh**](https://www.linkedin.com/in/rajveer-singh-589b3950/)  
+Email: raj14.1984@gmail.com  
+If you find any issues or need support, please reach out.  
+Give it a :star: on [GitHub](https://github.com/officiallysingh/spring-boot-spark-kubernetes) and a :clap: on [Medium](https://officiallysingh.medium.com/spark-spring-boot-starter-e206def765b9) if you find it helpful.
 
 ## References
 - [Bitnami Helm package for Apache Spark](https://github.com/bitnami/charts/tree/main/bitnami/spark/#bitnami-package-for-apache-spark)

@@ -1,4 +1,6 @@
 {
+  // OpenAPI specification for Spark Job Service APIs
+  // Provides endpoints for submitting, stopping, and querying Spark jobs
   "openapi": "3.0.1",
   "info": {
     "title": "OpenAPI definition",

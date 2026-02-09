@@ -1,5 +1,13 @@
+
+/**
+ * Module: spark-stream-logs-analysis-job
+ * 
+ * Entry point for the Log Analysis Spark streaming job.
+ * Implements Spring Cloud Task for streaming log analysis.
+ */
 package com.ksoot.spark.loganalysis;
 
+// ...existing code...
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -12,6 +20,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
+/**
+ * Main class for the Log Analysis Spark streaming job.
+ * Handles initialization and pipeline execution.
+ */
 @Slf4j
 @EnableTask
 @EnableKafka
@@ -20,7 +32,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 public class LogAnalysisJob {
 
   @Value("${ksoot.hadoop-dll:null}")
-  private String hadoopDll;
+  String hadoopDll;
 
   public static void main(String[] args) {
     SpringApplication.run(LogAnalysisJob.class, args);

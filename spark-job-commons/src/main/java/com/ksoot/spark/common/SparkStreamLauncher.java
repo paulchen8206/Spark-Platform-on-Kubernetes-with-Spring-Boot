@@ -1,5 +1,13 @@
+
+/**
+ * Module: spark-job-commons
+ * 
+ * Provides utilities for launching and managing Spark streaming jobs with fault-tolerant mechanisms.
+ * Handles retries and execution management for streaming queries.
+ */
 package com.ksoot.spark.common;
 
+// ...existing code...
 import com.ksoot.spark.common.util.StreamRetryableException;
 import java.util.concurrent.TimeoutException;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +20,9 @@ import org.springframework.core.task.TaskExecutor;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 
+/**
+ * Launches and manages Spark streaming jobs with retry and execution management.
+ */
 @Log4j2
 @RequiredArgsConstructor
 public class SparkStreamLauncher {
