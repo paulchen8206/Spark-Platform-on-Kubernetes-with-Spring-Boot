@@ -38,6 +38,7 @@
    - MongoDB and ArangoDB are available for job-specific data needs.
 
 ## 1.2. Deployment to Kubernetes (Detailed)
+### Option 1: Standard kubectl Deployment
 1. **Build Docker images:**
    - Each module has a `Dockerfile`. Build images for all Spark jobs and services:
      ```sh
@@ -101,134 +102,42 @@
    - Use `kubectl logs <pod>`, `kubectl describe <pod>`, and your Kubernetes dashboard for troubleshooting.
    - Scale deployments and manage resources as needed.
 
-
-
-# 2. Project Summary
-
-This project is a unified framework for building, running, and managing Apache Spark jobs with Spring Boot, supporting both local and Kubernetes deployments. It includes:
-
-## 2.1. Main Components
-- **spark-batch-sales-report-job**: Example Spark batch job with Spring Boot integration.
-- **spark-stream-logs-analysis-job**: Example Spark streaming job with Spring Boot integration.
-- **spark-job-service**: RESTful API service for submitting and managing Spark jobs.
-- **spark-job-commons**: Shared libraries and utilities for Spark jobs.
-- **Conduktor Platform**: Kafka monitoring and management UI, integrated via Docker Compose.
-- **Kafka, Zookeeper, PostgreSQL, MongoDB, ArangoDB**: Supporting services for data processing, storage, and messaging, all orchestrated with Docker Compose.
-
-See below for details on each component and how to get started.
-
-## 2.2. Conduktor Platform Integration
-
-This project integrates the [Conduktor Platform](https://www.conduktor.io/) for advanced Apache Kafka monitoring and management. Conduktor provides a powerful UI to manage Kafka clusters, topics, consumers, producers, and more. It also supports user authentication, auditing, and persistent storage with PostgreSQL.
-
-## 2.3. Features
-- Visualize and manage Kafka clusters
-- Monitor topics, partitions, and consumer groups
-- Submit and track Kafka jobs
-- User authentication and role management
-- Persistent storage with PostgreSQL
-
-## 2.4. Usage
-- The Conduktor service is defined in `docker-compose.yml` and runs on port 8081.
-- Default admin credentials are set via environment variables (`CDK_ADMIN_EMAIL`, `CDK_ADMIN_PASSWORD`).
-- Access the UI at [http://localhost:8081](http://localhost:8081) after starting the stack.
-
-See the `docker-compose.yml` for configuration details and environment variables.
-
-
-
-# 3. Unified Framework for Building Spark Jobs with Spring Boot and Running on Local and Kubernetes
-An innovative approach to implementing Spark Jobs with Spring Boot ecosystem, enabling developer-friendly environment. 
-It integrates cross-cutting concerns as reusable libraries to minimize boilerplate code. 
-Moreover, the framework supports one-click deployment of Spark jobs with RESTful APIs, making it a breeze to run jobs locally, on Minikube or Kubernetes.  
-
-![Thumbnail](img/Thumbnail.png)
-
-## 3.1. Apache Spark overview
-[Apache Spark](https://spark.apache.org/docs/3.5.3/index.html) is a distributed computing framework designed for fast and efficient large-scale data processing.  
-Its architecture enables in-memory computing, making it significantly faster than traditional disk-based systems like Hadoop MapReduce.  
-Here’s a brief breakdown of Spark’s architecture:
-
-1. **Core Components**
-- Driver: The driver is the central control unit that coordinates the execution of tasks. It:
-  - Converts user-defined code into tasks.
-  - Distributes these tasks across executors.
-  - Tracks the progress and status of the tasks.
-- Executors: These are worker processes running on cluster nodes. They:
-  - Execute the tasks assigned by the driver.
-  - Store data partitions in memory or disk, enabling iterative computations.
-- Cluster Manager: Spark relies on a cluster manager (e.g., YARN, Mesos and Kubernetes etc.) to manage resources and schedule jobs across the cluster.
-
-2. **Resilient Distributed Dataset (RDD)**  
-At the core of Spark’s architecture is the RDD, a fault-tolerant and immutable distributed collection of objects.  
-RDDs allow parallel operations and automatic recovery from node failures.  
-The Latest Spark versions have introduced and recommend DataFrames and Datasets, which are back by RDD.
-
-3. **Key Abstractions**
-- **Transformations**: Operations like map() or filter() create a new RDD from an existing one. Transformations are lazy and executed only when an action is called.
-- **Actions**: Operations like reduce() or collect() trigger the computation of RDDs and return a result.
-
-4. **Execution Workflow**
-- Spark splits the execution of a job into stages.
-- Within each stage, tasks are executed in parallel across the cluster.
-- The Directed Acyclic Graph (DAG) Scheduler optimizes task execution by constructing a dependency graph of RDD transformations.
-
-**Apache Spark Distributed Architecture** from [Spark in Action](https://www.manning.com/books/spark-in-action-second-edition).
-![Spark Architecture](img/Spark_Architecture.png)
-
-## 3.2.Introduction
-Spring Boot has become de-facto standard for Java application developement. It offers a robust framework for building scalable, enterprise-grade applications.
-It could be tedious to build Spark Jobs using Spring boot and deployment on local and Kubernetes.
-This framework aims to simplify this process by providing a unified solution for building Spark jobs with Spring Boot, running locally and deployment on Minikube or Kubernetes.
-
-## 3.3. Installation
-### 3.3.1. Prerequisites
-- Java 21, Spark 4.0.0 now supports Java 21. See [Spark Java compatibility](https://spark.apache.org/docs/latest/#downloading).
-- [Maven](https://maven.apache.org), Make sure environment variable `M2_REPO` is set to local maven repository `<your user home>/.m2/repository`.
-- [Scala 2.13.14](https://www.scala-lang.org/download/2.13.14.html)
-- [Spark 4.0.0](https://spark.apache.org/docs/4.0.0), Make sure environment variable `SPARK_HOME` is set to local spark installation.
-- [Docker](https://www.docker.com), Make sure Docker is allocated with enough resources.
-- [Minikube](https://minikube.sigs.k8s.io/docs/), Make sure Docker is allocated with enough resources.
-- IDE (IntelliJ, Eclipse or VS Code), Recommended [IntelliJ IDEA](https://www.jetbrains.com/idea).
-- Optional [Configure Formatter in intelliJ](https://github.com/google/google-java-format/blob/master/README.md#intellij-android-studio-and-other-jetbrains-ides), refer to [fmt-maven-plugin](https://github.com/spotify/fmt-maven-plugin) for details.
-
-#### 3.3.2. Java
-Recommended [sdkman](https://sdkman.io/install/) for managing Java, Scala installations.
-Make sure `JAVA_HOME` set to Java 21 installation path and `PATH` variable contains entry for `$JAVA_HOME/bin`
-Check Java version as follows. It should look like following, showing major version 21.
-```shell
-% java -version
-openjdk version "21.0.2" 2026-01-15
-OpenJDK Runtime Environment Temurin-21.0.2+13 (build 21.0.2+13)
-OpenJDK 64-Bit Server VM Temurin-21.0.2+13 (build 21.0.2+13, mixed mode)
-```
-
-#### 3.3.3. Scala
-Check Scala version as follows. It should look like following, showing scala version 2.13.14.
-```shell
-% scala -version
-Scala code runner version 2.13.14 -- Copyright 2002-2026, LAMP/EPFL and Lightbend, Inc.
-```
-
-#### 3.3.4. Spark
-Download and extract [spark-4.0.0-bin-hadoop3](https://archive.apache.org/dist/spark/spark-4.0.0/spark-4.0.0-bin-hadoop3.tgz) on your machine and set the following environment variables.
-```shell
-export SPARK_HOME="/<your directory>/spark-4.0.0-bin-hadoop3"
-export SPARK_CONF_DIR=$SPARK_HOME/conf
-export PATH="$SPARK_HOME/bin:$PATH"
-```
-
-### 3.4. Environment setup
-The demo jobs and `spark-job-service` need following services up and running.
-- Make sure **Postgres** is running at `localhost:5432` with username `postgres` and password `admin`.  
-  Create databases `spark_jobs_db` and `error_logs_db` if they do not exist.
-- Make sure **MongoDB** running at `localhost:27017`.
-- Make sure **ArangoDB** running at `localhost:8529` with `root` password as `admin`.
-- Make sure **Kafka** running with bootstrap servers `localhost:9092`.
-- Make sure **Kafka UI** running at `http://localhost:8100`. Create topics `job-stop-requests` and `error-logs` if they do not exist.
+### Option 2: Helm Chart Deployment
+1. **Configure environment-specific values:**
+   - Edit or review the provided values files in `helm/` (e.g., `values-dev.yaml`, `values-qa.yaml`, `values-stg.yaml`, `values-prd.yaml`).
+2. **Package or use the Helm chart directly:**
+   - From the project root:
+     ```sh
+     helm dependency update ./helm
+     # (optional) helm package ./helm
+     ```
+3. **Install or upgrade the release for your environment:**
+   - For DEV:
+     ```sh
+     helm install my-release ./helm -f helm/values-dev.yaml
+     # or upgrade
+     helm upgrade my-release ./helm -f helm/values-dev.yaml
+     ```
+   - For QA, STG, PRD: use the corresponding values file.
+4. **Check deployment status:**
+   ```sh
+   helm list
+   kubectl get pods
+   kubectl get svc
+   ```
+5. **Rollback or uninstall if needed:**
+   ```sh
+   helm rollback my-release <revision>
+   helm uninstall my-release
+   ```
+6. **Customize further:**
+   - Add or override values with `--set key=value` or additional `-f` files as needed.
 
 > [!IMPORTANT]  
 > It is recommended to have port numbers same as mentioned above, otherwise you may need to change at multiple places i.e. in job's `application-local.yml`, `spark-job-service` application ymls and deployment yml etc.
+
+> [!IMPORTANT]  
+> While using docker compose make sure the required ports are free on your machine, otherwise port busy error could be thrown.
 
 #### 3.5. Manual
 All these services can be installed locally on your machine, and should be accessible at above-mentioned urls and credentials (wherever applicable).
@@ -530,4 +439,3 @@ All main modules include mock-based unit tests in their `src/test/java` folders.
 - Use [Minikube](https://minikube.sigs.k8s.io/docs/) for local Kubernetes testing.
 - Use [skaffold](https://skaffold.dev/) or similar tools for rapid build/deploy cycles.
 - Store secrets and sensitive configs in Kubernetes Secrets, not in plain manifests.
-- For production, configure persistent storage, resource limits, and health checks.

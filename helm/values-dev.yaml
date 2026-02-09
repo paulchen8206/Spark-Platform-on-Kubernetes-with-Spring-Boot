@@ -1,0 +1,11 @@
+# Environment-specific values for DEV
+conduktor:
+  adminEmail: dev-admin@company.com
+  adminPassword: devpass
+  service:
+    nodePort: 30081
+postgresql:
+  auth:
+    password: devpassword
+image:
+  tag: dev

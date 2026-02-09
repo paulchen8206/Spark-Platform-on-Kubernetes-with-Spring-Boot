@@ -1,0 +1,54 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: conduktor
+spec:
+  type: {{ .Values.conduktor.service.type }}
+  ports:
+    - port: {{ .Values.conduktor.service.port }}
+      targetPort: 8080
+      nodePort: {{ .Values.conduktor.service.nodePort }}
+  selector:
+    app: conduktor
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: conduktor
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: conduktor
+  template:
+    metadata:
+      labels:
+        app: conduktor
+    spec:
+      containers:
+        - name: conduktor
+          image: {{ .Values.conduktor.image.repository }}:{{ .Values.conduktor.image.tag }}
+          imagePullPolicy: {{ .Values.conduktor.image.pullPolicy }}
+          env:
+            - name: CDK_ADMIN_EMAIL
+              value: {{ .Values.conduktor.adminEmail | quote }}
+            - name: CDK_ADMIN_PASSWORD
+              value: {{ .Values.conduktor.adminPassword | quote }}
+            - name: DATABASE_URL
+              value: "jdbc:postgresql://postgres:5432/conduktor"
+            - name: DATABASE_USERNAME
+              value: "conduktor"
+            - name: DATABASE_PASSWORD
+              value: "yourpassword"
+            - name: DATABASE_TYPE
+              value: "postgresql"
+          ports:
+            - containerPort: 8080
+          volumeMounts:
+            - name: conduktor-config
+              mountPath: /opt/conduktor/default-platform-config.yaml
+              subPath: default-platform-config.yaml
+      volumes:
+        - name: conduktor-config
+          configMap:
+            name: conduktor-config

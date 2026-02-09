@@ -1,0 +1,11 @@
+# Environment-specific values for STG
+conduktor:
+  adminEmail: stg-admin@company.com
+  adminPassword: stgpass
+  service:
+    nodePort: 30083
+postgresql:
+  auth:
+    password: stgpassword
+image:
+  tag: stg

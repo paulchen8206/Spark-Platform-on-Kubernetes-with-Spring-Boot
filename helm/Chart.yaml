@@ -1,0 +1,10 @@
+apiVersion: v2
+name: spark-springboot-platform
+version: 0.1.0
+description: A Helm chart for deploying the Spark + Spring Boot + Conduktor platform
+keywords:
+- spark
+- springboot
+- kafka
+- conduktor
+- kubernetes

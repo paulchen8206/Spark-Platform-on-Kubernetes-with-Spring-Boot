@@ -1,0 +1,46 @@
+# Default values for spark-springboot-platform Helm chart.
+# This file is a starting point and should be customized as needed.
+
+replicaCount: 1
+image:
+  repository: myrepo/spark-batch-sales-report-job
+  tag: latest
+  pullPolicy: IfNotPresent
+conduktor:
+  image:
+    repository: conduktor/conduktor-console
+    tag: 1.28.0
+    pullPolicy: IfNotPresent
+  adminEmail: user@discounttire.com
+  adminPassword: admin
+  service:
+    type: NodePort
+    port: 8080
+    nodePort: 30081
+postgresql:
+  enabled: true
+  image:
+    repository: postgres
+    tag: 15.15
+  auth:
+    username: conduktor
+    password: yourpassword
+    database: conduktor
+  service:
+    port: 5432
+kafka:
+  enabled: true
+  image:
+    repository: confluentinc/cp-kafka
+    tag: 7.3.2
+  service:
+    port: 9092
+zookeeper:
+  enabled: true
+  image:
+    repository: confluentinc/cp-zookeeper
+    tag: 7.3.2
+  service:
+    port: 2181
+
+# Add more values as needed for MongoDB, ArangoDB, and other services.
