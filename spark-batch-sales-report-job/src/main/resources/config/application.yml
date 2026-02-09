@@ -1,0 +1,161 @@
+# ===================================================================
+# Spring Boot configuration.
+#
+# This configuration will be overridden by the Spring profile you use,
+# for example application-dev.yml if you use the "dev" profile.
+#
+# Full reference for Standard Spring Boot properties is available at:
+# http://docs.spring.io/spring-boot/docs/current/reference/html/common-application-properties.html
+# ===================================================================
+# set -Dspring.profiles.active=<dev|sit|int> as JVM argument to run in desired profile
+# If no profile is specified explicitly, application will fall back to default profile, which is "local"
+
+spring:
+  application:
+    name: sales-report-job
+  autoconfigure:
+    exclude: org.springframework.boot.autoconfigure.gson.GsonAutoConfiguration
+  cloud:
+    task:
+      initialize-enabled: ${ksoot.job.persist}
+      external-execution-id: ${ksoot.job.correlation-id}
+  main:
+    log-startup-info: true
+
+  #------------------------- Kafka configuration -------------------------
+  kafka:
+    producer:
+      bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+    consumer:
+      bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+#      group-id: spark-jobs-group
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      auto-offset-reset: earliest
+
+  #------------------------- Postgres configuration -------------------------
+  datasource:
+    url: ${POSTGRES_URL:jdbc:postgresql://localhost:5432/spark_jobs_db}
+    username: ${POSTGRES_USER:postgres}
+    password: ${POSTGRES_PASSWORD:admin}
+    hikari:
+      pool-name: pg-connection-pool
+      maximum-pool-size: 32
+      minimum-idle: 8
+  jpa:
+#    defer-datasource-initialization: true
+    hibernate:
+      ddl-auto: validate
+    database: POSTGRESQL
+    open-in-view: false
+    show-sql: false
+    properties:
+      '[hibernate.show_sql]': false
+      '[hibernate.format_sql]': true
+      '[hibernate.use_sql_comments]': true
+      '[hibernate.jdbc.time_zone]': UTC
+      '[integration.envers.enabled]': true
+      '[hibernate.enable_lazy_load_no_trans]': true
+  #------------------------- MongoDB configuration -------------------------
+  data:
+    mongodb:
+      uri: ${MONGODB_URL:mongodb://localhost:27017}
+      database: ${MONGODB_DATABASE:sales_db}
+      auto-index-creation: false
+      uuid-representation: standard
+
+#------------------------- ArangoDB configuration -------------------------
+arangodb:
+  spring:
+    data:
+      hosts: ${ARANGODB_URL:localhost:8529}
+      user: ${ARANGODB_USER:root}
+      password: ${ARANGODB_PASSWORD:admin}
+      database: ${ARANGODB_DATABASE:products_db}
+
+#------------------------- Logging configuration -------------------------
+logging:
+  level:
+    ROOT: info
+    '[org.mongodb.driver]': warn
+    '[org.apache.spark]': warn
+    '[org.apache.hadoop]': warn
+    '[org.sparkproject]': warn
+    '[org.apache.spark.ui]': info
+    '[org.springframework.cloud.task]': debug
+    '[com.mongodb.spark.sql.connector.read.partitioner.Partitioner]': warn
+    '[org.apache.kafka.clients.admin.KafkaAdminClient]': error
+    '[org.apache.kafka.clients]': error
+debug: false
+
+#------------------------- Spark configurations -------------------------
+spark:
+  app.name: ${spring.application.name}
+  master: k8s://https://kubernetes.default.svc
+  driver:
+    memory: 2g
+    cores: 2
+  executor:
+    instances: 2
+    memory: 2g
+    cores: 2
+  ui:
+    enabled: true
+  sql:
+    streaming:
+      checkpointLocation: ${CHECKPOINT_LOCATION:spark-space/checkpoints}
+      forceDeleteTempCheckpointLocation: true
+    adaptive:
+      enabled: true
+  checkpoint:
+    compress: true
+  hadoop:
+    fs:
+      s3a:
+        access.key: ${AWS_ACCESS_KEY:<put your aws access key>}
+        secret.key: ${AWS_SECRET_KEY:<put your aws secret key>}
+        endpoint: ${AWS_S3_ENDPOINT:<put your aws s3 endpoint>}
+        impl: org.apache.hadoop.fs.s3a.S3AFileSystem
+        path.style.access: true  # For path-style access, useful in some S3-compatible services
+        connection.ssl.enabled: true  # Enable SSL
+        fast.upload: true  # Enable faster uploads
+    google.cloud.auth.service.account.json.keyfile: ${GCS_KEY_FILE:<put your sa-key.json>}
+
+# ===================================================================
+# Application specific properties
+# Add your own application properties here
+# ===================================================================
+
+#------------------------- Job configurations -------------------------
+ksoot:
+#  Applicable only while running on Windows machine, replace ${HOME} with your directory
+  hadoop-dll: ${HOME}/hadoop-3.0.0/bin/hadoop.dll
+  job:
+    month: ${STATEMENT_MONTH:}
+    correlation-id: ${CORRELATION_ID:${spring.application.name}-1}
+    persist: ${PERSIST_JOB:false}
+    job-stop-topic: ${JOB_STOP_TOPIC:job-stop-requests}
+  connector:
+    save-mode: Append
+    output-mode: Update
+    mongo-options:
+      url: ${MONGODB_URL:mongodb://localhost:27017}
+      database: ${MONGODB_DATABASE:sales_db}
+    arango-options:
+      endpoints: ${ARANGODB_URL:localhost:8529}
+      database: ${ARANGODB_DATABASE:products_db}
+      username: ${ARANGODB_USER:root}
+      password: ${ARANGODB_PASSWORD:admin}
+      ssl-enabled: false
+      ssl-cert-value: ""
+      cursor-ttl: PT5M # 5 minutes, see the ISO 8601 standard for java.time.Duration String patterns
+    file-options:
+      format: csv
+      header: true
+      path: ${SPARK_OUTPUT_PATH:spark-space/output}
+      merge: true
+    kafka-options:
+      bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+      fail-on-data-loss: ${KAFKA_FAIL_ON_DATA_LOSS:false}

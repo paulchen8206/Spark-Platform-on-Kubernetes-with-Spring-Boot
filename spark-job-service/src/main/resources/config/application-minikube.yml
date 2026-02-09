@@ -1,0 +1,76 @@
+spring:
+  kafka:
+    producer:
+      # Change the ip to `minikube ip`
+      bootstrap-servers: localhost:9092
+    consumer:
+      # Change the ip to `minikube ip`
+      bootstrap-servers: localhost:9092
+  datasource:
+    # Change the ip to `minikube ip`
+    url: jdbc:postgresql://localhost:5432/spark_jobs_db
+
+logging:
+  logback:
+    rollingpolicy:
+      clean-history-on-start: true
+  file:
+    path: logs
+    name: ${logging.file.path}/application.log
+  level:
+    ROOT: info
+    org.apache.spark: warn
+    org.apache.hadoop: warn
+    org.sparkproject: warn
+debug: false
+
+#------------------------- Spark configurations -------------------------
+spark:
+  # Need to change this whenever minikube is restarted. Find using `kubectl cluster-info`
+  master: k8s://https://127.0.0.1:50537
+  #  master: k8s://https://kubernetes.default.svc
+  executor:
+    instances: 2
+    memory: 2g
+    cores: 1
+  driver:
+    memory: 1g
+    cores: 1
+  #    extraJavaOptions: >
+  #      -DMONGODB_URL=mongodb://192.168.1.6:27017
+  #      -DSPARK_OUTPUT_PATH=spark-output
+  kubernetes:
+    namespace: ksoot
+    authenticate.driver.serviceAccountName: spark
+    driverEnv:
+      SPARK_USER: spark
+    #Always, Never, and IfNotPresent
+    container.image.pullPolicy: IfNotPresent
+  submit.deployMode: cluster
+
+# ===================================================================
+# Application specific properties
+# Add your own application properties here
+# ===================================================================
+
+#------------------------- Spark Job Launcher configurations -------------------------
+spark-launcher:
+  capture-jobs-logs: true
+  persist-jobs: true
+  env:
+    POSTGRES_URL: "jdbc:postgresql://postgres:5432/spark_jobs_db"
+    KAFKA_BOOTSTRAP_SERVERS: "kafka:9092"
+  jobs:
+    sales-report-job:
+      jar-file: local:///opt/spark/job-apps/spark-batch-sales-report-job.jar
+      env:
+        MONGODB_URL: "mongodb://mongo:27017"
+        ARANGODB_URL: "arango:8529"
+      spark-config:
+        spark.kubernetes.container.image: spark-batch-sales-report-job:0.0.1
+    logs-analysis-job:
+      jar-file: local:///opt/spark/job-apps/spark-stream-logs-analysis-job.jar
+      env:
+        JDBC_URL: "jdbc:postgresql://postgres:5432"
+      spark-config:
+        spark.kubernetes.container.image: spark-stream-logs-analysis-job:0.0.1
