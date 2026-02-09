@@ -1,10 +1,12 @@
 services:
   conduktor:
-    image: conduktor/conduktor-platform:1.18.2
+    image: conduktor/conduktor-console:1.28.0
     container_name: conduktor
     ports:
       - "8081:8080"
     environment:
+      CDK_ADMIN_EMAIL: 'user@discounttire.com'
+      CDK_ADMIN_PASSWORD: 'admin'
       CONDUKTOR_PLATFORM_LICENSE_KEY: ""
       CONDUKTOR_PLATFORM_KAFKA_BOOTSTRAP_SERVERS: "kafka:29092"
       CONDUKTOR_PLATFORM_SECURITY_AUTH_ENABLED: "true"

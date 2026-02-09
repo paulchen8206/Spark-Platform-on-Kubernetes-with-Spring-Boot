@@ -1,3 +1,21 @@
+# Conduktor Platform Integration
+
+This project integrates the [Conduktor Platform](https://www.conduktor.io/) for advanced Apache Kafka monitoring and management. Conduktor provides a powerful UI to manage Kafka clusters, topics, consumers, producers, and more. It also supports user authentication, auditing, and persistent storage with PostgreSQL.
+
+## Features
+- Visualize and manage Kafka clusters
+- Monitor topics, partitions, and consumer groups
+- Submit and track Kafka jobs
+- User authentication and role management
+- Persistent storage with PostgreSQL
+
+## Usage
+- The Conduktor service is defined in `docker-compose.yml` and runs on port 8081.
+- Default admin credentials are set via environment variables (`CDK_ADMIN_EMAIL`, `CDK_ADMIN_PASSWORD`).
+- Access the UI at [http://localhost:8081](http://localhost:8081) after starting the stack.
+
+See the `docker-compose.yml` for configuration details and environment variables.
+
 # Unified Framework for Building Spark Jobs with Spring boot and Running on Local and Kubernetes
 An innovative approach to implementing Spark Jobs with Spring Boot ecosystem, enabling developer-friendly environment. 
 It integrates cross-cutting concerns as reusable libraries to minimize boilerplate code. 
@@ -382,10 +400,3 @@ All main modules include mock-based unit tests in their `src/test/java` folders.
 - [Spring boot starter for Spark](https://github.com/officiallysingh/spring-boot-starter-spark).
 - [Spark Performance Tuning](https://spark.apache.org/docs/3.5.3/sql-performance-tuning.html)
 - Spark Performance Optimization [Part 1](https://blog.cloudera.com/how-to-tune-your-apache-spark-jobs-part-1) and [Part 2](https://blog.cloudera.com/how-to-tune-your-apache-spark-jobs-part-2)
-
-- [Spring Boot](https://docs.spring.io/spring-boot/index.html)
-- [Spring Cloud Task](https://spring.io/projects/spring-cloud-task)
-- [Spring Boot Configurations](https://docs.spring.io/spring-boot/reference/features/external-config.html)
-
-- [Exception handling in Spring boot Web applications](https://github.com/officiallysingh/spring-boot-problem-handler).
-- [Spring boot starter for Spark](https://github.com/officiallysingh/spring-boot-starter-spark).
