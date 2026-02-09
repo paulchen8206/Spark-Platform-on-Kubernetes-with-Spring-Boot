@@ -221,6 +221,91 @@ Keep it running in a separate terminal. Output should look like below.
 
 
 # <span style="color:#7b1fa2;font-weight:bold;">3. Framework Architecture</span>
+# <span style="color:#1976d2;font-weight:bold;">Spring Boot Spark Application Design Pattern</span>
+
+This application follows a layered architecture, combining Spring Boot’s dependency injection and configuration management with Apache Spark’s distributed data processing.
+
+## Design Pattern Overview
+
+- **Layered Structure:**
+  - Controller Layer: Handles HTTP requests (REST API), delegates to service layer.
+  - Service Layer: Contains business logic, orchestrates Spark jobs, manages workflow.
+  - Job Layer: Defines Spark jobs (batch or streaming), encapsulates Spark transformations and actions.
+  - Commons/Utility Layer: Shared code, helpers, and reusable components.
+- **Configuration Management:** Uses Spring Boot’s YAML/properties files for environment-specific settings. Spark job parameters, cluster configs, and resource allocation are managed via Spring’s configuration.
+- **Dependency Injection:** Spring Boot injects beans for services, repositories, and Spark job classes, promoting loose coupling and testability.
+- **Job Submission & Execution:** Jobs are triggered via REST endpoints, scheduled tasks, or command-line scripts. Spark jobs are defined as classes, often extending a base job class or implementing a job interface.
+- **Error Handling & Logging:** Uses Spring Boot’s exception handling and logging for unified error management.
+- **Modularization:** Multiple modules (batch, stream, commons, service) allow separation of concerns and easier maintenance.
+- **Kubernetes & Docker Integration:** Deployment descriptors enable containerized and orchestrated execution.
+
+
+## Architecture Diagrams
+
+### Layered Design Pattern (Mermaid)
+
+```mermaid
+graph TD
+  A[Controller Layer] --> B[Service Layer]
+  B --> C[Job Layer]
+  C --> D[Commons/Utility Layer]
+  B --> E[Configuration Management]
+  B --> F[Dependency Injection]
+  C --> G[Job Submission & Execution]
+  B --> H[Error Handling & Logging]
+  A --> I[REST API Exposure]
+  D --> J[Shared Code]
+  F --> K[Spring Boot Beans]
+  G --> L[Spark Job Classes]
+  E --> M[YAML/Properties Files]
+  G --> N[Command-line Scripts]
+  G --> O[Scheduled Tasks]
+  B --> P[Modularization]
+  P --> Q[Batch/Stream/Commons/Service]
+  B --> R[Kubernetes & Docker Integration]
+  R --> S[Deployment Descriptors]
+  R --> T[Containerized Execution]
+```
+
+### Layered Flow (Mermaid)
+
+```mermaid
+flowchart LR
+  A[User/API Request]
+  B[Controller Layer]
+  C[Service Layer]
+  D[Job Layer]
+  E[Commons/Utility Layer]
+  F[Configuration Management]
+  G[Dependency Injection]
+  H[Job Submission]
+  I[Error Handling]
+  J[Logging]
+  K[Kubernetes/Docker]
+  L[REST API]
+  M[Batch Job]
+  N[Streaming Job]
+  O[Shared Utilities]
+
+  A --> B
+  B --> C
+  C --> D
+  D --> M
+  D --> N
+  D --> E
+  C --> F
+  C --> G
+  C --> H
+  C --> I
+  C --> J
+  C --> K
+  B --> L
+  E --> O
+```
+
+---
+The diagrams above illustrate the flow from user/API request through controller, service, job, and utility layers, and show integration points for configuration, dependency injection, job submission, error handling, logging, modularization, and Kubernetes/Docker deployment.
+
 
 ## <span style="color:#7b1fa2;font-weight:bold;">3.1. Features</span>
 - **Job Launching**: Trigger Spark jobs via REST endpoint for deployment on local and kubernetes. Either **Job jars** or **Docker images** can be launched using spark-submit
