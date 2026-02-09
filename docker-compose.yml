@@ -1,4 +1,27 @@
 services:
+  conduktor:
+    image: conduktor/conduktor-platform:1.18.2
+    container_name: conduktor
+    ports:
+      - "8081:8080"
+    environment:
+      CONDUKTOR_PLATFORM_LICENSE_KEY: ""
+      CONDUKTOR_PLATFORM_KAFKA_BOOTSTRAP_SERVERS: "kafka:29092"
+      CONDUKTOR_PLATFORM_SECURITY_AUTH_ENABLED: "true"
+      CONDUKTOR_PLATFORM_SECURITY_PASSWORD_POLICY_MIN_LENGTH: "8"
+      CONDUKTOR_PLATFORM_SECURITY_SESSION_TIMEOUT: "30"
+      CONDUKTOR_PLATFORM_SECURITY_AUDIT_ENABLED: "true"
+      DATABASE_URL: "jdbc:postgresql://postgres:5432/conduktor"
+      DATABASE_USERNAME: "conduktor"
+      DATABASE_PASSWORD: "yourpassword"
+      DATABASE_TYPE: "postgresql"
+    volumes:
+      - conduktor_data:/data
+      - ./default-platform-config.yaml:/opt/conduktor/default-platform-config.yaml:ro
+    depends_on:
+      - kafka
+    networks:
+      - mynetwork
   mongo:
     image: mongo:latest
     container_name: mongo
@@ -11,7 +34,6 @@ services:
       test: echo "try { rs.status() } catch (err) { rs.initiate({_id:'rs0',members:[{_id:0,host:'host.docker.internal:27017'}]}) }" | mongosh --port 27017 --quiet
       interval: 5s
       timeout: 30s
-      start_period: 0s
       retries: 30
     volumes:
       - "mongo_data:/data/db"
@@ -37,9 +59,9 @@ services:
     hostname: postgres
     container_name: postgres
     environment:
-      POSTGRES_DB: spark_jobs_db
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: conduktor
+      POSTGRES_USER: conduktor
+      POSTGRES_PASSWORD: yourpassword
     ports:
       - "5432:5432"
     volumes:
@@ -105,11 +127,11 @@ services:
       - mynetwork
 
 volumes:
+  conduktor_data:
   mongo_data:
   mongo_config:
   arango_data:
   postgres_data:
-  conduktor_data:
 
 networks:
   mynetwork:

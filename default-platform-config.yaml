@@ -1,0 +1,22 @@
+database:
+  type: postgresql
+  host: postgres
+  port: 5432
+  name: conduktor
+  username: conduktor
+  password: yourpassword
+  ssl: false
+  userManagement:
+    enabled: true
+  authentication:
+    method: database
+security:
+  auth:
+    enabled: true
+  users:
+  - username: admin
+    password: admin123
+    roles: [ADMIN]
+  - username: analyst
+    password: analyst123
+    roles: [ANALYST]
