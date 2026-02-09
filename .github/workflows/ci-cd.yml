@@ -24,6 +24,12 @@ jobs:
       run: mvn clean install --batch-mode
     - name: Run tests
       run: mvn test
+    - name: Set up kubeconfig for dev
+      if: env.KUBECONFIG != ''
+      env:
+        KUBECONFIG: ${{ secrets.KUBECONFIG_DEV }}
+      run: |
+        echo "$KUBECONFIG" | base64 --decode > $HOME/.kube/config
   ci-qa:
     if: github.ref == 'refs/heads/testing'
     runs-on: ubuntu-latest
@@ -39,6 +45,11 @@ jobs:
       run: mvn clean install --batch-mode
     - name: Run tests
       run: mvn test
+    - name: Set up kubeconfig for qa
+      env:
+        KUBECONFIG: ${{ secrets.KUBECONFIG_QA }}
+      run: |
+        echo "$KUBECONFIG" | base64 --decode > $HOME/.kube/config
     - name: Build Docker images
       run: |
         docker build -t ${{ secrets.DOCKER_REPO }}/spark-job-service:qa ./spark-job-service
@@ -74,6 +85,11 @@ jobs:
       run: mvn clean install --batch-mode
     - name: Run tests
       run: mvn test
+    - name: Set up kubeconfig for stg
+      env:
+        KUBECONFIG: ${{ secrets.KUBECONFIG_STG }}
+      run: |
+        echo "$KUBECONFIG" | base64 --decode > $HOME/.kube/config
     - name: Build Docker images
       run: |
         docker build -t ${{ secrets.DOCKER_REPO }}/spark-job-service:stg ./spark-job-service
@@ -109,6 +125,11 @@ jobs:
       run: mvn clean install --batch-mode
     - name: Run tests
       run: mvn test
+    - name: Set up kubeconfig for prd
+      env:
+        KUBECONFIG: ${{ secrets.KUBECONFIG_PRD }}
+      run: |
+        echo "$KUBECONFIG" | base64 --decode > $HOME/.kube/config
     - name: Build Docker images
       run: |
         docker build -t ${{ secrets.DOCKER_REPO }}/spark-job-service:prd ./spark-job-service
