@@ -38,7 +38,7 @@
    - MongoDB and ArangoDB are available for job-specific data needs.
 
 ## 1.2. Deployment to Kubernetes (Detailed)
-### Option 1: Standard kubectl Deployment
+### 1.2.1. Standard kubectl Deployment
 1. **Build Docker images:**
    - Each module has a `Dockerfile`. Build images for all Spark jobs and services:
      ```sh
@@ -102,7 +102,7 @@
    - Use `kubectl logs <pod>`, `kubectl describe <pod>`, and your Kubernetes dashboard for troubleshooting.
    - Scale deployments and manage resources as needed.
 
-### Option 2: Helm Chart Deployment
+### 1.2.2. Helm Chart Deployment
 1. **Configure environment-specific values:**
    - Edit or review the provided values files in `helm/` (e.g., `values-dev.yaml`, `values-qa.yaml`, `values-stg.yaml`, `values-prd.yaml`).
 2. **Package or use the Helm chart directly:**
@@ -139,10 +139,10 @@
 > [!IMPORTANT]  
 > While using docker compose make sure the required ports are free on your machine, otherwise port busy error could be thrown.
 
-#### 3.5. Manual
+#### 1.3. Manual
 All these services can be installed locally on your machine, and should be accessible at above-mentioned urls and credentials (wherever applicable).
 
-#### 3.6. Docker compose
+#### 1.4. Docker compose
 * The [docker-compose.yml](docker-compose.yml) file defines the services and configurations to run required infrastructure in Docker. 
 * In Terminal go to project root `spring-boot-spark-kubernetes` and execute following command and confirm if all services are running.
 ```shell
@@ -153,7 +153,7 @@ docker compose up -d
 > [!IMPORTANT]  
 > While using docker compose make sure the required ports are free on your machine, otherwise port busy error could be thrown.
 
-#### 3.7. Minikube
+#### 1.5. Minikube
 * In Terminal go to project root `spring-boot-spark-kubernetes` and execute following commands to create a namespace `ksoot` and necessary Kubernetes services in given namespace. 
 Refer to [Kubernetes configuration files section](#kubernetes-configuration-files) for more details.
 ```shell
@@ -200,16 +200,16 @@ Keep it running in a separate terminal. Output should look like below.
 
 
 
-## 4. Framework Architecture
+# 2. Framework Architecture
 
-### 4.1. Features
+## 2.1. Features
 - **Job Launching**: Trigger Spark jobs via REST endpoint for deployment on local and kubernetes. Either **Job jars** or **Docker images** can be launched using spark-submit
 - **Job Termination**: Accept requests to stop running jobs via REST endpoint, though not a gauranteed method. You may need to kill the job manually if not terminated by this.
 - **Job Monitoring**: Track job status, start and end time, duration taken, error messages if there is any, via REST endpoints.
 - **Auto-configurations**: of Common components such as `SparkSession`, Job lifecycle listener and Connectors to read and write to various datasources.
 - **Demo Jobs**: A [Spark Batch Job](spark-batch-sales-report-job) and another [Spark Streaming Job](spark-stream-logs-analysis-job), to start with.
 
-### 4.2. Components
+## 2.2. Components
 The framework consists of following components. Refer to respective project's README for details.
 - [**spark-job-service**](spark-job-service/README.md): A Spring Boot application to launch Spark jobs and monitor their status.
 - [**spring-boot-starter-spark**](https://github.com/officiallysingh/spring-boot-starter-spark): Spring boot starter for Spark.
@@ -217,7 +217,7 @@ The framework consists of following components. Refer to respective project's RE
 - [**spark-batch-sales-report-job**](spark-batch-sales-report-job/README.md): A demo Spark Batch Job to generate Monthly sales reports.
 - [**spark-stream-logs-analysis-job**](spark-stream-logs-analysis-job/README.md): A demo Spark Streaming Job to analyze logs in real-time.
 
-### 4.3. Kubernetes configuration files
+## 2.3. Kubernetes configuration files
 The framework includes Kubernetes configuration files to deploy the required infrastructure and services in a Kubernetes cluster in namespace **`ksoot`**. You can change the namespace in these two files as per your requirement.
 Each service is configured with necessary environment variables, volume mounts, and ports to ensure proper operation within the Kubernetes cluster.
 1. The [infra-k8s-deployment.yml](infra-k8s-deployment.yml) file defines the Kubernetes resources required to deploy various services.
@@ -233,14 +233,14 @@ Each service is configured with necessary environment variables, volume mounts, 
 - **ServiceAccount**: Creates a ServiceAccount named `spark`.
 - **ClusterRoleBinding**: Binds the spark ServiceAccount to the `edit` `ClusterRole`, granting it permissions to edit resources within the namespace.
 
-### 4.4. Running Jobs Locally
+## 2.4. Running Jobs Locally
 - Individual Spark Jobs can be run as Spring boot application locally in your favorite IDE. Refer to [sales-report-job](spark-batch-sales-report-job/README.md#intellij-run-configurations) and [logs-analysis-job](spark-stream-logs-analysis-job/README.md#intellij-run-configurations).
 - Spark Job can be Launched locally via REST API provided by `spark-job-service`. Refer to [spark-job-service](spark-job-service/README.md#running-locally) for details.  
 > [!IMPORTANT]  
 > Spark Job's `jar` files from Maven repository are deployed on local via `spark-submit` command.
 
-### 4.5. Running Jobs on Minikube
-#### 4.5.1. Preparing for Minikube
+## 2.5. Running Jobs on Minikube
+### 2.5.1. Preparing for Minikube
 * Make sure minikube infra is ready as mentioned in [Minikube Environment setup section](#minikube).
 * Build custom base Docker image for Spark for more control over it, Refer to base [Dockerfile](Dockerfile) for details. Spark contains a lot of jars at `${SPARK_HOME/jars}`, some of which may conflict with your application jars. So you may need to exclude such jars from Spark.  
   For example following conflicting jars are excluded from Spark in base [Dockerfile](Dockerfile).
@@ -276,7 +276,7 @@ docker image build . -t spark-job-service:0.0.1 -f Dockerfile
 minikube image load spark-job-service:0.0.1
 ```
 
-#### 4.5.2. Running on Minikube
+### 2.5.2. Running on Minikube
 * Make sure [Environment setup on Minikube](#minikube) is already done and [application artifacts are ready](#preparing-for-minikube).
 > [!IMPORTANT]  
 > No configuration change is required except specifically asked to run this code locally.
@@ -365,19 +365,19 @@ sales-report-job-2e9c6f93ef784c17-driver         0/1     Completed   0          
 > All applications run in `default` profile on minikube.  
 > Spark Job's Docker images are deployed on Kubernetes via `spark-submit` command.
 
-### 4.6. Deployment architecture
-#### 4.6.1. Deploy Modes
+## 2.6. Deployment architecture
+### 2.6.1. Deploy Modes
 There are two deployment modes for Spark Job deployment on Kubernetes.
 - **Client Deploy Mode**: The driver runs in the client’s JVM process and communicates with the executors managed by the cluster.
 - **Cluster Deploy Mode**: The driver process runs as a separate JVM process in a cluster, and the cluster manages its resources.
 
 ![Spark Deploy Modes](img/Spark_Deploy_Modes.png)
 
-#### 4.6.2. Deployment process
+### 2.6.2. Deployment process
 
 ![Spark Deployment on Kubernetes](img/Spark_Deployment_Cluster.png)
 
-#### 4.6.3. Configurations precedence order
+### 2.6.3. Configurations precedence order
 Configurations can be provided at multiple levels. At individual project level, the precedence order is [Standard Spring Boot configurations precedence order](https://docs.spring.io/spring-boot/reference/features/external-config.html).
 * In `application.yml`s of individual Jobs projects and profile specific `yml`s.
 * In `application.yml`s of `spark-job-service`.
@@ -388,7 +388,7 @@ Configurations can be provided at multiple levels. At individual project level, 
 
 ![Configurations Precedence Order](img/Configurations_Precedence_Order.png)
 
-#### 4.6.4. Spark UI
+### 2.6.4. Spark UI
 Access Spark UI at [**`http://localhost:4040`**](http://localhost:4040) to monitor and inspect Spark Batch job execution. 
 On Minikube or Kubernetes you may need to do port forwarding to access it, and it may not be accessible if Job is not in running state at the moment.
 
@@ -398,7 +398,7 @@ On Minikube or Kubernetes you may need to do port forwarding to access it, and i
 
 ![Spark UI](img/Spark_UI_Streaming.png)
 
-## 5. Common Errors
+# 3. Common Errors
 * `24/12/26 01:07:11 INFO KerberosConfDriverFeatureStep: You have not specified a krb5.conf file locally or via a ConfigMap. Make sure that you have the krb5.conf locally on the driver image.
 24/12/26 01:07:12 ERROR Client: Please check "kubectl auth can-i create pod" first. It should be yes.`  
 **Possible cause**: Wrong `spark.master` value or `spark-rbac.yml` is not applied properly in correct namespace.     
@@ -407,10 +407,10 @@ On Minikube or Kubernetes you may need to do port forwarding to access it, and i
 **Possible cause**: The error message indicates that your Spark application is trying to access an internal Java class (sun.nio.ch.DirectBuffer) in the java.base module, which is not exported to Spark’s unnamed module. This issue arises because Java modules introduced in JDK 9 restrict access to internal APIs.  
 **Solution**: Add VM option `--add-exports java.base/sun.nio.ch=ALL-UNNAMED`
 
-## 6. Testing
+# 4. Testing
 All main modules include mock-based unit tests in their `src/test/java` folders. These tests validate core logic without loading the full Spring or Spark context, ensuring fast and reliable test execution. Advanced tests (integration, API, edge cases) can be added as needed.
 
-## 7. References
+# 5. References
 - [Bitnami Helm package for Apache Spark](https://github.com/bitnami/charts/tree/main/bitnami/spark/#bitnami-package-for-apache-spark)
 - [Apache Spark](https://spark.apache.org/docs/4.0.0)
 - [Spark in Action](https://www.manning.com/books/spark-in-action-second-edition)
@@ -423,8 +423,6 @@ All main modules include mock-based unit tests in their `src/test/java` folders.
 - [Spark ArangoDB Connector](https://docs.arangodb.com/3.13/develop/integrations/arangodb-datasource-for-apache-spark)
 - [Spark MongoDB Connector](https://www.mongodb.com/docs/spark-connector/v10.4)
 - [Spark Kafka Connector](https://spark.apache.org/docs/4.0.0/structured-streaming-kafka-integration.html)
-- [Spark Performance Tuning](https://spark.apache.org/docs/4.0.0/sql-performance-tuning.html)
-- Spark Performance Optimization [Part 1](https://blog.cloudera.com/how-to-tune-your-apache-spark-jobs-part-1) and [Part 2](https://blog.cloudera.com/how-to-tune-your-apache-spark-jobs-part-2)
 - [Spring Boot](https://docs.spring.io/spring-boot/index.html)
 - [Spring Cloud Task](https://spring.io/projects/spring-cloud-task)
 - [Spring Boot Configurations](https://docs.spring.io/spring-boot/reference/features/external-config.html)
@@ -435,7 +433,7 @@ All main modules include mock-based unit tests in their `src/test/java` folders.
 
 
 
-## 8. Tips & Best Practices
+# 6. Tips & Best Practices
 - Use [Minikube](https://minikube.sigs.k8s.io/docs/) for local Kubernetes testing.
 - Use [skaffold](https://skaffold.dev/) or similar tools for rapid build/deploy cycles.
 - Store secrets and sensitive configs in Kubernetes Secrets, not in plain manifests.
