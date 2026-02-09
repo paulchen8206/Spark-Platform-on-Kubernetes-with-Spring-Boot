@@ -1,3 +1,17 @@
+# Project Summary
+
+This project is a unified framework for building, running, and managing Apache Spark jobs with Spring Boot, supporting both local and Kubernetes deployments. It includes:
+
+## Main Components
+- **spark-batch-sales-report-job**: Example Spark batch job with Spring Boot integration.
+- **spark-stream-logs-analysis-job**: Example Spark streaming job with Spring Boot integration.
+- **spark-job-service**: RESTful API service for submitting and managing Spark jobs.
+- **spark-job-commons**: Shared libraries and utilities for Spark jobs.
+- **Conduktor Platform**: Kafka monitoring and management UI, integrated via Docker Compose.
+- **Kafka, Zookeeper, PostgreSQL, MongoDB, ArangoDB**: Supporting services for data processing, storage, and messaging, all orchestrated with Docker Compose.
+
+See below for details on each component and how to get started.
+
 # Conduktor Platform Integration
 
 This project integrates the [Conduktor Platform](https://www.conduktor.io/) for advanced Apache Kafka monitoring and management. Conduktor provides a powerful UI to manage Kafka clusters, topics, consumers, producers, and more. It also supports user authentication, auditing, and persistent storage with PostgreSQL.
@@ -16,7 +30,7 @@ This project integrates the [Conduktor Platform](https://www.conduktor.io/) for 
 
 See the `docker-compose.yml` for configuration details and environment variables.
 
-# Unified Framework for Building Spark Jobs with Spring boot and Running on Local and Kubernetes
+# Unified Framework for Building Spark Jobs with Spring Boot and Running on Local and Kubernetes
 An innovative approach to implementing Spark Jobs with Spring Boot ecosystem, enabling developer-friendly environment. 
 It integrates cross-cutting concerns as reusable libraries to minimize boilerplate code. 
 Moreover, the framework supports one-click deployment of Spark jobs with RESTful APIs, making it a breeze to run jobs locally, on Minikube or Kubernetes.  
@@ -400,3 +414,112 @@ All main modules include mock-based unit tests in their `src/test/java` folders.
 - [Spring boot starter for Spark](https://github.com/officiallysingh/spring-boot-starter-spark).
 - [Spark Performance Tuning](https://spark.apache.org/docs/3.5.3/sql-performance-tuning.html)
 - Spark Performance Optimization [Part 1](https://blog.cloudera.com/how-to-tune-your-apache-spark-jobs-part-1) and [Part 2](https://blog.cloudera.com/how-to-tune-your-apache-spark-jobs-part-2)
+
+# Local Development Setup (Detailed)
+
+1. **Clone the repository:**
+   ```sh
+   git clone <repo-url>
+   cd Spring-Boot-Spark-Kubernetes
+   ```
+2. **Start all services locally:**
+   - Launch all required services (Kafka, Zookeeper, PostgreSQL, MongoDB, ArangoDB, Conduktor, Spark jobs) with:
+     ```sh
+     docker compose up -d
+     ```
+   - Check service status:
+     ```sh
+     docker compose ps
+     ```
+3. **Build and run Spark job modules locally:**
+   - Each Spark job is a Spring Boot application. You can run them directly from your IDE or with Maven:
+     ```sh
+     cd spark-batch-sales-report-job
+     ./mvnw spring-boot:run
+     # or build a JAR
+     ./mvnw clean package
+     java -jar target/*.jar
+     ```
+   - Repeat for other modules as needed.
+4. **Access UIs and APIs:**
+   - **Conduktor UI:** [http://localhost:8081](http://localhost:8081)
+   - **Kafka UI:** [http://localhost:8100](http://localhost:8100)
+   - **Spark Job Service API:** [http://localhost:<service-port>]
+   - Default admin credentials are set in `docker-compose.yml` (see `CDK_ADMIN_EMAIL`, `CDK_ADMIN_PASSWORD`).
+5. **Develop and debug:**
+   - Use breakpoints, hot reload, and Spring Boot DevTools for rapid development.
+   - Use the REST API in `spark-job-service` to submit jobs and monitor status.
+6. **Database and persistence:**
+   - PostgreSQL is used for job metadata and Conduktor persistence.
+   - MongoDB and ArangoDB are available for job-specific data needs.
+
+# Deployment to Kubernetes (Detailed)
+
+1. **Build Docker images:**
+   - Each module has a `Dockerfile`. Build images for all Spark jobs and services:
+     ```sh
+     cd spark-batch-sales-report-job
+     docker build -t myrepo/spark-batch-sales-report-job:latest .
+     # Repeat for other modules
+     ```
+2. **Push images to a registry:**
+   - Tag and push images to your container registry (Docker Hub, ECR, GCR, etc.):
+     ```sh
+     docker tag myrepo/spark-batch-sales-report-job:latest <your-registry>/spark-batch-sales-report-job:latest
+     docker push <your-registry>/spark-batch-sales-report-job:latest
+     # Repeat for other modules
+     ```
+3. **Configure Kubernetes manifests:**
+   - Use `infra-k8s-deployment.yml` as a template.
+   - Update image references, environment variables, and persistent volume claims as needed.
+   - Example snippet:
+     ```yaml
+     apiVersion: apps/v1
+     kind: Deployment
+     metadata:
+       name: spark-batch-sales-report-job
+     spec:
+       template:
+         spec:
+           containers:
+           - name: spark-batch-sales-report-job
+             image: <your-registry>/spark-batch-sales-report-job:latest
+             env:
+             - name: SPRING_PROFILES_ACTIVE
+               value: kubernetes
+     ```
+4. **Deploy to Kubernetes:**
+   - Apply manifests:
+     ```sh
+     kubectl apply -f infra-k8s-deployment.yml
+     ```
+   - Check pod and service status:
+     ```sh
+     kubectl get pods
+     kubectl get svc
+     ```
+5. **Access UIs and APIs in Kubernetes:**
+   - Expose services via NodePort, LoadBalancer, or Ingress as needed.
+   - Example (NodePort):
+     ```yaml
+     kind: Service
+     apiVersion: v1
+     metadata:
+       name: conduktor
+     spec:
+       type: NodePort
+       ports:
+         - port: 8080
+           targetPort: 8080
+           nodePort: 30081
+     ```
+   - Access Conduktor at `http://<node-ip>:30081`.
+6. **Monitor and manage:**
+   - Use `kubectl logs <pod>`, `kubectl describe <pod>`, and your Kubernetes dashboard for troubleshooting.
+   - Scale deployments and manage resources as needed.
+
+# Tips
+- Use [Minikube](https://minikube.sigs.k8s.io/docs/) for local Kubernetes testing.
+- Use [skaffold](https://skaffold.dev/) or similar tools for rapid build/deploy cycles.
+- Store secrets and sensitive configs in Kubernetes Secrets, not in plain manifests.
+- For production, configure persistent storage, resource limits, and health checks.
