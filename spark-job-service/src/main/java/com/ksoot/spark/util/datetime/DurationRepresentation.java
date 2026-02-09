@@ -9,7 +9,7 @@ import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
 
 /**
- * @author Rajveer Singh
+ * @author Paul Chen (paulchen8206@gmail.com)
  */
 @AllArgsConstructor(staticName = "of")
 public class DurationRepresentation {

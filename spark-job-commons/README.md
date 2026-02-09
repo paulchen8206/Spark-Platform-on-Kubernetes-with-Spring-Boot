@@ -208,8 +208,8 @@ The Spark option constants to avoid typos and ensure reusability across Spark jo
 Open source [**MIT License**](https://opensource.org/licenses/MIT)
 
 ## Author
-[**Rajveer Singh**](https://www.linkedin.com/in/rajveer-singh-589b3950/)  
-Email: raj14.1984@gmail.com  
+**Paul Chen** (paulchen8206@gmail.com)  
+Email: paulchen8206@gmail.com  
 If you find any issues or need support, please reach out.  
 Give it a :star: on [GitHub](https://github.com/officiallysingh/spring-boot-spark-kubernetes) and a :clap: on [Medium](https://officiallysingh.medium.com/spark-spring-boot-starter-e206def765b9) if you find it helpful.
 
