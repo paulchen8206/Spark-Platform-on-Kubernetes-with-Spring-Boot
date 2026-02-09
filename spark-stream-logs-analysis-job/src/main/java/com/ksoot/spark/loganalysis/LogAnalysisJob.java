@@ -1,9 +1,8 @@
-
 /**
  * Module: spark-stream-logs-analysis-job
- * 
- * Entry point for the Log Analysis Spark streaming job.
- * Implements Spring Cloud Task for streaming log analysis.
+ *
+ * <p>Entry point for the Log Analysis Spark streaming job. Implements Spring Cloud Task for
+ * streaming log analysis.
  */
 package com.ksoot.spark.loganalysis;
 
@@ -21,8 +20,8 @@ import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
- * Main class for the Log Analysis Spark streaming job.
- * Handles initialization and pipeline execution.
+ * Main class for the Log Analysis Spark streaming job. Handles initialization and pipeline
+ * execution.
  */
 @Slf4j
 @EnableTask

@@ -18,18 +18,6 @@
     <!--    </properties>-->
 
     <dependencies>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-surefire-plugin</artifactId>
-                        <version>3.0.0-M9</version>
-                        <configuration>
-                            <argLine>--add-exports java.base/sun.nio.ch=ALL-UNNAMED</argLine>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
         <!-- Spring Dependencies -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -83,7 +71,8 @@
         </dependency>
         <dependency>
             <groupId>com.arangodb</groupId>
-            <artifactId>arangodb-spark-datasource-${spark.compact.version}_${scala.compact.version}</artifactId>
+            <artifactId>arangodb-spark-datasource-4.0_2.13</artifactId>
+            <version>1.9.0</version>
         </dependency>
 
         <dependency>
@@ -102,6 +91,14 @@
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.0.0-M9</version>
+                <configuration>
+                    <argLine>--add-exports java.base/sun.nio.ch=ALL-UNNAMED</argLine>
+                </configuration>
+            </plugin>
             <!-- To make the jar compatible with spark-submit -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

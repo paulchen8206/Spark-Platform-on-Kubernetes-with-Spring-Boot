@@ -1,9 +1,8 @@
-
 /**
  * Module: spark-batch-sales-report-job
- * 
- * Entry point for the Sales Report Spark batch job.
- * Implements Spring Cloud Task for batch processing.
+ *
+ * <p>Entry point for the Sales Report Spark batch job. Implements Spring Cloud Task for batch
+ * processing.
  */
 package com.ksoot.spark.sales;
 
@@ -20,10 +19,7 @@ import org.springframework.cloud.task.configuration.EnableTask;
 import org.springframework.context.annotation.Bean;
 import org.springframework.kafka.annotation.EnableKafka;
 
-/**
- * Main class for the Sales Report Spark batch job.
- * Handles initialization and data population.
- */
+/** Main class for the Sales Report Spark batch job. Handles initialization and data population. */
 @Slf4j
 @EnableTask
 @EnableKafka

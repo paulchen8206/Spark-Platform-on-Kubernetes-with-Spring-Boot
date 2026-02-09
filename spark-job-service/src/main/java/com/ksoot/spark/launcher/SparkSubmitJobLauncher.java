@@ -21,6 +21,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
+import org.springframework.web.server.ResponseStatusException;
 
 @Slf4j
 @Component
@@ -51,12 +52,11 @@ public class SparkSubmitJobLauncher extends AbstractSparkJobLauncher {
                 this.sparkLauncherProperties.getJobs().get(jobLaunchRequest.getJobName()))
             .orElseThrow(
                 () ->
-                    Problems.newInstance("invalid.job.name")
-                        .defaultDetail("Invalid Job name: {0}. Allowed values: {1}")
-                        .detailArgs(
+                    Problems.newInstance(
+                        String.format(
+                            "Invalid Job name: %s. Allowed values: %s",
                             jobLaunchRequest.getJobName(),
-                            String.join(", ", this.sparkLauncherProperties.getJobs().keySet()))
-                        .throwAble(HttpStatus.BAD_REQUEST));
+                            String.join(", ", this.sparkLauncherProperties.getJobs().keySet()))));
     final Properties sparkConfigurations =
         this.sparkConfigurations(sparkJobProperties, jobLaunchRequest.getSparkConfigs());
 
@@ -90,11 +90,10 @@ public class SparkSubmitJobLauncher extends AbstractSparkJobLauncher {
                   jobLaunchRequest.getJobName(),
                   jobLaunchRequest.getCorrelationId()));
     } catch (final IOException | InterruptedException e) {
-      throw Problems.newInstance("spark.submit.error")
-          .defaultDetail(
-              "Something went wrong while executing spark-submit command. Please look into logs for details.")
-          .cause(e)
-          .throwAble(HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new ResponseStatusException(
+          HttpStatus.INTERNAL_SERVER_ERROR,
+          "Something went wrong while executing spark-submit command. Please look into logs for details.",
+          e);
     }
 
     log.info("============================================================");
