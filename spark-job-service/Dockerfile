@@ -1,4 +1,4 @@
-FROM ksoot/spark:3.5.3
+FROM ksoot/spark:4.0.0
 
 USER root
 
