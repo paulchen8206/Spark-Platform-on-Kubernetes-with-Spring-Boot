@@ -395,6 +395,11 @@ GET /v1/spark-jobs/executions/by-correlation-id/{correlationId}
 ## License
 Open source [**MIT License**](https://opensource.org/licenses/MIT)
 
+> **Author Notice:**
+>
+> This project is maintained by **Paul Chen** (paulchen8206@gmail.com).
+> If you use or modify this code, please retain author attribution and the license notice in all copies or substantial portions of the Software.
+
 ## Author
 **Paul Chen** (paulchen8206@gmail.com)  
 Email: paulchen8206@gmail.com  
