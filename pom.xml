@@ -24,7 +24,7 @@
 
     <properties>
         <!-- Framework versions-->
-        <java.version>17</java.version>
+        <java.version>21</java.version>
         <spring-boot.version>3.4.0</spring-boot.version>
         <spring-cloud.version>2023.0.4</spring-cloud.version>
         <spring-cloud-aws.version>3.2.0</spring-cloud-aws.version>
@@ -45,10 +45,10 @@
         <jakarta-servlet.version>4.0.3</jakarta-servlet.version>
         <jersey.version>2.36</jersey.version>
 
-        <scala.version>2.12.18</scala.version>
-        <scala.compact.version>2.12</scala.compact.version>
-        <spark.version>3.5.3</spark.version>
-        <spark.compact.version>3.5</spark.compact.version>
+        <scala.version>2.13.14</scala.version>
+        <scala.compact.version>2.13</scala.compact.version>
+        <spark.version>4.0.0</spark.version>
+        <spark.compact.version>4.0</spark.compact.version>
 
         <hadoop-aws.version>3.4.1</hadoop-aws.version>
         <spark-connector-mongo.version>10.4.0</spark-connector-mongo.version>

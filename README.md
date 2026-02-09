@@ -44,10 +44,10 @@ This framework aims to simplify this process by providing a unified solution for
 
 ## Installation
 ### Prerequisites
-- Java 17, Spark does not support java versions above 17 yet. See [Spark Java compatibility](https://spark.apache.org/docs/latest/#downloading).
+- Java 21, Spark 4.0.0 now supports Java 21. See [Spark Java compatibility](https://spark.apache.org/docs/latest/#downloading).
 - [Maven](https://maven.apache.org), Make sure environment variable `M2_REPO` is set to local maven repository `<your user home>/.m2/repository`.
-- [Scala 2.12.18](https://www.scala-lang.org/download/2.12.18.html)
-- [Spark 3.5.3](https://spark.apache.org/docs/3.5.3), Make sure environment variable `SPARK_HOME` is set to local spark installation.
+- [Scala 2.13.14](https://www.scala-lang.org/download/2.13.14.html)
+- [Spark 4.0.0](https://spark.apache.org/docs/4.0.0), Make sure environment variable `SPARK_HOME` is set to local spark installation.
 - [Docker](https://www.docker.com), Make sure Docker is allocated with enough resources.
 - [Minikube](https://minikube.sigs.k8s.io/docs/), Make sure Docker is allocated with enough resources.
 - IDE (IntelliJ, Eclipse or VS Code), Recommended [IntelliJ IDEA](https://www.jetbrains.com/idea).
@@ -55,26 +55,26 @@ This framework aims to simplify this process by providing a unified solution for
 
 #### Java
 Recommended [sdkman](https://sdkman.io/install/) for managing Java, Scala installations.
-Make sure `JAVA_HOME` set to Java 17 installation path and `PATH` variable contains entry for `$JAVA_HOME/bin`
-Check Java version as follows. It should look like following, showing major version 17.
+Make sure `JAVA_HOME` set to Java 21 installation path and `PATH` variable contains entry for `$JAVA_HOME/bin`
+Check Java version as follows. It should look like following, showing major version 21.
 ```shell
 % java -version
-openjdk version "17.0.12" 2024-07-16
-OpenJDK Runtime Environment Temurin-17.0.12+7 (build 17.0.12+7)
-OpenJDK 64-Bit Server VM Temurin-17.0.12+7 (build 17.0.12+7, mixed mode)
+openjdk version "21.0.2" 2026-01-15
+OpenJDK Runtime Environment Temurin-21.0.2+13 (build 21.0.2+13)
+OpenJDK 64-Bit Server VM Temurin-21.0.2+13 (build 21.0.2+13, mixed mode)
 ```
 
 #### Scala
-Check Scala version as follows. It should look like following, showing scala version 2.12.18.
+Check Scala version as follows. It should look like following, showing scala version 2.13.14.
 ```shell
 % scala -version
-Scala code runner version 2.12.18 -- Copyright 2002-2023, LAMP/EPFL and Lightbend, Inc.
+Scala code runner version 2.13.14 -- Copyright 2002-2026, LAMP/EPFL and Lightbend, Inc.
 ```
 
 #### Spark
-Download and extract [spark-3.5.3-bin-hadoop3](https://archive.apache.org/dist/spark/spark-3.5.3/spark-3.5.3-bin-hadoop3.tgz) on your machine and Set the following environment variables.
+Download and extract [spark-4.0.0-bin-hadoop3](https://archive.apache.org/dist/spark/spark-4.0.0/spark-4.0.0-bin-hadoop3.tgz) on your machine and set the following environment variables.
 ```shell
-export SPARK_HOME="/<your directory>/spark-3.5.3-bin-hadoop3"
+export SPARK_HOME="/<your directory>/spark-4.0.0-bin-hadoop3"
 export SPARK_CONF_DIR=$SPARK_HOME/conf
 export PATH="$SPARK_HOME/bin:$PATH"
 ```
@@ -202,7 +202,7 @@ rm -f jars/HikariCP-2.5.1.jar; \
 ```
 * In Terminal go to root project `spring-boot-spark-kubernetes` and execute the following command to build Spark base Docker image. All Job's Dockerfiles extend from this image.
 ```shell
-docker image build . -t ksoot/spark:3.5.3 -f Dockerfile
+docker image build . -t ksoot/spark:4.0.0 -f Dockerfile
 ```
 * In Terminal go to project `spring-boot-spark-kubernetes/spark-batch-sales-report-job` and execute following command to build docker image for `sales-report-job`.
 ```shell
@@ -362,18 +362,18 @@ All main modules include mock-based unit tests in their `src/test/java` folders.
 
 ## References
 - [Bitnami Helm package for Apache Spark](https://github.com/bitnami/charts/tree/main/bitnami/spark/#bitnami-package-for-apache-spark)
-- [Apache Spark](https://spark.apache.org/docs/3.5.3)
+- [Apache Spark](https://spark.apache.org/docs/4.0.0)
 - [Spark in Action](https://www.manning.com/books/spark-in-action-second-edition)
-- [Spark Configurations](https://spark.apache.org/docs/3.5.3/configuration.html)
-- [Spark Submit](https://spark.apache.org/docs/3.5.4/submitting-applications.html)
+- [Spark Configurations](https://spark.apache.org/docs/4.0.0/configuration.html)
+- [Spark Submit](https://spark.apache.org/docs/4.0.0/submitting-applications.html)
 - [Spark Launcher](https://mallikarjuna_g.gitbooks.io/spark/content/spark-SparkLauncher.html)
-- [Running Spark on Kubernetes](https://spark.apache.org/docs/3.5.4/running-on-kubernetes.html)
-- [Spark UI](https://spark.apache.org/docs/3.5.3/web-ui.html)
-- [Spark Streaming](https://spark.apache.org/docs/3.5.3/streaming-programming-guide.html)
+- [Running Spark on Kubernetes](https://spark.apache.org/docs/4.0.0/running-on-kubernetes.html)
+- [Spark UI](https://spark.apache.org/docs/4.0.0/web-ui.html)
+- [Spark Streaming](https://spark.apache.org/docs/4.0.0/streaming-programming-guide.html)
 - [Spark ArangoDB Connector](https://docs.arangodb.com/3.13/develop/integrations/arangodb-datasource-for-apache-spark)
 - [Spark MongoDB Connector](https://www.mongodb.com/docs/spark-connector/v10.4)
-- [Spark Kafka Connector](https://spark.apache.org/docs/3.5.1/structured-streaming-kafka-integration.html)
-- [Spark Performance Tuning](https://spark.apache.org/docs/3.5.3/sql-performance-tuning.html)
+- [Spark Kafka Connector](https://spark.apache.org/docs/4.0.0/structured-streaming-kafka-integration.html)
+- [Spark Performance Tuning](https://spark.apache.org/docs/4.0.0/sql-performance-tuning.html)
 - Spark Performance Optimization [Part 1](https://blog.cloudera.com/how-to-tune-your-apache-spark-jobs-part-1) and [Part 2](https://blog.cloudera.com/how-to-tune-your-apache-spark-jobs-part-2)
 - [Spring Boot](https://docs.spring.io/spring-boot/index.html)
 - [Spring Cloud Task](https://spring.io/projects/spring-cloud-task)

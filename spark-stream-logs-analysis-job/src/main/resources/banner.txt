@@ -6,4 +6,4 @@
 `--' `---'.`-  /        `--`--'`--''--' `--`--'`--'.-'  /  `----'`--'`----'     .-'  / `---'  `---'
           `---'                                    `---'                        '---'
 Application >> ${application.title}:${application.version}
-Powered by Spring Boot: ${spring-boot.version}, Java: ${java.version}, Scala: 2.12.18 and Spark: 3.5.3
+Powered by Spring Boot: ${spring-boot.version}, Java: ${java.version}, Scala: 2.13.14 and Spark: 4.0.0

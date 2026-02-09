@@ -20,14 +20,14 @@ For prerequisites and environment setup, refer to [Installation Instructions](..
 <dependency>
     <groupId>io.github.officiallysingh</groupId>
     <artifactId>spring-boot-starter-spark</artifactId>
-    <version>1.1</version>
+    <version>1.1</version> <!-- Update to latest if available for Spark 4.0.0 support -->
 </dependency>
 ```
 to avail the following features.
 - Spark dependencies compatible with Spring boot 3+.
 - Customizable `SparkSession` bean auto-configured.
 - Spark configurations and auto-completion assistance for Spark configuration properties in `application.yml`
-- All possible [Spark configurations](https://spark.apache.org/docs/3.5.3/configuration.html) can be set in `application.yml` as follows.
+- All possible [Spark configurations](https://spark.apache.org/docs/4.0.0/configuration.html) can be set in `application.yml` as follows.
 ```yaml
 spark:
   driver:
