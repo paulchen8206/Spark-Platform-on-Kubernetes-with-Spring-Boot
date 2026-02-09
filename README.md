@@ -1,8 +1,113 @@
-# Project Summary
+# 1. Local Development & Kubernetes Deployment: Step-by-Step Guide
+
+## 1.1. Local Development Setup (Detailed)
+1. **Clone the repository:**
+   ```sh
+   git clone <repo-url>
+   cd Spring-Boot-Spark-Kubernetes
+   ```
+2. **Start all services locally:**
+   - Launch all required services (Kafka, Zookeeper, PostgreSQL, MongoDB, ArangoDB, Conduktor, Spark jobs) with:
+     ```sh
+     docker compose up -d
+     ```
+   - Check service status:
+     ```sh
+     docker compose ps
+     ```
+3. **Build and run Spark job modules locally:**
+   - Each Spark job is a Spring Boot application. You can run them directly from your IDE or with Maven:
+     ```sh
+     cd spark-batch-sales-report-job
+     ./mvnw spring-boot:run
+     # or build a JAR
+     ./mvnw clean package
+     java -jar target/*.jar
+     ```
+   - Repeat for other modules as needed.
+4. **Access UIs and APIs:**
+   - **Conduktor UI:** [http://localhost:8081](http://localhost:8081)
+   - **Kafka UI:** [http://localhost:8100](http://localhost:8100)
+   - **Spark Job Service API:** [http://localhost:<service-port>]
+   - Default admin credentials are set in `docker-compose.yml` (see `CDK_ADMIN_EMAIL`, `CDK_ADMIN_PASSWORD`).
+5. **Develop and debug:**
+   - Use breakpoints, hot reload, and Spring Boot DevTools for rapid development.
+   - Use the REST API in `spark-job-service` to submit jobs and monitor status.
+6. **Database and persistence:**
+   - PostgreSQL is used for job metadata and Conduktor persistence.
+   - MongoDB and ArangoDB are available for job-specific data needs.
+
+## 1.2. Deployment to Kubernetes (Detailed)
+1. **Build Docker images:**
+   - Each module has a `Dockerfile`. Build images for all Spark jobs and services:
+     ```sh
+     cd spark-batch-sales-report-job
+     docker build -t myrepo/spark-batch-sales-report-job:latest .
+     # Repeat for other modules
+     ```
+2. **Push images to a registry:**
+   - Tag and push images to your container registry (Docker Hub, ECR, GCR, etc.):
+     ```sh
+     docker tag myrepo/spark-batch-sales-report-job:latest <your-registry>/spark-batch-sales-report-job:latest
+     docker push <your-registry>/spark-batch-sales-report-job:latest
+     # Repeat for other modules
+     ```
+3. **Configure Kubernetes manifests:**
+   - Use `infra-k8s-deployment.yml` as a template.
+   - Update image references, environment variables, and persistent volume claims as needed.
+   - Example snippet:
+     ```yaml
+     apiVersion: apps/v1
+     kind: Deployment
+     metadata:
+       name: spark-batch-sales-report-job
+     spec:
+       template:
+         spec:
+           containers:
+           - name: spark-batch-sales-report-job
+             image: <your-registry>/spark-batch-sales-report-job:latest
+             env:
+             - name: SPRING_PROFILES_ACTIVE
+               value: kubernetes
+     ```
+4. **Deploy to Kubernetes:**
+   - Apply manifests:
+     ```sh
+     kubectl apply -f infra-k8s-deployment.yml
+     ```
+   - Check pod and service status:
+     ```sh
+     kubectl get pods
+     kubectl get svc
+     ```
+5. **Access UIs and APIs in Kubernetes:**
+   - Expose services via NodePort, LoadBalancer, or Ingress as needed.
+   - Example (NodePort):
+     ```yaml
+     kind: Service
+     apiVersion: v1
+     metadata:
+       name: conduktor
+     spec:
+       type: NodePort
+       ports:
+         - port: 8080
+           targetPort: 8080
+           nodePort: 30081
+     ```
+   - Access Conduktor at `http://<node-ip>:30081`.
+6. **Monitor and manage:**
+   - Use `kubectl logs <pod>`, `kubectl describe <pod>`, and your Kubernetes dashboard for troubleshooting.
+   - Scale deployments and manage resources as needed.
+
+
+
+# 2. Project Summary
 
 This project is a unified framework for building, running, and managing Apache Spark jobs with Spring Boot, supporting both local and Kubernetes deployments. It includes:
 
-## Main Components
+## 2.1. Main Components
 - **spark-batch-sales-report-job**: Example Spark batch job with Spring Boot integration.
 - **spark-stream-logs-analysis-job**: Example Spark streaming job with Spring Boot integration.
 - **spark-job-service**: RESTful API service for submitting and managing Spark jobs.
@@ -12,32 +117,34 @@ This project is a unified framework for building, running, and managing Apache S
 
 See below for details on each component and how to get started.
 
-# Conduktor Platform Integration
+## 2.2. Conduktor Platform Integration
 
 This project integrates the [Conduktor Platform](https://www.conduktor.io/) for advanced Apache Kafka monitoring and management. Conduktor provides a powerful UI to manage Kafka clusters, topics, consumers, producers, and more. It also supports user authentication, auditing, and persistent storage with PostgreSQL.
 
-## Features
+## 2.3. Features
 - Visualize and manage Kafka clusters
 - Monitor topics, partitions, and consumer groups
 - Submit and track Kafka jobs
 - User authentication and role management
 - Persistent storage with PostgreSQL
 
-## Usage
+## 2.4. Usage
 - The Conduktor service is defined in `docker-compose.yml` and runs on port 8081.
 - Default admin credentials are set via environment variables (`CDK_ADMIN_EMAIL`, `CDK_ADMIN_PASSWORD`).
 - Access the UI at [http://localhost:8081](http://localhost:8081) after starting the stack.
 
 See the `docker-compose.yml` for configuration details and environment variables.
 
-# Unified Framework for Building Spark Jobs with Spring Boot and Running on Local and Kubernetes
+
+
+# 3. Unified Framework for Building Spark Jobs with Spring Boot and Running on Local and Kubernetes
 An innovative approach to implementing Spark Jobs with Spring Boot ecosystem, enabling developer-friendly environment. 
 It integrates cross-cutting concerns as reusable libraries to minimize boilerplate code. 
 Moreover, the framework supports one-click deployment of Spark jobs with RESTful APIs, making it a breeze to run jobs locally, on Minikube or Kubernetes.  
 
 ![Thumbnail](img/Thumbnail.png)
 
-## Apache Spark overview
+## 3.1. Apache Spark overview
 [Apache Spark](https://spark.apache.org/docs/3.5.3/index.html) is a distributed computing framework designed for fast and efficient large-scale data processing.  
 Its architecture enables in-memory computing, making it significantly faster than traditional disk-based systems like Hadoop MapReduce.  
 Here’s a brief breakdown of Spark’s architecture:
@@ -69,13 +176,13 @@ The Latest Spark versions have introduced and recommend DataFrames and Datasets,
 **Apache Spark Distributed Architecture** from [Spark in Action](https://www.manning.com/books/spark-in-action-second-edition).
 ![Spark Architecture](img/Spark_Architecture.png)
 
-## Introduction
+## 3.2.Introduction
 Spring Boot has become de-facto standard for Java application developement. It offers a robust framework for building scalable, enterprise-grade applications.
 It could be tedious to build Spark Jobs using Spring boot and deployment on local and Kubernetes.
 This framework aims to simplify this process by providing a unified solution for building Spark jobs with Spring Boot, running locally and deployment on Minikube or Kubernetes.
 
-## Installation
-### Prerequisites
+## 3.3. Installation
+### 3.3.1. Prerequisites
 - Java 21, Spark 4.0.0 now supports Java 21. See [Spark Java compatibility](https://spark.apache.org/docs/latest/#downloading).
 - [Maven](https://maven.apache.org), Make sure environment variable `M2_REPO` is set to local maven repository `<your user home>/.m2/repository`.
 - [Scala 2.13.14](https://www.scala-lang.org/download/2.13.14.html)
@@ -85,7 +192,7 @@ This framework aims to simplify this process by providing a unified solution for
 - IDE (IntelliJ, Eclipse or VS Code), Recommended [IntelliJ IDEA](https://www.jetbrains.com/idea).
 - Optional [Configure Formatter in intelliJ](https://github.com/google/google-java-format/blob/master/README.md#intellij-android-studio-and-other-jetbrains-ides), refer to [fmt-maven-plugin](https://github.com/spotify/fmt-maven-plugin) for details.
 
-#### Java
+#### 3.3.2. Java
 Recommended [sdkman](https://sdkman.io/install/) for managing Java, Scala installations.
 Make sure `JAVA_HOME` set to Java 21 installation path and `PATH` variable contains entry for `$JAVA_HOME/bin`
 Check Java version as follows. It should look like following, showing major version 21.
@@ -96,14 +203,14 @@ OpenJDK Runtime Environment Temurin-21.0.2+13 (build 21.0.2+13)
 OpenJDK 64-Bit Server VM Temurin-21.0.2+13 (build 21.0.2+13, mixed mode)
 ```
 
-#### Scala
+#### 3.3.3. Scala
 Check Scala version as follows. It should look like following, showing scala version 2.13.14.
 ```shell
 % scala -version
 Scala code runner version 2.13.14 -- Copyright 2002-2026, LAMP/EPFL and Lightbend, Inc.
 ```
 
-#### Spark
+#### 3.3.4. Spark
 Download and extract [spark-4.0.0-bin-hadoop3](https://archive.apache.org/dist/spark/spark-4.0.0/spark-4.0.0-bin-hadoop3.tgz) on your machine and set the following environment variables.
 ```shell
 export SPARK_HOME="/<your directory>/spark-4.0.0-bin-hadoop3"
@@ -111,7 +218,7 @@ export SPARK_CONF_DIR=$SPARK_HOME/conf
 export PATH="$SPARK_HOME/bin:$PATH"
 ```
 
-### Environment setup
+### 3.4. Environment setup
 The demo jobs and `spark-job-service` need following services up and running.
 - Make sure **Postgres** is running at `localhost:5432` with username `postgres` and password `admin`.  
   Create databases `spark_jobs_db` and `error_logs_db` if they do not exist.
@@ -123,10 +230,10 @@ The demo jobs and `spark-job-service` need following services up and running.
 > [!IMPORTANT]  
 > It is recommended to have port numbers same as mentioned above, otherwise you may need to change at multiple places i.e. in job's `application-local.yml`, `spark-job-service` application ymls and deployment yml etc.
 
-#### Manual
+#### 3.5. Manual
 All these services can be installed locally on your machine, and should be accessible at above-mentioned urls and credentials (wherever applicable).
 
-#### Docker compose
+#### 3.6. Docker compose
 * The [docker-compose.yml](docker-compose.yml) file defines the services and configurations to run required infrastructure in Docker. 
 * In Terminal go to project root `spring-boot-spark-kubernetes` and execute following command and confirm if all services are running.
 ```shell
@@ -137,7 +244,7 @@ docker compose up -d
 > [!IMPORTANT]  
 > While using docker compose make sure the required ports are free on your machine, otherwise port busy error could be thrown.
 
-#### Minikube
+#### 3.7. Minikube
 * In Terminal go to project root `spring-boot-spark-kubernetes` and execute following commands to create a namespace `ksoot` and necessary Kubernetes services in given namespace. 
 Refer to [Kubernetes configuration files section](#kubernetes-configuration-files) for more details.
 ```shell
@@ -182,16 +289,18 @@ Keep it running in a separate terminal. Output should look like below.
 ```
 * No need to create any databases or kafka topics required by applications as they are automatically created by [infra-k8s-deployment.yml](infra-k8s-deployment.yml).
 
-## Framework Architecture
 
-### Features
+
+## 4. Framework Architecture
+
+### 4.1. Features
 - **Job Launching**: Trigger Spark jobs via REST endpoint for deployment on local and kubernetes. Either **Job jars** or **Docker images** can be launched using spark-submit
 - **Job Termination**: Accept requests to stop running jobs via REST endpoint, though not a gauranteed method. You may need to kill the job manually if not terminated by this.
 - **Job Monitoring**: Track job status, start and end time, duration taken, error messages if there is any, via REST endpoints.
 - **Auto-configurations**: of Common components such as `SparkSession`, Job lifecycle listener and Connectors to read and write to various datasources.
 - **Demo Jobs**: A [Spark Batch Job](spark-batch-sales-report-job) and another [Spark Streaming Job](spark-stream-logs-analysis-job), to start with.
 
-### Components
+### 4.2. Components
 The framework consists of following components. Refer to respective project's README for details.
 - [**spark-job-service**](spark-job-service/README.md): A Spring Boot application to launch Spark jobs and monitor their status.
 - [**spring-boot-starter-spark**](https://github.com/officiallysingh/spring-boot-starter-spark): Spring boot starter for Spark.
@@ -199,7 +308,7 @@ The framework consists of following components. Refer to respective project's RE
 - [**spark-batch-sales-report-job**](spark-batch-sales-report-job/README.md): A demo Spark Batch Job to generate Monthly sales reports.
 - [**spark-stream-logs-analysis-job**](spark-stream-logs-analysis-job/README.md): A demo Spark Streaming Job to analyze logs in real-time.
 
-### Kubernetes configuration files
+### 4.3. Kubernetes configuration files
 The framework includes Kubernetes configuration files to deploy the required infrastructure and services in a Kubernetes cluster in namespace **`ksoot`**. You can change the namespace in these two files as per your requirement.
 Each service is configured with necessary environment variables, volume mounts, and ports to ensure proper operation within the Kubernetes cluster.
 1. The [infra-k8s-deployment.yml](infra-k8s-deployment.yml) file defines the Kubernetes resources required to deploy various services.
@@ -215,14 +324,14 @@ Each service is configured with necessary environment variables, volume mounts, 
 - **ServiceAccount**: Creates a ServiceAccount named `spark`.
 - **ClusterRoleBinding**: Binds the spark ServiceAccount to the `edit` `ClusterRole`, granting it permissions to edit resources within the namespace.
 
-### Running Jobs Locally
+### 4.4. Running Jobs Locally
 - Individual Spark Jobs can be run as Spring boot application locally in your favorite IDE. Refer to [sales-report-job](spark-batch-sales-report-job/README.md#intellij-run-configurations) and [logs-analysis-job](spark-stream-logs-analysis-job/README.md#intellij-run-configurations).
 - Spark Job can be Launched locally via REST API provided by `spark-job-service`. Refer to [spark-job-service](spark-job-service/README.md#running-locally) for details.  
 > [!IMPORTANT]  
 > Spark Job's `jar` files from Maven repository are deployed on local via `spark-submit` command.
 
-### Running Jobs on Minikube
-#### Preparing for Minikube
+### 4.5. Running Jobs on Minikube
+#### 4.5.1. Preparing for Minikube
 * Make sure minikube infra is ready as mentioned in [Minikube Environment setup section](#minikube).
 * Build custom base Docker image for Spark for more control over it, Refer to base [Dockerfile](Dockerfile) for details. Spark contains a lot of jars at `${SPARK_HOME/jars}`, some of which may conflict with your application jars. So you may need to exclude such jars from Spark.  
   For example following conflicting jars are excluded from Spark in base [Dockerfile](Dockerfile).
@@ -258,7 +367,7 @@ docker image build . -t spark-job-service:0.0.1 -f Dockerfile
 minikube image load spark-job-service:0.0.1
 ```
 
-#### Running on Minikube
+#### 4.5.2. Running on Minikube
 * Make sure [Environment setup on Minikube](#minikube) is already done and [application artifacts are ready](#preparing-for-minikube).
 > [!IMPORTANT]  
 > No configuration change is required except specifically asked to run this code locally.
@@ -347,19 +456,19 @@ sales-report-job-2e9c6f93ef784c17-driver         0/1     Completed   0          
 > All applications run in `default` profile on minikube.  
 > Spark Job's Docker images are deployed on Kubernetes via `spark-submit` command.
 
-### Deployment architecture
-#### Deploy Modes
+### 4.6. Deployment architecture
+#### 4.6.1. Deploy Modes
 There are two deployment modes for Spark Job deployment on Kubernetes.
 - **Client Deploy Mode**: The driver runs in the client’s JVM process and communicates with the executors managed by the cluster.
 - **Cluster Deploy Mode**: The driver process runs as a separate JVM process in a cluster, and the cluster manages its resources.
 
 ![Spark Deploy Modes](img/Spark_Deploy_Modes.png)
 
-#### Deployment process
+#### 4.6.2. Deployment process
 
 ![Spark Deployment on Kubernetes](img/Spark_Deployment_Cluster.png)
 
-#### Configurations precedence order
+#### 4.6.3. Configurations precedence order
 Configurations can be provided at multiple levels. At individual project level, the precedence order is [Standard Spring Boot configurations precedence order](https://docs.spring.io/spring-boot/reference/features/external-config.html).
 * In `application.yml`s of individual Jobs projects and profile specific `yml`s.
 * In `application.yml`s of `spark-job-service`.
@@ -370,7 +479,7 @@ Configurations can be provided at multiple levels. At individual project level, 
 
 ![Configurations Precedence Order](img/Configurations_Precedence_Order.png)
 
-#### Spark UI
+#### 4.6.4. Spark UI
 Access Spark UI at [**`http://localhost:4040`**](http://localhost:4040) to monitor and inspect Spark Batch job execution. 
 On Minikube or Kubernetes you may need to do port forwarding to access it, and it may not be accessible if Job is not in running state at the moment.
 
@@ -380,7 +489,7 @@ On Minikube or Kubernetes you may need to do port forwarding to access it, and i
 
 ![Spark UI](img/Spark_UI_Streaming.png)
 
-## Common Errors
+## 5. Common Errors
 * `24/12/26 01:07:11 INFO KerberosConfDriverFeatureStep: You have not specified a krb5.conf file locally or via a ConfigMap. Make sure that you have the krb5.conf locally on the driver image.
 24/12/26 01:07:12 ERROR Client: Please check "kubectl auth can-i create pod" first. It should be yes.`  
 **Possible cause**: Wrong `spark.master` value or `spark-rbac.yml` is not applied properly in correct namespace.     
@@ -389,10 +498,10 @@ On Minikube or Kubernetes you may need to do port forwarding to access it, and i
 **Possible cause**: The error message indicates that your Spark application is trying to access an internal Java class (sun.nio.ch.DirectBuffer) in the java.base module, which is not exported to Spark’s unnamed module. This issue arises because Java modules introduced in JDK 9 restrict access to internal APIs.  
 **Solution**: Add VM option `--add-exports java.base/sun.nio.ch=ALL-UNNAMED`
 
-## Testing
+## 6. Testing
 All main modules include mock-based unit tests in their `src/test/java` folders. These tests validate core logic without loading the full Spring or Spark context, ensuring fast and reliable test execution. Advanced tests (integration, API, edge cases) can be added as needed.
 
-## References
+## 7. References
 - [Bitnami Helm package for Apache Spark](https://github.com/bitnami/charts/tree/main/bitnami/spark/#bitnami-package-for-apache-spark)
 - [Apache Spark](https://spark.apache.org/docs/4.0.0)
 - [Spark in Action](https://www.manning.com/books/spark-in-action-second-edition)
@@ -415,110 +524,9 @@ All main modules include mock-based unit tests in their `src/test/java` folders.
 - [Spark Performance Tuning](https://spark.apache.org/docs/3.5.3/sql-performance-tuning.html)
 - Spark Performance Optimization [Part 1](https://blog.cloudera.com/how-to-tune-your-apache-spark-jobs-part-1) and [Part 2](https://blog.cloudera.com/how-to-tune-your-apache-spark-jobs-part-2)
 
-# Local Development Setup (Detailed)
 
-1. **Clone the repository:**
-   ```sh
-   git clone <repo-url>
-   cd Spring-Boot-Spark-Kubernetes
-   ```
-2. **Start all services locally:**
-   - Launch all required services (Kafka, Zookeeper, PostgreSQL, MongoDB, ArangoDB, Conduktor, Spark jobs) with:
-     ```sh
-     docker compose up -d
-     ```
-   - Check service status:
-     ```sh
-     docker compose ps
-     ```
-3. **Build and run Spark job modules locally:**
-   - Each Spark job is a Spring Boot application. You can run them directly from your IDE or with Maven:
-     ```sh
-     cd spark-batch-sales-report-job
-     ./mvnw spring-boot:run
-     # or build a JAR
-     ./mvnw clean package
-     java -jar target/*.jar
-     ```
-   - Repeat for other modules as needed.
-4. **Access UIs and APIs:**
-   - **Conduktor UI:** [http://localhost:8081](http://localhost:8081)
-   - **Kafka UI:** [http://localhost:8100](http://localhost:8100)
-   - **Spark Job Service API:** [http://localhost:<service-port>]
-   - Default admin credentials are set in `docker-compose.yml` (see `CDK_ADMIN_EMAIL`, `CDK_ADMIN_PASSWORD`).
-5. **Develop and debug:**
-   - Use breakpoints, hot reload, and Spring Boot DevTools for rapid development.
-   - Use the REST API in `spark-job-service` to submit jobs and monitor status.
-6. **Database and persistence:**
-   - PostgreSQL is used for job metadata and Conduktor persistence.
-   - MongoDB and ArangoDB are available for job-specific data needs.
 
-# Deployment to Kubernetes (Detailed)
-
-1. **Build Docker images:**
-   - Each module has a `Dockerfile`. Build images for all Spark jobs and services:
-     ```sh
-     cd spark-batch-sales-report-job
-     docker build -t myrepo/spark-batch-sales-report-job:latest .
-     # Repeat for other modules
-     ```
-2. **Push images to a registry:**
-   - Tag and push images to your container registry (Docker Hub, ECR, GCR, etc.):
-     ```sh
-     docker tag myrepo/spark-batch-sales-report-job:latest <your-registry>/spark-batch-sales-report-job:latest
-     docker push <your-registry>/spark-batch-sales-report-job:latest
-     # Repeat for other modules
-     ```
-3. **Configure Kubernetes manifests:**
-   - Use `infra-k8s-deployment.yml` as a template.
-   - Update image references, environment variables, and persistent volume claims as needed.
-   - Example snippet:
-     ```yaml
-     apiVersion: apps/v1
-     kind: Deployment
-     metadata:
-       name: spark-batch-sales-report-job
-     spec:
-       template:
-         spec:
-           containers:
-           - name: spark-batch-sales-report-job
-             image: <your-registry>/spark-batch-sales-report-job:latest
-             env:
-             - name: SPRING_PROFILES_ACTIVE
-               value: kubernetes
-     ```
-4. **Deploy to Kubernetes:**
-   - Apply manifests:
-     ```sh
-     kubectl apply -f infra-k8s-deployment.yml
-     ```
-   - Check pod and service status:
-     ```sh
-     kubectl get pods
-     kubectl get svc
-     ```
-5. **Access UIs and APIs in Kubernetes:**
-   - Expose services via NodePort, LoadBalancer, or Ingress as needed.
-   - Example (NodePort):
-     ```yaml
-     kind: Service
-     apiVersion: v1
-     metadata:
-       name: conduktor
-     spec:
-       type: NodePort
-       ports:
-         - port: 8080
-           targetPort: 8080
-           nodePort: 30081
-     ```
-   - Access Conduktor at `http://<node-ip>:30081`.
-6. **Monitor and manage:**
-   - Use `kubectl logs <pod>`, `kubectl describe <pod>`, and your Kubernetes dashboard for troubleshooting.
-   - Scale deployments and manage resources as needed.
-
-# Tips
+## 8. Tips & Best Practices
 - Use [Minikube](https://minikube.sigs.k8s.io/docs/) for local Kubernetes testing.
 - Use [skaffold](https://skaffold.dev/) or similar tools for rapid build/deploy cycles.
 - Store secrets and sensitive configs in Kubernetes Secrets, not in plain manifests.
