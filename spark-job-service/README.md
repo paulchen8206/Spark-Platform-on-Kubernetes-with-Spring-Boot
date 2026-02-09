@@ -401,6 +401,9 @@ Email: raj14.1984@gmail.com
 If you find any issues or need support, please reach out.  
 Give it a :star: on [GitHub](https://github.com/officiallysingh/spring-boot-spark-kubernetes) and a :clap: on [Medium](https://officiallysingh.medium.com/spark-spring-boot-starter-e206def765b9) if you find it helpful.
 
+## Testing
+Mock-based unit tests are included in `src/test/java` for core logic validation without loading the full Spring or Spark context. Advanced tests can be added as needed.
+
 ## References
 - [Apache Spark](https://spark.apache.org/docs/3.5.3)
 - [Spark Submit](https://spark.apache.org/docs/3.5.4/submitting-applications.html)

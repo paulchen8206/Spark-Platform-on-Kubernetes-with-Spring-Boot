@@ -357,14 +357,8 @@ On Minikube or Kubernetes you may need to do port forwarding to access it, and i
 **Possible cause**: The error message indicates that your Spark application is trying to access an internal Java class (sun.nio.ch.DirectBuffer) in the java.base module, which is not exported to Spark’s unnamed module. This issue arises because Java modules introduced in JDK 9 restrict access to internal APIs.  
 **Solution**: Add VM option `--add-exports java.base/sun.nio.ch=ALL-UNNAMED`
 
-## License
-Open source [**MIT License**](https://opensource.org/licenses/MIT)
-
-## Author
-[**Rajveer Singh**](https://www.linkedin.com/in/rajveer-singh-589b3950/)  
-Email: raj14.1984@gmail.com  
-If you find any issues or need support, please reach out.  
-Give it a :star: on [GitHub](https://github.com/officiallysingh/spring-boot-spark-kubernetes) and a :clap: on [Medium](https://officiallysingh.medium.com/spark-spring-boot-starter-e206def765b9) if you find it helpful.
+## Testing
+All main modules include mock-based unit tests in their `src/test/java` folders. These tests validate core logic without loading the full Spring or Spark context, ensuring fast and reliable test execution. Advanced tests (integration, API, edge cases) can be added as needed.
 
 ## References
 - [Bitnami Helm package for Apache Spark](https://github.com/bitnami/charts/tree/main/bitnami/spark/#bitnami-package-for-apache-spark)
@@ -375,11 +369,17 @@ Give it a :star: on [GitHub](https://github.com/officiallysingh/spring-boot-spar
 - [Spark Launcher](https://mallikarjuna_g.gitbooks.io/spark/content/spark-SparkLauncher.html)
 - [Running Spark on Kubernetes](https://spark.apache.org/docs/3.5.4/running-on-kubernetes.html)
 - [Spark UI](https://spark.apache.org/docs/3.5.3/web-ui.html)
-
 - [Spark Streaming](https://spark.apache.org/docs/3.5.3/streaming-programming-guide.html)
 - [Spark ArangoDB Connector](https://docs.arangodb.com/3.13/develop/integrations/arangodb-datasource-for-apache-spark)
 - [Spark MongoDB Connector](https://www.mongodb.com/docs/spark-connector/v10.4)
 - [Spark Kafka Connector](https://spark.apache.org/docs/3.5.1/structured-streaming-kafka-integration.html)
+- [Spark Performance Tuning](https://spark.apache.org/docs/3.5.3/sql-performance-tuning.html)
+- Spark Performance Optimization [Part 1](https://blog.cloudera.com/how-to-tune-your-apache-spark-jobs-part-1) and [Part 2](https://blog.cloudera.com/how-to-tune-your-apache-spark-jobs-part-2)
+- [Spring Boot](https://docs.spring.io/spring-boot/index.html)
+- [Spring Cloud Task](https://spring.io/projects/spring-cloud-task)
+- [Spring Boot Configurations](https://docs.spring.io/spring-boot/reference/features/external-config.html)
+- [Exception handling in Spring boot Web applications](https://github.com/officiallysingh/spring-boot-problem-handler).
+- [Spring boot starter for Spark](https://github.com/officiallysingh/spring-boot-starter-spark).
 - [Spark Performance Tuning](https://spark.apache.org/docs/3.5.3/sql-performance-tuning.html)
 - Spark Performance Optimization [Part 1](https://blog.cloudera.com/how-to-tune-your-apache-spark-jobs-part-1) and [Part 2](https://blog.cloudera.com/how-to-tune-your-apache-spark-jobs-part-2)
 
