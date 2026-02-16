@@ -1,3 +1,8 @@
+# <span style="color:#7b1fa2;font-weight:bold;">Kubernetes‑Native Spark Architecture with Spring Boot and Helm</span>
+
+
+This repository provides a comprehensive platform for running Spark jobs with Spring Boot, supporting both local development and production-grade Kubernetes deployments. It integrates CI/CD pipelines, container orchestration, and multi-environment configuration for seamless development, testing, and operations. The project includes modular Spark job applications, a job service API, and infrastructure templates for Kafka, Zookeeper, PostgreSQL, and more. Developers can quickly build, test, and deploy Spark jobs, leveraging automated workflows and secure environment management.
+
 # <span style="color:#1976d2;font-weight:bold;">1. GitHub Actions CI/CD Integration</span>
 
 This project uses GitHub Actions for automated CI/CD across multiple environments (dev, QA, staging, production). The workflow is defined in [.github/workflows/ci-cd.yml](.github/workflows/ci-cd.yml) and provides:
@@ -74,7 +79,7 @@ See the workflow file for details and adjust as needed for your infrastructure.
      # Repeat for other modules
      ```
 3. **Configure Kubernetes manifests:**
-   - Use `infra-k8s-deployment.yml` as a template.
+   - Use `infra-kubernetes-deploy.yml` as a template.
    - Update image references, environment variables, and persistent volume claims as needed.
    - Example snippet:
      ```yaml
@@ -95,7 +100,7 @@ See the workflow file for details and adjust as needed for your infrastructure.
 4. **Deploy to Kubernetes:**
    - Apply manifests:
      ```sh
-     kubectl apply -f infra-k8s-deployment.yml
+     kubectl apply -f infra-kubernetes-deploy.yml
      ```
    - Check pod and service status:
      ```sh
@@ -177,7 +182,7 @@ docker compose up -d
 * In Terminal go to project root `spring-boot-spark-kubernetes` and execute following commands to create a namespace `ksoot` and necessary Kubernetes services in given namespace. 
 Refer to [Kubernetes configuration files section](#kubernetes-configuration-files) for more details.
 ```shell
-kubectl apply -f infra-k8s-deployment.yml
+kubectl apply -f infra-kubernetes-deploy.yml
 kubectl apply -f spark-rbac.yml
 ```
 * Set default namespace to `ksoot` in minikube. You can always rollback to default namespace.
@@ -216,7 +221,7 @@ Keep it running in a separate terminal. Output should look like below.
 🏃  Starting tunnel for service postgres.
 🏃  Starting tunnel for service zookeeper.
 ```
-* No need to create any databases or kafka topics required by applications as they are automatically created by [infra-k8s-deployment.yml](infra-k8s-deployment.yml).
+* No need to create any databases or kafka topics required by applications as they are automatically created by [infra-kubernetes-deploy.yml](infra-kubernetes-deploy.yml).
 
 
 
@@ -325,7 +330,7 @@ The framework consists of following components. Refer to respective project's RE
 ## <span style="color:#7b1fa2;font-weight:bold;">3.3. Kubernetes configuration files</span>
 The framework includes Kubernetes configuration files to deploy the required infrastructure and services in a Kubernetes cluster in namespace **`ksoot`**. You can change the namespace in these two files as per your requirement.
 Each service is configured with necessary environment variables, volume mounts, and ports to ensure proper operation within the Kubernetes cluster.
-1. The [infra-k8s-deployment.yml](infra-k8s-deployment.yml) file defines the Kubernetes resources required to deploy various services.
+1. The [infra-kubernetes-deploy.yml](infra-kubernetes-deploy.yml) file defines the Kubernetes resources required to deploy various services.
 - **Namespace**: Creates a namespace **`ksoot`**.
 - **MongoDB**: Deployment, PersistentVolumeClaim, and Service for MongoDB.
 - **ArangoDB**: Deployment, PersistentVolumeClaim, and Service for ArangoDB.
@@ -516,24 +521,24 @@ On Minikube or Kubernetes you may need to do port forwarding to access it, and i
 All main modules include mock-based unit tests in their `src/test/java` folders. These tests validate core logic without loading the full Spring or Spark context, ensuring fast and reliable test execution. Advanced tests (integration, API, edge cases) can be added as needed.
 
 # <span style="color:#fbc02d;font-weight:bold;">6. References</span>
-- [Bitnami Helm package for Apache Spark](https://github.com/bitnami/charts/tree/main/bitnami/spark/#bitnami-package-for-apache-spark)
 - [Apache Spark](https://spark.apache.org/docs/4.0.0)
-- [Spark in Action](https://www.manning.com/books/spark-in-action-second-edition)
-- [Spark Configurations](https://spark.apache.org/docs/4.0.0/configuration.html)
-- [Spark Submit](https://spark.apache.org/docs/4.0.0/submitting-applications.html)
-- [Spark Launcher](https://mallikarjuna_g.gitbooks.io/spark/content/spark-SparkLauncher.html)
+- [Bitnami Helm package for Apache Spark](https://github.com/bitnami/charts/tree/main/bitnami/spark/#bitnami-package-for-apache-spark)
+- [Exception handling in Spring boot Web applications](https://github.com/officiallysingh/spring-boot-problem-handler).
 - [Running Spark on Kubernetes](https://spark.apache.org/docs/4.0.0/running-on-kubernetes.html)
-- [Spark UI](https://spark.apache.org/docs/4.0.0/web-ui.html)
-- [Spark Streaming](https://spark.apache.org/docs/4.0.0/streaming-programming-guide.html)
 - [Spark ArangoDB Connector](https://docs.arangodb.com/3.13/develop/integrations/arangodb-datasource-for-apache-spark)
-- [Spark MongoDB Connector](https://www.mongodb.com/docs/spark-connector/v10.4)
+- [Spark Configurations](https://spark.apache.org/docs/4.0.0/configuration.html)
+- [Spark in Action](https://www.manning.com/books/spark-in-action-second-edition)
 - [Spark Kafka Connector](https://spark.apache.org/docs/4.0.0/structured-streaming-kafka-integration.html)
+- [Spark Launcher](https://mallikarjuna_g.gitbooks.io/spark/content/spark-SparkLauncher.html)
+- [Spark MongoDB Connector](https://www.mongodb.com/docs/spark-connector/v10.4)
+- [Spark Performance Tuning](https://spark.apache.org/docs/3.5.3/sql-performance-tuning.html)
+- [Spark Streaming](https://spark.apache.org/docs/4.0.0/streaming-programming-guide.html)
+- [Spark Submit](https://spark.apache.org/docs/4.0.0/submitting-applications.html)
+- [Spark UI](https://spark.apache.org/docs/4.0.0/web-ui.html)
+- [Spring Boot Configurations](https://docs.spring.io/spring-boot/reference/features/external-config.html)
+- [Spring boot starter for Spark](https://github.com/officiallysingh/spring-boot-starter-spark).
 - [Spring Boot](https://docs.spring.io/spring-boot/index.html)
 - [Spring Cloud Task](https://spring.io/projects/spring-cloud-task)
-- [Spring Boot Configurations](https://docs.spring.io/spring-boot/reference/features/external-config.html)
-- [Exception handling in Spring boot Web applications](https://github.com/officiallysingh/spring-boot-problem-handler).
-- [Spring boot starter for Spark](https://github.com/officiallysingh/spring-boot-starter-spark).
-- [Spark Performance Tuning](https://spark.apache.org/docs/3.5.3/sql-performance-tuning.html)
 - Spark Performance Optimization [Part 1](https://blog.cloudera.com/how-to-tune-your-apache-spark-jobs-part-1) and [Part 2](https://blog.cloudera.com/how-to-tune-your-apache-spark-jobs-part-2)
 
 

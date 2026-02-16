@@ -67,7 +67,7 @@ jobs:
       uses: azure/setup-kubectl@v3
     - name: Deploy
       run: |
-        kubectl apply -f infra-k8s-deployment.yml
+        kubectl apply -f infra-kubernetes-deploy.yml
         # Or use Helm:
         # helm upgrade --install qa-release ./helm -f helm/values-qa.yaml
   ci-stg:
@@ -107,7 +107,7 @@ jobs:
       uses: azure/setup-kubectl@v3
     - name: Deploy
       run: |
-        kubectl apply -f infra-k8s-deployment.yml
+        kubectl apply -f infra-kubernetes-deploy.yml
         # Or use Helm:
         # helm upgrade --install stg-release ./helm -f helm/values-stg.yaml
   ci-prd:
@@ -147,6 +147,6 @@ jobs:
       uses: azure/setup-kubectl@v3
     - name: Deploy
       run: |-
-        kubectl apply -f infra-k8s-deployment.yml
+        kubectl apply -f infra-kubernetes-deploy.yml
         # Or use Helm:
         # helm upgrade --install prd-release ./helm -f helm/values-prd.yaml
