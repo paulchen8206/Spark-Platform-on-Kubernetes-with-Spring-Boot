@@ -1,7 +1,7 @@
 
 # <span style="color:#7b1fa2;font-weight:bold;">Kubernetes‑Native Spark Architecture with Spring Boot and Helm</span>
 
-This repository provides a comprehensive platform for running Spark jobs with Spring Boot, supporting both local development and production-grade Kubernetes deployments.
+This repository delivers an advanced big data engineering platform for running Spark jobs with Spring Boot, built on leading-edge architecture and modern design patterns. It supports both local development and production-grade Kubernetes deployments, enabling scalable, resilient, and maintainable data solutions for enterprise environments.
 
 This is a end-to-end and advanced reference project for building Kubernetes‑Native Spark Architecture with Spring Boot and Helm.
 
