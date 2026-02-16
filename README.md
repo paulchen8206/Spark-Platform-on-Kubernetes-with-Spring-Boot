@@ -1,7 +1,90 @@
+
 # <span style="color:#7b1fa2;font-weight:bold;">Kubernetes‑Native Spark Architecture with Spring Boot and Helm</span>
 
+This repository provides a comprehensive platform for running Spark jobs with Spring Boot, supporting both local development and production-grade Kubernetes deployments.
 
-This repository provides a comprehensive platform for running Spark jobs with Spring Boot, supporting both local development and production-grade Kubernetes deployments. It integrates CI/CD pipelines, container orchestration, and multi-environment configuration for seamless development, testing, and operations. The project includes modular Spark job applications, a job service API, and infrastructure templates for Kafka, Zookeeper, PostgreSQL, and more. Developers can quickly build, test, and deploy Spark jobs, leveraging automated workflows and secure environment management.
+This is a end-to-end and advanced reference project for building Kubernetes‑Native Spark Architecture with Spring Boot and Helm.
+
+> **Production Ready:**
+> - This is a production-ready Spark streaming project with robust architecture and best practices for reliability and scalability.
+> - End-to-end CI/CD pipelines are included for automated build, test, deployment, and environment management.
+> - Complete lifecycle management: job launching, monitoring, termination, and error handling are integrated.
+> - Modular design enables easy extension for batch and streaming jobs, with reusable commons and service APIs.
+> - Secure credential and configuration management for all environments (dev, QA, staging, production).
+> - Supports local development, Minikube, and full Kubernetes clusters.
+> - Infrastructure templates for Kafka, Zookeeper, PostgreSQL, MongoDB, ArangoDB, and more.
+> - See below for details on CI/CD, deployment, and architecture.
+
+It integrates CI/CD pipelines, container orchestration, and multi-environment configuration for seamless development, testing, and operations. The project includes modular Spark job applications, a job service API, and infrastructure templates for Kafka, Zookeeper, PostgreSQL, and more. Developers can quickly build, test, and deploy Spark jobs, leveraging automated workflows and secure environment management.
+
+
+## <span style="color:#388e3c;font-weight:bold;">Project Directory Structure</span>
+
+```
+.github/workflows/*
+helm/
+  Chart.yaml
+  templates/
+    conduktor-configmap.yaml
+    conduktor-deployment.yaml
+    kafka-deployment.yaml
+    postgres-deployment.yaml
+    zookeeper-deployment.yaml
+  values-dev.yaml
+  values-prd.yaml
+  values-qa.yaml
+  values-stg.yaml
+  values.yaml
+img/*
+spark-batch-sales-report-job/
+  .gitignore
+  Dockerfile
+  README.md
+  mvnw
+  mvnw.cmd
+  pom.xml
+  src/*
+spark-job-commons/
+  .gitignore
+  README.md
+  mvnw
+  mvnw.cmd
+  pom.xml
+  src/*
+spark-job-service/
+  .gitignore
+  Dockerfile
+  README.md
+  api-spec/
+  cmd/
+  deployment.yml
+  mvnw
+  mvnw.cmd
+  pom.xml
+  src/*
+spark-stream-logs-analysis-job/
+  .gitignore
+  Dockerfile
+  README.md
+  mvnw
+  mvnw.cmd
+  pom.xml
+  src/*
+.gitignore
+conduktor-config.yml
+default-platform-config.yaml
+docker-compose.yml
+Dockerfile
+infra-kubernetes-deploy.yml
+LICENSE
+mvnw
+mvnw.cmd
+pom.xml
+README.md
+spark-rbac.yml
+```
+
+
 
 # <span style="color:#1976d2;font-weight:bold;">1. GitHub Actions CI/CD Integration</span>
 
@@ -547,3 +630,15 @@ All main modules include mock-based unit tests in their `src/test/java` folders.
 - Use [Minikube](https://minikube.sigs.k8s.io/docs/) for local Kubernetes testing.
 - Use [skaffold](https://skaffold.dev/) or similar tools for rapid build/deploy cycles.
 - Store secrets and sensitive configs in Kubernetes Secrets, not in plain manifests.
+
+# <span style="color:#d32f2f;font-weight:bold;">8. ⚠️ Notes & Caution</span>
+
+> **Please read carefully before using this repository:**
+> - Ensure you understand the CI/CD and deployment workflows before running in production; misconfiguration may lead to downtime or security risks.
+> - Sensitive credentials and secrets must be managed securely (use GitHub Secrets, Kubernetes Secrets, never commit them to source).
+> - Review and adapt infrastructure templates (Kubernetes, Docker, Helm) to your own environment and compliance requirements.
+> - Test changes in a safe environment (local, Minikube, staging) before deploying to production.
+> - Monitor resource usage and scaling; improper settings may cause performance issues or unexpected costs.
+> - Always check compatibility of Spark, Spring Boot, and other dependencies with your target environment.
+> - This project is intended for advanced users familiar with distributed systems, Kubernetes, and CI/CD pipelines.
+> - For critical workloads, consult your DevOps and security teams before adoption.
