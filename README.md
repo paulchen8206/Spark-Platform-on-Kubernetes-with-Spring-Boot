@@ -1,4 +1,4 @@
-# Spark on Kubernetes End-to-End with Spring Boot
+# Spark Job Platform on Kubernetes with Spring Boot
 
 End-to-end reference project for launching and managing Apache Spark jobs from Spring Boot, with local development and Kubernetes deployment support.
 
