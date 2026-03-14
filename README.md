@@ -17,6 +17,54 @@ This repository includes:
 - [`spark-batch-sales-report-job`](spark-batch-sales-report-job/README.md): Sample batch pipeline.
 - [`spark-stream-logs-analysis-job`](spark-stream-logs-analysis-job/README.md): Sample streaming pipeline.
 
+### Maven Components Organization (Mermaid)
+
+```mermaid
+flowchart TB
+  Root["root pom.xml\npackaging: pom"]
+
+  Commons["spark-job-commons\npom.xml"]
+  Service["spark-job-service\npom.xml"]
+  Batch["spark-batch-sales-report-job\npom.xml"]
+  Stream["spark-stream-logs-analysis-job\npom.xml"]
+
+  Root --> Commons
+  Root --> Service
+  Root --> Batch
+  Root --> Stream
+
+  Commons --> Service
+  Commons --> Batch
+  Commons --> Stream
+
+  Service --> Batch
+  Service --> Stream
+```
+
+### Maven Components Organization (Left-to-Right)
+
+```mermaid
+flowchart LR
+  Root["root pom.xml"]
+
+  Commons["spark-job-commons"]
+  Service["spark-job-service"]
+  Batch["spark-batch-sales-report-job"]
+  Stream["spark-stream-logs-analysis-job"]
+
+  Root --> Commons
+  Root --> Service
+  Root --> Batch
+  Root --> Stream
+
+  Commons --> Service
+  Commons --> Batch
+  Commons --> Stream
+
+  Service --> Batch
+  Service --> Stream
+```
+
 ## Installation
 
 ### Prerequisites
