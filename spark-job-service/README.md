@@ -11,18 +11,18 @@ For prerequisites and repository-level setup, see [Installation](../README.md#in
 From repository root, the most relevant operational targets for this module are:
 
 ```bash
-make image-job-service
-make deploy-app
-make rollout-status
-make spark-job-service-port-forward
-make spark-job-service-api-check
+make mk-image-job-service
+make mk-deploy-app
+make mk-rollout-status
+make mk-port-forward
+make mk-api-check
 ```
 
 If local port-forward is unstable, use in-cluster submission helpers:
 
 ```bash
-make submit-sales
-make submit-logs
+make mk-submit-sales
+make mk-submit-logs
 ```
 
 ## What This Module Does

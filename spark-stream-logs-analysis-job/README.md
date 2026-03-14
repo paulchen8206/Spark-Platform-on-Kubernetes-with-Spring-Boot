@@ -13,15 +13,15 @@ For prerequisites and infrastructure setup, see [Installation](../README.md#inst
 From repository root:
 
 ```bash
-make image-stream
-make submit-logs
-make show-recent-pods
+make mk-image-stream
+make mk-submit-logs
+make mk-show-recent-pods
 ```
 
 For end-to-end verification, run:
 
 ```bash
-make smoke
+make mk-smoke
 ```
 
 ## Pipeline Summary

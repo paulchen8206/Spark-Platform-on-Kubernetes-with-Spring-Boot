@@ -19,8 +19,8 @@ Add dependency from sibling modules:
 From repository root, common workflows that include this module are:
 
 ```bash
-make build
-make images
+make mk-build
+make mk-images
 ```
 
 To build only this module directly:

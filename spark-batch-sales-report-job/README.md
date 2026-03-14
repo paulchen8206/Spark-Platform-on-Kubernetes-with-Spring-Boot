@@ -15,15 +15,15 @@ For prerequisites and infrastructure setup, see [Installation](../README.md#inst
 From repository root:
 
 ```bash
-make image-batch
-make submit-sales SALES_MONTH=2024-11
-make show-recent-pods
+make mk-image-batch
+make mk-submit-sales SALES_MONTH=2024-11
+make mk-show-recent-pods
 ```
 
 For end-to-end verification, run:
 
 ```bash
-make smoke
+make mk-smoke
 ```
 
 ## Pipeline Summary

@@ -44,11 +44,11 @@ mvn clean install
 Use the root `Makefile` to run the most common local Kubernetes flow:
 
 ```bash
-make minikube-start
-make build images
-make namespace secrets
-make deploy rollout-status
-make smoke
+make mk-start
+make mk-build mk-images
+make mk-namespace mk-secrets
+make mk-deploy mk-rollout-status
+make mk-smoke
 ```
 
 Default local passwords are defined in [k8s/platform-secrets-dev.yaml](k8s/platform-secrets-dev.yaml). Update that file before running in shared environments.
@@ -65,22 +65,22 @@ Common operations from repository root:
 
 ```bash
 # Build all project artifacts and images
-make build images
+make mk-build mk-images
 
 # Deploy and verify
-make namespace secrets
-make deploy rollout-status
-make pods services
+make mk-namespace mk-secrets
+make mk-deploy mk-rollout-status
+make mk-pods mk-services
 
 # Submit smoke jobs (in-cluster)
-make smoke
+make mk-smoke
 
 # Cleanup
-make cleanup
-make cleanup-all
+make mk-cleanup
+make mk-cleanup-all
 ```
 
-If `kubectl port-forward -n ksoot svc/spark-job-service 8090:8090` is unstable on your machine, prefer the in-cluster smoke commands (`make smoke`) for job submission and validation.
+If `kubectl port-forward -n ksoot svc/spark-job-service 8090:8090` is unstable on your machine, prefer the in-cluster smoke commands (`make mk-smoke`) for job submission and validation.
 
 ### Docker Compose
 
@@ -162,6 +162,19 @@ Helm chart is under [`helm`](helm). Example install:
 helm install my-release ./helm -f helm/values-dev.yaml \
   --set platformSecrets.existingSecret=platform-secrets
 ```
+
+### Helm E2E Quick Path
+
+```bash
+kubectl create namespace ksoot --dry-run=client -o yaml | kubectl apply -f -
+kubectl apply -n ksoot -f k8s/platform-secrets-dev.yaml
+helm upgrade --install local-release ./helm -n ksoot -f helm/values-dev.yaml \
+  --set platformSecrets.existingSecret=platform-secrets
+kubectl get pods -n ksoot -o wide
+```
+
+Detailed end-to-end Helm operations (verify, access, smoke checks, upgrade, uninstall):
+[`RUNBOOK.md` section 10](RUNBOOK.md#10-helm-alternative-optional).
 
 Environment-specific values files:
 - [`helm/values-dev.yaml`](helm/values-dev.yaml)
