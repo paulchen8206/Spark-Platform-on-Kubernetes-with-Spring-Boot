@@ -8,6 +8,16 @@ Main class: [LogAnalysisJob](src/main/java/com/ksoot/spark/loganalysis/LogAnalys
 
 For prerequisites and infrastructure setup, see [Installation](../README.md#installation).
 
+## Dockerfile Introduction
+
+The module Dockerfile is minimal and validated for Spark-on-Kubernetes execution in this project.
+
+- Base image: `ksoot/spark:4.0.0`
+- Artifact copied: `target/spark-stream-logs-analysis-job-*.jar` to `$SPARK_JOB_APPS_DIR/spark-stream-logs-analysis-job.jar`
+- Entrypoint: `/opt/entrypoint.sh` (provided by the base image)
+
+This image is intended to be launched by `spark-submit` through `spark-job-service`, not as a standalone HTTP service.
+
 ## Makefile Usage
 
 From repository root:

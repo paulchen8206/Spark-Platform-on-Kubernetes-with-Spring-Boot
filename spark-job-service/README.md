@@ -6,6 +6,17 @@ Spring Boot service that accepts REST requests and launches Spark jobs using `sp
 
 For prerequisites and repository-level setup, see [Installation](../README.md#installation).
 
+## Dockerfile Introduction
+
+The module Dockerfile is production-oriented and validated for this repository workflow.
+
+- Base image: `ksoot/spark:4.0.0`
+- Artifact copied: `target/spark-job-service-*.jar` to `/app.jar`
+- Runtime helper copied: `cmd/spark-job-submit.sh` to `$SPARK_HOME/bin`
+- Container user: runs as non-root `spark` after setup
+- Exposed port: `8090`
+- Entrypoint: `java -jar /app.jar`
+
 ## Makefile Usage
 
 From repository root, the most relevant operational targets for this module are:
