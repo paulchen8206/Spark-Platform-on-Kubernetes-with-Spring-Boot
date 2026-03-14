@@ -46,19 +46,38 @@ Use the root `Makefile` to run the most common local Kubernetes flow:
 ```bash
 make minikube-start
 make build images
-make namespace secrets \
-  PLATFORM_POSTGRES_PASSWORD='<set-postgres-password>' \
-  PLATFORM_ARANGO_ROOT_PASSWORD='<set-arango-password>' \
-  PLATFORM_CDK_ADMIN_PASSWORD='<set-admin-password>' \
-  PLATFORM_CONDUKTOR_ANALYST_PASSWORD='<set-analyst-password>'
+make namespace secrets
 make deploy rollout-status
 make smoke
 ```
+
+Default local passwords are defined in [k8s/platform-secrets-dev.yaml](k8s/platform-secrets-dev.yaml). Update that file before running in shared environments.
 
 To see all available operational targets:
 
 ```bash
 make help
+```
+
+### Makefile Usage Reference
+
+Common operations from repository root:
+
+```bash
+# Build all project artifacts and images
+make build images
+
+# Deploy and verify
+make namespace secrets
+make deploy rollout-status
+make pods services
+
+# Submit smoke jobs (in-cluster)
+make smoke
+
+# Cleanup
+make cleanup
+make cleanup-all
 ```
 
 If `kubectl port-forward -n ksoot svc/spark-job-service 8090:8090` is unstable on your machine, prefer the in-cluster smoke commands (`make smoke`) for job submission and validation.
@@ -105,11 +124,7 @@ Notes:
 Deploy infrastructure and RBAC:
 
 ```bash
-kubectl create secret generic platform-secrets -n ksoot \
-  --from-literal=postgres-password='<set-postgres-password>' \
-  --from-literal=arango-root-password='<set-arango-password>' \
-  --from-literal=cdk-admin-password='<set-admin-password>' \
-  --from-literal=conduktor-analyst-password='<set-analyst-password>'
+kubectl apply -n ksoot -f k8s/platform-secrets-dev.yaml
 kubectl apply -f k8s/infra-kubernetes-deploy.yml
 kubectl apply -f k8s/spark-rbac.yml
 kubectl config set-context --current --namespace=ksoot

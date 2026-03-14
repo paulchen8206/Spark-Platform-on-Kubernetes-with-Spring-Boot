@@ -14,6 +14,21 @@ Add dependency from sibling modules:
 </dependency>
 ```
 
+## Makefile Usage
+
+From repository root, common workflows that include this module are:
+
+```bash
+make build
+make images
+```
+
+To build only this module directly:
+
+```bash
+mvn -pl spark-job-commons -am clean install
+```
+
 ## Connectors
 
 Reusable connectors are provided in [connector](src/main/java/com/ksoot/spark/common/connector):

@@ -2,6 +2,25 @@
 
 This runbook describes day-to-day operations for running this project locally on Kubernetes using Minikube with the Docker driver.
 
+## Quick Makefile Usage
+
+From repository root, these commands cover the standard lifecycle:
+
+```bash
+make minikube-start
+make build images
+make namespace secrets
+make deploy rollout-status
+make smoke
+```
+
+For cleanup:
+
+```bash
+make cleanup
+make cleanup-all
+```
+
 ## 1. Prerequisites
 
 - Docker Desktop running
@@ -67,14 +86,10 @@ Create namespace and platform secret used by infrastructure components.
 
 ```bash
 kubectl create namespace ksoot --dry-run=client -o yaml | kubectl apply -f -
-
-kubectl create secret generic platform-secrets -n ksoot \
-  --from-literal=postgres-password='<set-postgres-password>' \
-  --from-literal=arango-root-password='<set-arango-password>' \
-  --from-literal=cdk-admin-password='<set-admin-password>' \
-  --from-literal=conduktor-analyst-password='<set-analyst-password>' \
-  --dry-run=client -o yaml | kubectl apply -f -
+kubectl apply -n ksoot -f k8s/platform-secrets-dev.yaml
 ```
+
+Edit `k8s/platform-secrets-dev.yaml` if you want different initial passwords.
 
 ## 5. Deploy Infrastructure and App
 
@@ -232,12 +247,7 @@ kubectl rollout restart deployment/spark-job-service -n ksoot
 If `spark-job-service` fails to start due to DB authentication:
 
 ```bash
-kubectl create secret generic platform-secrets -n ksoot \
-  --from-literal=postgres-password='<set-postgres-password>' \
-  --from-literal=arango-root-password='<set-arango-password>' \
-  --from-literal=cdk-admin-password='<set-admin-password>' \
-  --from-literal=conduktor-analyst-password='<set-analyst-password>' \
-  --dry-run=client -o yaml | kubectl apply -f -
+kubectl apply -n ksoot -f k8s/platform-secrets-dev.yaml
 
 kubectl rollout restart deployment/spark-job-service -n ksoot
 kubectl rollout status deployment/spark-job-service -n ksoot --timeout=300s

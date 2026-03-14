@@ -8,6 +8,22 @@ Main class: [LogAnalysisJob](src/main/java/com/ksoot/spark/loganalysis/LogAnalys
 
 For prerequisites and infrastructure setup, see [Installation](../README.md#installation).
 
+## Makefile Usage
+
+From repository root:
+
+```bash
+make image-stream
+make submit-logs
+make show-recent-pods
+```
+
+For end-to-end verification, run:
+
+```bash
+make smoke
+```
+
 ## Pipeline Summary
 
 Implementation entry point: [SparkPipelineExecutor](src/main/java/com/ksoot/spark/loganalysis/SparkPipelineExecutor.java)

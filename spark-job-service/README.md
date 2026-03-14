@@ -6,6 +6,25 @@ Spring Boot service that accepts REST requests and launches Spark jobs using `sp
 
 For prerequisites and repository-level setup, see [Installation](../README.md#installation).
 
+## Makefile Usage
+
+From repository root, the most relevant operational targets for this module are:
+
+```bash
+make image-job-service
+make deploy-app
+make rollout-status
+make spark-job-service-port-forward
+make spark-job-service-api-check
+```
+
+If local port-forward is unstable, use in-cluster submission helpers:
+
+```bash
+make submit-sales
+make submit-logs
+```
+
 ## What This Module Does
 
 - Exposes job launcher APIs under `/v1/spark-jobs`.
