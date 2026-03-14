@@ -77,6 +77,8 @@ flowchart LR
   - Minikube
   - Helm 3
 
+This repository standardizes on system Maven (`mvn`) for builds and packaging.
+
 ### Build all modules
 
 From repository root:
