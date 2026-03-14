@@ -17,6 +17,7 @@ CURL_IMAGE ?= curlimages/curl:8.10.1
 SALES_MONTH ?= 2024-08
 PLATFORM_SECRETS_FILE ?= k8s/platform-secrets-dev.yaml
 ENV_FILE ?= .env
+COMPOSE_REQUIRED_VARS ?= CDK_ADMIN_PASSWORD CDK_ANALYST_PASSWORD DATABASE_PASSWORD POSTGRES_PASSWORD ARANGO_ROOT_PASSWORD
 
 KUBECTL ?= kubectl
 MINIKUBE ?= minikube
@@ -24,18 +25,29 @@ KNS := $(KUBECTL) -n $(NAMESPACE)
 MK_DOCKER_ENV = eval "$$($(MINIKUBE) -p $(MINIKUBE_PROFILE) docker-env)"
 
 .PHONY: help \
-	dc-up dc-ps dc-down dc-e2e \
+	dc-env-check dc-up dc-ps dc-down dc-e2e \
 	mk-start mk-stop mk-delete mk-tunnel mk-docker-env mk-print-docker-env mk-build mk-image-spark-base mk-image-job-service mk-image-batch mk-image-stream mk-images mk-namespace mk-secrets mk-deploy-infra mk-deploy-rbac mk-deploy-app mk-deploy mk-rollout-status mk-pods mk-services mk-kafka-ui-health mk-port-forward mk-api-check mk-clean-job-pods mk-submit-sales mk-submit-logs mk-show-recent-pods mk-smoke mk-service-logs mk-events mk-cleanup mk-cleanup-all mk-e2e \
 	helm-prepare helm-install helm-verify helm-url helm-smoke helm-uninstall helm-e2e
 
 help: ## Show runbook-compatible targets
 	@awk 'BEGIN {FS = ":.*##"; printf "Runbook-compatible targets:\n"} /^[a-zA-Z0-9_.-]+:.*##/ {printf "  make %-25s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
-dc-up: ## [A] Start Docker Compose infrastructure
+dc-env-check: ## [A] Validate required env vars for Docker Compose
 	@if [[ ! -f "$(ENV_FILE)" ]]; then \
 		echo "Missing $(ENV_FILE). Create it or set ENV_FILE=<path>."; \
 		exit 1; \
 	fi
+	@set -a; source $(ENV_FILE); set +a; \
+	missing=0; \
+	for var in $(COMPOSE_REQUIRED_VARS); do \
+		if [[ -z "$${!var}" ]]; then \
+			echo "Missing required env var: $$var (set it in $(ENV_FILE) or shell)"; \
+			missing=1; \
+		fi; \
+	done; \
+	if [[ $$missing -ne 0 ]]; then exit 1; fi
+
+dc-up: dc-env-check ## [A] Start Docker Compose infrastructure
 	set -a; source $(ENV_FILE); set +a; docker compose -f docker/docker-compose.yml up -d
 
 dc-ps: ## [A] Show Docker Compose services
