@@ -395,11 +395,6 @@ flowchart LR
   Cluster -.-> note2
 ```
 
-Design sources are in [`diagrams`](diagrams):
-- [`diagrams/Spark_Deploy_Modes.drawio`](diagrams/Spark_Deploy_Modes.drawio)
-- [`diagrams/Spark_Deployment_Cluster.drawio`](diagrams/Spark_Deployment_Cluster.drawio)
-- [`diagrams/Configurations_Precedence_Order.drawio`](diagrams/Configurations_Precedence_Order.drawio)
-- [`diagrams/Spark_deploy_local.drawio`](diagrams/Spark_deploy_local.drawio)
 
 ## References
 
