@@ -44,11 +44,11 @@ From repository root:
 Start local infrastructure:
 
 ```bash
-docker compose up -d
-docker compose ps
+docker compose -f docker/docker-compose.yml up -d
+docker compose -f docker/docker-compose.yml ps
 ```
 
-Main local endpoints from [`docker-compose.yml`](docker-compose.yml):
+Main local endpoints from [`docker/docker-compose.yml`](docker/docker-compose.yml):
 - Conduktor UI: http://localhost:8081
 - Kafka UI: http://localhost:8100
 - Kafka broker (host): `localhost:9092`
