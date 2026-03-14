@@ -18,6 +18,8 @@ spark:
   driver:
     memory: 1g
     cores: 1
+    host: 127.0.0.1
+    bindAddress: 127.0.0.1
     extraJavaOptions: >
       -Dspring.profiles.active=local
 
