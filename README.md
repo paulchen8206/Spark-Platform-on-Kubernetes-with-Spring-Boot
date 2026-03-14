@@ -39,6 +39,24 @@ From repository root:
 
 ## Local Development
 
+### Makefile Happy Path
+
+Use the root `Makefile` to run the most common local Kubernetes flow:
+
+```bash
+make minikube-start
+make build images
+make namespace secrets \
+  PLATFORM_POSTGRES_PASSWORD='<set-postgres-password>' \
+  PLATFORM_ARANGO_ROOT_PASSWORD='<set-arango-password>' \
+  PLATFORM_CDK_ADMIN_PASSWORD='<set-admin-password>' \
+  PLATFORM_CONDUKTOR_ANALYST_PASSWORD='<set-analyst-password>'
+make deploy rollout-status
+make smoke
+```
+
+If `kubectl port-forward -n ksoot svc/spark-job-service 8090:8090` is unstable on your machine, prefer the in-cluster smoke commands (`make smoke`) for job submission and validation.
+
 ### Docker Compose
 
 Start local infrastructure:
