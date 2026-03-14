@@ -142,11 +142,11 @@ For job launching specifically:
 
 ## Architecture and Diagrams
 
-Design sources are in [`img`](img):
-- [`img/Spark_Deploy_Modes.drawio`](img/Spark_Deploy_Modes.drawio)
-- [`img/Spark_Deployment_Cluster.drawio`](img/Spark_Deployment_Cluster.drawio)
-- [`img/Configurations_Precedence_Order.drawio`](img/Configurations_Precedence_Order.drawio)
-- [`img/Spark_deploy_local.drawio`](img/Spark_deploy_local.drawio)
+Design sources are in [`diagrams`](diagrams):
+- [`diagrams/Spark_Deploy_Modes.drawio`](diagrams/Spark_Deploy_Modes.drawio)
+- [`diagrams/Spark_Deployment_Cluster.drawio`](diagrams/Spark_Deployment_Cluster.drawio)
+- [`diagrams/Configurations_Precedence_Order.drawio`](diagrams/Configurations_Precedence_Order.drawio)
+- [`diagrams/Spark_deploy_local.drawio`](diagrams/Spark_deploy_local.drawio)
 
 ## References
 
