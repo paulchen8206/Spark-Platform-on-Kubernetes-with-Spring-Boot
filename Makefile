@@ -13,16 +13,12 @@ SPARK_STREAM_IMAGE ?= spark-stream-logs-analysis-job:0.0.1
 CURL_IMAGE ?= curlimages/curl:8.10.1
 
 SALES_MONTH ?= 2024-08
+PLATFORM_SECRETS_FILE ?= k8s/platform-secrets-dev.yaml
 
 KUBECTL ?= kubectl
 MINIKUBE ?= minikube
 KNS := $(KUBECTL) -n $(NAMESPACE)
 MK_DOCKER_ENV = eval "$$($(MINIKUBE) -p $(MINIKUBE_PROFILE) docker-env)"
-
-PLATFORM_POSTGRES_PASSWORD ?=
-PLATFORM_ARANGO_ROOT_PASSWORD ?=
-PLATFORM_CDK_ADMIN_PASSWORD ?=
-PLATFORM_CONDUKTOR_ANALYST_PASSWORD ?=
 
 .PHONY: help minikube-start minikube-stop stop-minikube minikube-delete cleanup-minikube minikube-tunnel docker-env \
 	build image-spark-base image-job-service image-batch image-stream images \
@@ -79,17 +75,12 @@ images: image-spark-base image-job-service image-batch image-stream ## Build all
 namespace: ## Create namespace if missing
 	$(KUBECTL) create namespace $(NAMESPACE) --dry-run=client -o yaml | $(KUBECTL) apply -f -
 
-secrets: ## Create/update platform-secrets (requires password vars)
-	@if [[ -z "$(PLATFORM_POSTGRES_PASSWORD)" || -z "$(PLATFORM_ARANGO_ROOT_PASSWORD)" || -z "$(PLATFORM_CDK_ADMIN_PASSWORD)" || -z "$(PLATFORM_CONDUKTOR_ANALYST_PASSWORD)" ]]; then \
-		echo "Set PLATFORM_POSTGRES_PASSWORD, PLATFORM_ARANGO_ROOT_PASSWORD, PLATFORM_CDK_ADMIN_PASSWORD, PLATFORM_CONDUKTOR_ANALYST_PASSWORD"; \
+secrets: ## Create/update platform-secrets from $(PLATFORM_SECRETS_FILE)
+	@if [[ ! -f "$(PLATFORM_SECRETS_FILE)" ]]; then \
+		echo "Secrets file not found: $(PLATFORM_SECRETS_FILE)"; \
 		exit 1; \
 	fi
-	$(KUBECTL) create secret generic platform-secrets -n $(NAMESPACE) \
-	  --from-literal=postgres-password='$(PLATFORM_POSTGRES_PASSWORD)' \
-	  --from-literal=arango-root-password='$(PLATFORM_ARANGO_ROOT_PASSWORD)' \
-	  --from-literal=cdk-admin-password='$(PLATFORM_CDK_ADMIN_PASSWORD)' \
-	  --from-literal=conduktor-analyst-password='$(PLATFORM_CONDUKTOR_ANALYST_PASSWORD)' \
-	  --dry-run=client -o yaml | $(KUBECTL) apply -f -
+	$(KNS) apply -f $(PLATFORM_SECRETS_FILE)
 
 deploy-infra: ## Apply infrastructure manifests
 	$(KUBECTL) apply -f k8s/infra-kubernetes-deploy.yml
