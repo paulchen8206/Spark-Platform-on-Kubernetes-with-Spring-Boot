@@ -16,6 +16,7 @@ CURL_IMAGE ?= curlimages/curl:8.10.1
 
 SALES_MONTH ?= 2024-08
 PLATFORM_SECRETS_FILE ?= k8s/platform-secrets-dev.yaml
+ENV_FILE ?= .env
 
 KUBECTL ?= kubectl
 MINIKUBE ?= minikube
@@ -31,8 +32,11 @@ help: ## Show runbook-compatible targets
 	@awk 'BEGIN {FS = ":.*##"; printf "Runbook-compatible targets:\n"} /^[a-zA-Z0-9_.-]+:.*##/ {printf "  make %-25s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
 dc-up: ## [A] Start Docker Compose infrastructure
-	export CDK_ADMIN_PASSWORD='admin' CDK_ANALYST_PASSWORD='admin' DATABASE_PASSWORD='admin' POSTGRES_PASSWORD='admin' ARANGO_ROOT_PASSWORD='admin' && \
-	docker compose -f docker/docker-compose.yml up -d
+	@if [[ ! -f "$(ENV_FILE)" ]]; then \
+		echo "Missing $(ENV_FILE). Create it or set ENV_FILE=<path>."; \
+		exit 1; \
+	fi
+	set -a; source $(ENV_FILE); set +a; docker compose -f docker/docker-compose.yml up -d
 
 dc-ps: ## [A] Show Docker Compose services
 	docker compose -f docker/docker-compose.yml ps
