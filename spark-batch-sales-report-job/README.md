@@ -39,6 +39,17 @@ Flow:
 
 Sample data bootstrap: [DataPopulator](src/main/java/com/ksoot/spark/sales/DataPopulator.java)
 
+## Dataflow Diagram
+
+```mermaid
+flowchart LR
+  Input[(MongoDB sales transactions)] --> Read[Read by month]
+  Ref[(In-memory product reference)] --> Join[Join with product data]
+  Read --> Join
+  Join --> Agg[Aggregate daily sales]
+  Agg --> Out[(MongoDB sales_report_YYYY_MM)]
+```
+
 ## Configuration
 
 Primary file: [application.yml](src/main/resources/config/application.yml)

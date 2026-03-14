@@ -36,6 +36,15 @@ Flow:
 
 The stream launcher and retry behavior are provided by commons utilities.
 
+## Dataflow Diagram
+
+```mermaid
+flowchart LR
+  LogsGen[LogsGenerator test events] --> Kafka[(Kafka error-logs topic)]
+  Kafka --> Parse[Parse and filter error events]
+  Parse --> Sink[(PostgreSQL error_logs table)]
+```
+
 ## Configuration
 
 Primary file: [application.yml](src/main/resources/config/application.yml)

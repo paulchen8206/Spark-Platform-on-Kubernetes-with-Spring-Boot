@@ -8,6 +8,22 @@ This runbook is organized into three distinct end-to-end paths:
 
 Choose one path and follow it start-to-finish.
 
+## Runtime Dataflow Diagram
+
+```mermaid
+flowchart LR
+  Client[API Client] -->|Start request| SJS[spark-job-service]
+  SJS -->|spark-submit| Driver[Spark Driver Pod]
+  Driver --> Executors[Spark Executor Pods]
+
+  Executors -->|Consume| Kafka[(Kafka error-logs)]
+  Executors -->|Write stream analysis| Pg[(PostgreSQL error_logs)]
+  Executors -->|Write batch statements| Mongo[(MongoDB monthly_sales_statements_yyyy_mm)]
+
+  SJS -->|Persist task metadata| Meta[(PostgreSQL task metadata)]
+  Client -->|Execution/status APIs| SJS
+```
+
 ## 1. Common Prerequisites
 
 - Java 21

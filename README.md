@@ -269,6 +269,22 @@ flowchart LR
   B --> J[(PostgreSQL task metadata)]
 ```
 
+### Dataflow Diagram (Mermaid)
+
+```mermaid
+flowchart LR
+  C[Client] -->|POST /v1/spark-jobs/start| API[spark-job-service]
+  API -->|Persist execution metadata| META[(PostgreSQL)]
+  API -->|spark-submit| DRV[Spark Driver Pod]
+  DRV --> EXE[Spark Executor Pods]
+
+  EXE -->|Batch output| MONGO[(MongoDB monthly_sales_statements_yyyy_mm)]
+  EXE -->|Structured streaming sink| PG[(PostgreSQL error_logs)]
+  EXE -->|Consume stream| KAFKA[(Kafka error-logs topic)]
+
+  API -->|Query execution APIs| C
+```
+
 ### Deployment Diagram (Mermaid)
 
 ```mermaid

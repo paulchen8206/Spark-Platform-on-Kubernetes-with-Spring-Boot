@@ -38,6 +38,22 @@ make mk-submit-logs
   - [SparkExampleJobLaunchRequest](src/main/java/com/ksoot/spark/dto/SparkExampleJobLaunchRequest.java)
 - Uses [SparkSubmitJobLauncher](src/main/java/com/ksoot/spark/launcher/SparkSubmitJobLauncher.java) to build and execute `spark-submit` commands.
 
+## Dataflow Diagram
+
+```mermaid
+flowchart LR
+  Req[REST Start Request] --> Svc[spark-job-service]
+  Svc -->|Build command| Launcher[SparkSubmitJobLauncher]
+  Launcher -->|spark-submit| Driver[Spark Driver Pod]
+  Driver --> Exec[Spark Executor Pods]
+
+  Exec -->|Batch write| Mongo[(MongoDB monthly_sales_statements_yyyy_mm)]
+  Exec -->|Stream write| Pg[(PostgreSQL error_logs)]
+  Exec -->|Read stream| Kafka[(Kafka error-logs topic)]
+
+  Svc -->|Persist/query execution metadata| Meta[(PostgreSQL)]
+```
+
 ## Configuration
 
 Primary config files:
