@@ -4,7 +4,7 @@ database:
   port: 5432
   name: conduktor
   username: conduktor
-  password: yourpassword
+  password: ${DATABASE_PASSWORD}
   ssl: false
   userManagement:
     enabled: true
@@ -15,8 +15,8 @@ security:
     enabled: true
   users:
   - username: admin
-    password: admin123
+    password: ${CDK_ADMIN_PASSWORD}
     roles: [ADMIN]
   - username: analyst
-    password: analyst123
+    password: ${CDK_ANALYST_PASSWORD}
     roles: [ANALYST]

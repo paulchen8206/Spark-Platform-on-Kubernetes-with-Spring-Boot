@@ -65,11 +65,25 @@ jobs:
         # Repeat for other modules
     - name: Deploy to QA Kubernetes
       uses: azure/setup-kubectl@v3
+    - name: Ensure platform secrets
+      env:
+        PLATFORM_POSTGRES_PASSWORD: ${{ secrets.PLATFORM_POSTGRES_PASSWORD }}
+        PLATFORM_ARANGO_ROOT_PASSWORD: ${{ secrets.PLATFORM_ARANGO_ROOT_PASSWORD }}
+        PLATFORM_CDK_ADMIN_PASSWORD: ${{ secrets.PLATFORM_CDK_ADMIN_PASSWORD }}
+        PLATFORM_CONDUKTOR_ANALYST_PASSWORD: ${{ secrets.PLATFORM_CONDUKTOR_ANALYST_PASSWORD }}
+      run: |
+        kubectl create ns ksoot --dry-run=client -o yaml | kubectl apply -f -
+        kubectl create secret generic platform-secrets -n ksoot \
+          --from-literal=postgres-password="$PLATFORM_POSTGRES_PASSWORD" \
+          --from-literal=arango-root-password="$PLATFORM_ARANGO_ROOT_PASSWORD" \
+          --from-literal=cdk-admin-password="$PLATFORM_CDK_ADMIN_PASSWORD" \
+          --from-literal=conduktor-analyst-password="$PLATFORM_CONDUKTOR_ANALYST_PASSWORD" \
+          --dry-run=client -o yaml | kubectl apply -f -
     - name: Deploy
       run: |
         kubectl apply -f k8s/infra-kubernetes-deploy.yml
         # Or use Helm:
-        # helm upgrade --install qa-release ./helm -f helm/values-qa.yaml
+        # helm upgrade --install qa-release ./helm -f helm/values-qa.yaml --set platformSecrets.existingSecret=platform-secrets
   ci-stg:
     if: github.ref == 'refs/heads/stg'
     runs-on: ubuntu-latest
@@ -105,11 +119,25 @@ jobs:
         # Repeat for other modules
     - name: Deploy to Staging Kubernetes
       uses: azure/setup-kubectl@v3
+    - name: Ensure platform secrets
+      env:
+        PLATFORM_POSTGRES_PASSWORD: ${{ secrets.PLATFORM_POSTGRES_PASSWORD }}
+        PLATFORM_ARANGO_ROOT_PASSWORD: ${{ secrets.PLATFORM_ARANGO_ROOT_PASSWORD }}
+        PLATFORM_CDK_ADMIN_PASSWORD: ${{ secrets.PLATFORM_CDK_ADMIN_PASSWORD }}
+        PLATFORM_CONDUKTOR_ANALYST_PASSWORD: ${{ secrets.PLATFORM_CONDUKTOR_ANALYST_PASSWORD }}
+      run: |
+        kubectl create ns ksoot --dry-run=client -o yaml | kubectl apply -f -
+        kubectl create secret generic platform-secrets -n ksoot \
+          --from-literal=postgres-password="$PLATFORM_POSTGRES_PASSWORD" \
+          --from-literal=arango-root-password="$PLATFORM_ARANGO_ROOT_PASSWORD" \
+          --from-literal=cdk-admin-password="$PLATFORM_CDK_ADMIN_PASSWORD" \
+          --from-literal=conduktor-analyst-password="$PLATFORM_CONDUKTOR_ANALYST_PASSWORD" \
+          --dry-run=client -o yaml | kubectl apply -f -
     - name: Deploy
       run: |
         kubectl apply -f k8s/infra-kubernetes-deploy.yml
         # Or use Helm:
-        # helm upgrade --install stg-release ./helm -f helm/values-stg.yaml
+        # helm upgrade --install stg-release ./helm -f helm/values-stg.yaml --set platformSecrets.existingSecret=platform-secrets
   ci-prd:
     if: github.event_name == 'pull_request' && github.base_ref == 'prd'
     runs-on: ubuntu-latest
@@ -145,8 +173,22 @@ jobs:
         # Repeat for other modules
     - name: Deploy to Production Kubernetes
       uses: azure/setup-kubectl@v3
+    - name: Ensure platform secrets
+      env:
+        PLATFORM_POSTGRES_PASSWORD: ${{ secrets.PLATFORM_POSTGRES_PASSWORD }}
+        PLATFORM_ARANGO_ROOT_PASSWORD: ${{ secrets.PLATFORM_ARANGO_ROOT_PASSWORD }}
+        PLATFORM_CDK_ADMIN_PASSWORD: ${{ secrets.PLATFORM_CDK_ADMIN_PASSWORD }}
+        PLATFORM_CONDUKTOR_ANALYST_PASSWORD: ${{ secrets.PLATFORM_CONDUKTOR_ANALYST_PASSWORD }}
+      run: |
+        kubectl create ns ksoot --dry-run=client -o yaml | kubectl apply -f -
+        kubectl create secret generic platform-secrets -n ksoot \
+          --from-literal=postgres-password="$PLATFORM_POSTGRES_PASSWORD" \
+          --from-literal=arango-root-password="$PLATFORM_ARANGO_ROOT_PASSWORD" \
+          --from-literal=cdk-admin-password="$PLATFORM_CDK_ADMIN_PASSWORD" \
+          --from-literal=conduktor-analyst-password="$PLATFORM_CONDUKTOR_ANALYST_PASSWORD" \
+          --dry-run=client -o yaml | kubectl apply -f -
     - name: Deploy
       run: |-
         kubectl apply -f k8s/infra-kubernetes-deploy.yml
         # Or use Helm:
-        # helm upgrade --install prd-release ./helm -f helm/values-prd.yaml
+        # helm upgrade --install prd-release ./helm -f helm/values-prd.yaml --set platformSecrets.existingSecret=platform-secrets

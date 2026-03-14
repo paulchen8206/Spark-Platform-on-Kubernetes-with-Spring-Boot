@@ -1,11 +1,12 @@
 # Environment-specific values for PRD
 conduktor:
   adminEmail: prd-admin@company.com
-  adminPassword: prdpass
+  adminPassword: ""
+  analystPassword: ""
   service:
     nodePort: 30084
 postgresql:
   auth:
-    password: prdpassword
+    password: ""
 image:
   tag: prd

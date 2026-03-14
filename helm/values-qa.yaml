@@ -1,11 +1,12 @@
 # Environment-specific values for QA
 conduktor:
   adminEmail: qa-admin@company.com
-  adminPassword: qapass
+  adminPassword: ""
+  analystPassword: ""
   service:
     nodePort: 30082
 postgresql:
   auth:
-    password: qapassword
+    password: ""
 image:
   tag: qa

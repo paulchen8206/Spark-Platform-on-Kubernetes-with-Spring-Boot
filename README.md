@@ -44,6 +44,11 @@ From repository root:
 Start local infrastructure:
 
 ```bash
+export CDK_ADMIN_PASSWORD='<set-admin-password>'
+export CDK_ANALYST_PASSWORD='<set-analyst-password>'
+export DATABASE_PASSWORD='<set-postgres-password>'
+export POSTGRES_PASSWORD='<set-postgres-password>'
+export ARANGO_ROOT_PASSWORD='<set-arango-password>'
 docker compose -f docker/docker-compose.yml up -d
 docker compose -f docker/docker-compose.yml ps
 ```
@@ -76,6 +81,11 @@ Notes:
 Deploy infrastructure and RBAC:
 
 ```bash
+kubectl create secret generic platform-secrets -n ksoot \
+  --from-literal=postgres-password='<set-postgres-password>' \
+  --from-literal=arango-root-password='<set-arango-password>' \
+  --from-literal=cdk-admin-password='<set-admin-password>' \
+  --from-literal=conduktor-analyst-password='<set-analyst-password>'
 kubectl apply -f k8s/infra-kubernetes-deploy.yml
 kubectl apply -f k8s/spark-rbac.yml
 kubectl config set-context --current --namespace=ksoot
@@ -110,7 +120,8 @@ Detailed steps remain in module READMEs:
 Helm chart is under [`helm`](helm). Example install:
 
 ```bash
-helm install my-release ./helm -f helm/values-dev.yaml
+helm install my-release ./helm -f helm/values-dev.yaml \
+  --set platformSecrets.existingSecret=platform-secrets
 ```
 
 Environment-specific values files:
@@ -128,6 +139,45 @@ Current behavior in workflow:
 - Triggers on pull requests targeting `prd`.
 - Runs Maven build/tests per environment.
 - Contains placeholders/comments for multi-image build/push and deployment expansion.
+
+Required GitHub Environment Secrets (for `qa`, `stg`, and `prd` deployments):
+- `PLATFORM_POSTGRES_PASSWORD`
+- `PLATFORM_ARANGO_ROOT_PASSWORD`
+- `PLATFORM_CDK_ADMIN_PASSWORD`
+- `PLATFORM_CONDUKTOR_ANALYST_PASSWORD`
+- `KUBECONFIG_QA`
+- `KUBECONFIG_STG`
+- `KUBECONFIG_PRD`
+- `DOCKER_USERNAME`
+- `DOCKER_PASSWORD`
+- `DOCKER_REPO`
+
+Preflight check (requires GitHub CLI `gh` authenticated to this repository):
+
+```bash
+required=(
+  PLATFORM_POSTGRES_PASSWORD
+  PLATFORM_ARANGO_ROOT_PASSWORD
+  PLATFORM_CDK_ADMIN_PASSWORD
+  PLATFORM_CONDUKTOR_ANALYST_PASSWORD
+  KUBECONFIG_QA
+  KUBECONFIG_STG
+  KUBECONFIG_PRD
+  DOCKER_USERNAME
+  DOCKER_PASSWORD
+  DOCKER_REPO
+)
+
+for env in qa stg prd; do
+  echo "Checking environment: $env"
+  existing=$(gh secret list --env "$env" --json name --jq '.[].name')
+  for key in "${required[@]}"; do
+    if ! echo "$existing" | grep -qx "$key"; then
+      echo "  MISSING: $key"
+    fi
+  done
+done
+```
 
 ## Configuration Precedence Order
 

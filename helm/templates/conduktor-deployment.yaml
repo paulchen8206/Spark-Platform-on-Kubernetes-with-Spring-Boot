@@ -25,6 +25,7 @@ spec:
       labels:
         app: conduktor
     spec:
+      {{- $platformSecretName := default "platform-secrets" .Values.platformSecrets.existingSecret }}
       containers:
         - name: conduktor
           image: {{ .Values.conduktor.image.repository }}:{{ .Values.conduktor.image.tag }}
@@ -33,15 +34,31 @@ spec:
             - name: CDK_ADMIN_EMAIL
               value: {{ .Values.conduktor.adminEmail | quote }}
             - name: CDK_ADMIN_PASSWORD
-              value: {{ .Values.conduktor.adminPassword | quote }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $platformSecretName }}
+                  key: cdk-admin-password
             - name: DATABASE_URL
               value: "jdbc:postgresql://postgres:5432/conduktor"
             - name: DATABASE_USERNAME
               value: "conduktor"
             - name: DATABASE_PASSWORD
-              value: "yourpassword"
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $platformSecretName }}
+                  key: postgres-password
             - name: DATABASE_TYPE
               value: "postgresql"
+            - name: CONDUKTOR_CONFIG_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $platformSecretName }}
+                  key: postgres-password
+            - name: CONDUKTOR_ANALYST_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $platformSecretName }}
+                  key: conduktor-analyst-password
           ports:
             - containerPort: 8080
           volumeMounts:

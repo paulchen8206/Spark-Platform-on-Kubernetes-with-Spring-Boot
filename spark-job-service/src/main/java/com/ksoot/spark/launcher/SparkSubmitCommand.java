@@ -2,6 +2,8 @@ package com.ksoot.spark.launcher;
 
 import static com.ksoot.spark.util.Constants.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.stream.Collectors;
@@ -36,6 +38,8 @@ public class SparkSubmitCommand {
 
   public interface VerboseBuilder extends Builder<String> {
     Builder<String> verbose(final boolean verbose);
+
+    List<String> buildCommandArgs();
   }
 
   public static class SparkSubmitCommandBuilder
@@ -115,6 +119,10 @@ public class SparkSubmitCommand {
 
     @Override
     public String build() {
+      return String.join(" ", this.buildCommandArgs());
+    }
+
+    public List<String> buildCommandArgs() {
       String sparkDriverExtraJavaOptions =
           this.sparkConfigurations.getOrDefault(SPARK_DRIVER_EXTRA_JAVA_OPTIONS, "").toString();
       if (StringUtils.isNotBlank(this.jobArgs)) {
@@ -129,29 +137,24 @@ public class SparkSubmitCommand {
             StringUtils.wrap(sparkDriverExtraJavaOptions.trim(), '"'));
       }
 
-      String sparkConf =
-          sparkConfigurations.entrySet().stream()
-              .map(
-                  entry ->
-                      CONF_PREFIX
-                          + entry.getKey().toString().trim()
-                          + "="
-                          + entry.getValue().toString().trim())
-              .collect(Collectors.joining(" "))
-              .trim();
+      List<String> args = new ArrayList<>();
+      args.add("./bin/spark-submit");
+      if (this.verbose) {
+        args.add("--verbose");
+      }
+      args.add("--name");
+      args.add(this.jobName);
+      args.add("--class");
+      args.add(this.mainClass);
 
-      String sparkSubmitCommand =
-          "./bin/spark-submit"
-              + (this.verbose ? " --verbose" : "")
-              + " --name "
-              + this.jobName
-              + " --class "
-              + this.mainClass
-              + SPACE
-              + sparkConf
-              + SPACE
-              + this.jarFile;
-      return sparkSubmitCommand;
+      this.sparkConfigurations.forEach(
+          (key, value) -> {
+            args.add("--conf");
+            args.add(key.toString().trim() + "=" + value.toString().trim());
+          });
+
+      args.add(this.jarFile);
+      return args;
     }
   }
 }

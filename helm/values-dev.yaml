@@ -1,11 +1,12 @@
 # Environment-specific values for DEV
 conduktor:
   adminEmail: dev-admin@company.com
-  adminPassword: devpass
+  adminPassword: ""
+  analystPassword: ""
   service:
     nodePort: 30081
 postgresql:
   auth:
-    password: devpassword
+    password: ""
 image:
   tag: dev

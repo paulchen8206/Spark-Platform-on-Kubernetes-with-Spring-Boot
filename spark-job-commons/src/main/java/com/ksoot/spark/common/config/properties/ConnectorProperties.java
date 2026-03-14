@@ -37,7 +37,7 @@ public class ConnectorProperties {
       case "Update" -> OutputMode.Update();
       default ->
           throw new IllegalStateException(
-              "Unexpected 'mlhb.ejestion.output-mode' value: " + this.outputMode);
+              "Unexpected 'ksoot.connector.output-mode' value: " + this.outputMode);
     };
   }
 

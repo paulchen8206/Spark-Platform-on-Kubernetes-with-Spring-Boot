@@ -50,7 +50,6 @@ public class SparkStreamLauncher {
     if (faultTolerant) {
       this.startStream(dataStreamWriter);
     } else {
-      dataStreamWriter.start().awaitTermination();
       this.taskExecutor.execute(
           () -> {
             try {

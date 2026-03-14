@@ -6,8 +6,8 @@ import com.ksoot.problem.core.Problems;
 import com.ksoot.spark.conf.SparkJobProperties;
 import com.ksoot.spark.conf.SparkLauncherProperties;
 import com.ksoot.spark.dto.JobLaunchRequest;
+import jakarta.annotation.PreDestroy;
 import java.io.*;
-import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
@@ -16,8 +16,6 @@ import java.util.function.Consumer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
@@ -66,16 +64,16 @@ public class SparkSubmitJobLauncher extends AbstractSparkJobLauncher {
     jobArgs.put(CORRELATION_ID, jobLaunchRequest.getCorrelationId());
     jobArgs.put(PERSIST_JOB, String.valueOf(this.sparkLauncherProperties.isPersistJobs()));
 
-    final String sparkSubmitCommand =
+    final List<String> sparkSubmitCommand =
         SparkSubmitCommand.jobName(jobLaunchRequest.getJobName())
             .mainClass(sparkJobProperties.getMainClassName())
             .sparkConfigurations(sparkConfigurations)
             .jobArgs(jobArgs)
             .environmentVariables(envVars)
             .jarFile(sparkJobProperties.getJarFile())
-            .build();
+            .buildCommandArgs();
 
-    log.info("spark-submit command: {}", sparkSubmitCommand);
+    log.info("spark-submit command: {}", String.join(" ", sparkSubmitCommand));
 
     try {
       CompletableFuture<Process> process = this.sparkSubmit(sparkSubmitCommand);
@@ -99,18 +97,13 @@ public class SparkSubmitJobLauncher extends AbstractSparkJobLauncher {
     log.info("============================================================");
   }
 
-  private CompletableFuture<Process> sparkSubmit(final String sparkSubmitCommand)
+  private CompletableFuture<Process> sparkSubmit(final List<String> sparkSubmitCommand)
       throws IOException, InterruptedException {
 
     final File directory = new File(this.sparkLauncherProperties.getSparkHome());
 
-    final String sparkSubmitScriptPath = this.getSparkSubmitScriptPath();
-
     final ProcessBuilder processBuilder =
-        new ProcessBuilder(sparkSubmitScriptPath).directory(directory);
-
-    final Map<String, String> environment = processBuilder.environment();
-    environment.put("JOB_SUBMIT_COMMAND", sparkSubmitCommand);
+        new ProcessBuilder(sparkSubmitCommand).directory(directory);
 
     final Process process;
     // Start the process
@@ -125,28 +118,6 @@ public class SparkSubmitJobLauncher extends AbstractSparkJobLauncher {
     }
 
     return process.onExit();
-  }
-
-  private String getSparkSubmitScriptPath() {
-    final String osName = System.getProperty("os.name").toLowerCase();
-    String sparkSubmitScriptFile = SPARK_SUBMIT_SCRIPT + (osName.contains("win") ? ".bat" : ".sh");
-    String sparkSubmitScriptPath;
-    try {
-      // A Heck to get spark-job-submit.sh path at project root while running in local
-      final Resource resource =
-          new ClassPathResource("META-INF/additional-spring-configuration-metadata.json");
-      final Path currentPath = resource.getFile().toPath();
-      sparkSubmitScriptPath =
-          currentPath.getParent().getParent().getParent().getParent().toString()
-              + "/cmd/"
-              + sparkSubmitScriptFile;
-    } catch (final FileNotFoundException e) {
-      sparkSubmitScriptPath = "./bin/" + sparkSubmitScriptFile;
-    } catch (final IOException e) {
-      throw new UncheckedIOException(e);
-    }
-    log.info("spark-job-submit file path: {}", sparkSubmitScriptPath);
-    return sparkSubmitScriptPath;
   }
 
   static class StreamGobbler implements Runnable {
@@ -167,5 +138,10 @@ public class SparkSubmitJobLauncher extends AbstractSparkJobLauncher {
   @Override
   public void stopJob(final String jobCorrelationId) {
     this.kafkaTemplate.send(this.jobStopTopic, jobCorrelationId);
+  }
+
+  @PreDestroy
+  void shutdownExecutor() {
+    this.executor.shutdownNow();
   }
 }

@@ -2,6 +2,8 @@
 # This file is a starting point and should be customized as needed.
 
 replicaCount: 1
+platformSecrets:
+  existingSecret: ""
 image:
   repository: myrepo/spark-batch-sales-report-job
   tag: latest
@@ -12,7 +14,8 @@ conduktor:
     tag: 1.28.0
     pullPolicy: IfNotPresent
   adminEmail: user@discounttire.com
-  adminPassword: admin
+  adminPassword: ""
+  analystPassword: ""
   service:
     type: NodePort
     port: 8080
@@ -24,7 +27,7 @@ postgresql:
     tag: 15.15
   auth:
     username: conduktor
-    password: yourpassword
+    password: ""
     database: conduktor
   service:
     port: 5432

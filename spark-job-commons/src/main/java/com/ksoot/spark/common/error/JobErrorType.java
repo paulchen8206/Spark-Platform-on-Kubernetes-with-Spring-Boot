@@ -57,7 +57,7 @@ public class JobErrorType implements ErrorType {
         + code
         + '\''
         + ", title: '"
-        + code
+        + title
         + '\''
         + ", message: '"
         + message

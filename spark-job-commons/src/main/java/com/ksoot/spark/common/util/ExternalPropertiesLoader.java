@@ -14,7 +14,7 @@ import org.springframework.core.io.support.PropertiesLoaderUtils;
 import org.springframework.util.Assert;
 
 @UtilityClass
-public class ExternalPropertiesLoader extends PropertiesLoaderUtils {
+public class ExternalPropertiesLoader {
 
   private static final String PROPERTY_FILE_EXTENSION = "properties";
   private static final String CONF_FILE_EXTENSION = "conf";

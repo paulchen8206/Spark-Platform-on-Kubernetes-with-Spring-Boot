@@ -56,7 +56,8 @@ public class SparkExecutionManager {
   }
 
   @KafkaListener(
-      topics = "job-stop-requests",
+      topics =
+          "${spark-launcher.job-stop-topic:${ksoot.spark-launcher.job-stop-topic:job-stop-requests}}",
       groupId = "#{T(java.util.UUID).randomUUID().toString()}")
   void onJobStopRequest(final String correlationId) {
     if (!this.jobCorrelationId.equals(correlationId)) {
@@ -120,7 +121,7 @@ public class SparkExecutionManager {
         taskExecution.getTaskName(),
         taskExecution.getExecutionId(),
         taskExecution.getExternalExecutionId(),
-        this.exitCode == -1 ? "completed successfully" : "failed",
+        this.exitCode == 2 ? "stopped" : "completed",
         taskExecution.getEndTime(),
         taskExecution.getExitCode(),
         taskExecution.getExitMessage(),

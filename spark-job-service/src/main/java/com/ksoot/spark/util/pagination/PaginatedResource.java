@@ -54,13 +54,12 @@ public class PaginatedResource<T> implements Iterable<T> {
     final PaginatedResource<?> that = (PaginatedResource<?>) other;
     final boolean metadataEquals = Objects.equals(this.metadata, that.metadata);
 
-    // return metadataEquals ? super.equals(other) : false;
-    return metadataEquals == super.equals(other);
+    return metadataEquals && Objects.equals(this.content, that.content);
   }
 
   @Override
   public int hashCode() {
-    int result = super.hashCode();
+    int result = Objects.hashCode(this.content);
     result += this.metadata == null ? 0 : HASH_CODE_PRIME_NUM * this.metadata.hashCode();
     return result;
   }

@@ -68,7 +68,6 @@ public class DataPopulator {
       this.arangoOperations.insert(Product.of("1010", "Tablet"));
       log.info("Created Products data");
     }
-    this.arangoOperations.driver().shutdown();
   }
 
   private void createSalesSchema() {

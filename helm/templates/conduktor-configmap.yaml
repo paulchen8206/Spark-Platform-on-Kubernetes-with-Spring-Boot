@@ -12,7 +12,7 @@ data:
       port: 5432
       name: conduktor
       username: conduktor
-      password: yourpassword
+      password: ${CONDUKTOR_CONFIG_DB_PASSWORD}
       ssl: false
       userManagement:
         enabled: true
@@ -23,8 +23,8 @@ data:
         enabled: true
       users:
         - username: admin
-          password: admin123
+          password: ${CDK_ADMIN_PASSWORD}
           roles: [ADMIN]
         - username: analyst
-          password: analyst123
+          password: ${CONDUKTOR_ANALYST_PASSWORD}
           roles: [ANALYST]

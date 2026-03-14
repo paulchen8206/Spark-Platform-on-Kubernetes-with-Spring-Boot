@@ -1,19 +1,5 @@
 # The Following is required to allow Spark to be able to manage Driver and Executor pods
 # Make sure namespace `ksoot` is already created.
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
-metadata:
-  name: fabric8-rbac
-subjects:
-  - kind: ServiceAccount
-    name: default
-    namespace: ksoot
-roleRef:
-  kind: ClusterRole
-  name: cluster-admin
-  apiGroup: rbac.authorization.k8s.io
----
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -21,14 +7,31 @@ metadata:
   namespace: ksoot
 ---
 apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
+kind: Role
 metadata:
   name: spark-role
+  namespace: ksoot
+rules:
+- apiGroups: [""]
+  resources: ["pods", "pods/log", "services", "configmaps"]
+  verbs: ["create", "get", "list", "watch", "delete", "patch", "update"]
+- apiGroups: [""]
+  resources: ["events"]
+  verbs: ["create", "patch", "update"]
+- apiGroups: ["apps"]
+  resources: ["deployments"]
+  verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: spark-role-binding
+  namespace: ksoot
 subjects:
-  - kind: ServiceAccount
-    name: spark
-    namespace: ksoot
+- kind: ServiceAccount
+  name: spark
+  namespace: ksoot
 roleRef:
-  kind: ClusterRole
-  name: edit
   apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: spark-role

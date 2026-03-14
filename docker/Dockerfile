@@ -24,8 +24,8 @@ RUN set -ex; \
     rm -rf /var/lib/apt/lists/*
 
 # Install Apache Spark
-ENV SPARK_TGZ_URL=https://archive.apache.org/dist/spark/spark-3.5.3/spark-3.5.3-bin-hadoop3.tgz \
-    SPARK_TGZ_ASC_URL=https://archive.apache.org/dist/spark/spark-3.5.3/spark-3.5.3-bin-hadoop3.tgz.asc \
+ENV SPARK_TGZ_URL=https://archive.apache.org/dist/spark/spark-4.0.0/spark-4.0.0-bin-hadoop3.tgz \
+    SPARK_TGZ_ASC_URL=https://archive.apache.org/dist/spark/spark-4.0.0/spark-4.0.0-bin-hadoop3.tgz.asc \
     GPG_KEY=0A2D660358B6F6F8071FD16F6606986CF5A8447C
 
 RUN set -ex; \
