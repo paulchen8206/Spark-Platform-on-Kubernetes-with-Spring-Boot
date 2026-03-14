@@ -237,12 +237,24 @@ Use this path when you want Helm-managed platform components (`conduktor`, `post
 
 Note: Helm chart in this repository manages platform infra components, not the `spark-job-service` deployment itself. Keep `k8s/deployment.yml` flow for `spark-job-service`.
 
+### 4.0 Prerequisite: Running Kubernetes Context
+
+Before section 4.1, ensure a Kubernetes cluster is running and `kubectl` is pointing to it.
+
+For Minikube:
+
+```bash
+make mk-start
+kubectl config use-context minikube
+```
+
 ### 4.1 Prepare Namespace and Shared Secret
 
 ```bash
-kubectl create namespace ksoot --dry-run=client -o yaml | kubectl apply -f -
+kubectl config use-context minikube
+kubectl create namespace ksoot --dry-run=client -o yaml | kubectl apply --validate=false -f -
 kubectl config set-context --current --namespace=ksoot
-kubectl apply -n ksoot -f k8s/platform-secrets-dev.yaml
+kubectl apply -n ksoot --validate=false -f k8s/platform-secrets-dev.yaml
 ```
 
 ### 4.2 Install or Upgrade Helm Release
