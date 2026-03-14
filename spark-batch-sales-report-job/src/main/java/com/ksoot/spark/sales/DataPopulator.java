@@ -1,18 +1,14 @@
 package com.ksoot.spark.sales;
 
-import com.arangodb.springframework.core.ArangoOperations;
 import com.mongodb.client.MongoCollection;
 import java.time.*;
 import java.util.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.datafaker.Faker;
 import org.apache.commons.collections4.CollectionUtils;
 import org.bson.Document;
 import org.bson.types.ObjectId;
-import org.springframework.data.annotation.Id;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.data.mongodb.core.index.Index;
@@ -42,9 +38,6 @@ public class DataPopulator {
   private static final String SALES_COLLECTION = "sales";
   private final MongoOperations mongoOperations;
 
-  private static final String PRODUCTS_COLLECTION = "products";
-  private final ArangoOperations arangoOperations;
-
   public void populateData() {
     this.createProductsData();
     this.createSalesSchema();
@@ -52,22 +45,7 @@ public class DataPopulator {
   }
 
   private void createProductsData() {
-    log.info("Creating Products data");
-    if (this.arangoOperations.collection(PRODUCTS_COLLECTION).count() > 0) {
-      log.info("Data already exists: {}", PRODUCTS_COLLECTION);
-    } else {
-      this.arangoOperations.insert(Product.of("1001", "TV"));
-      this.arangoOperations.insert(Product.of("1002", "Mobile"));
-      this.arangoOperations.insert(Product.of("1003", "Table"));
-      this.arangoOperations.insert(Product.of("1004", "Chair"));
-      this.arangoOperations.insert(Product.of("1005", "Sofa"));
-      this.arangoOperations.insert(Product.of("1006", "AC"));
-      this.arangoOperations.insert(Product.of("1007", "Bed"));
-      this.arangoOperations.insert(Product.of("1008", "Charger"));
-      this.arangoOperations.insert(Product.of("1009", "Laptop"));
-      this.arangoOperations.insert(Product.of("1010", "Tablet"));
-      log.info("Created Products data");
-    }
+    log.info("Using in-memory products reference data");
   }
 
   private void createSalesSchema() {
@@ -157,15 +135,5 @@ public class DataPopulator {
       sales.clear();
     }
     log.info("Created {} Sales transactions", recordCount);
-  }
-
-  @Getter
-  @AllArgsConstructor(staticName = "of")
-  @com.arangodb.springframework.annotation.Document("products")
-  static class Product {
-
-    @Id private String id;
-
-    private String name;
   }
 }

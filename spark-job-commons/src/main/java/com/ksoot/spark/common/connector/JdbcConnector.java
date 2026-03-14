@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
+import org.apache.spark.sql.WriteConfigMethods;
 import org.apache.spark.sql.streaming.DataStreamWriter;
 import org.apache.spark.sql.types.StructType;
 
@@ -60,23 +61,25 @@ public class JdbcConnector {
         this.properties.getJdbcOptions().getDatabase(),
         table);
     // Write each micro-batch to PostgreSQL
-    return dataset
-        .writeStream()
-        .outputMode(this.properties.outputMode())
-        .options(this.properties.getJdbcOptions().writeOptions())
-        .foreachBatch(
-            (batchDataset, batchId) -> {
-              batchDataset
-                  .write()
-                  .mode(this.properties.getSaveMode())
-                  .jdbc(
-                      this.properties.getJdbcOptions().getUrl(),
-                      table,
-                      this.properties.getJdbcOptions().connectionProperties());
-            })
-    //        .option(SparkOptions.Common.CHECKPOINT_LOCATION,
-    // this.properties.getCheckpointLocation())
-    ;
+    var streamWriter =
+        dataset
+            .writeStream()
+            .outputMode(this.properties.outputMode())
+            .foreachBatch(
+                (batchDataset, batchId) -> {
+                  batchDataset
+                      .write()
+                      .mode(this.properties.getSaveMode())
+                      .jdbc(
+                          this.properties.getJdbcOptions().getUrl(),
+                          table,
+                          this.properties.getJdbcOptions().connectionProperties());
+                })
+        //        .option(SparkOptions.Common.CHECKPOINT_LOCATION,
+        // this.properties.getCheckpointLocation())
+        ;
+    this.applyStreamOptions(streamWriter, this.properties.getJdbcOptions().writeOptions());
+    return streamWriter;
   }
 
   public DataStreamWriter<Row> writeStream(
@@ -86,20 +89,28 @@ public class JdbcConnector {
         this.properties.getJdbcOptions().getDatabase(),
         table);
     // Write each micro-batch to PostgreSQL
-    return dataset
-        .writeStream()
-        .outputMode(this.properties.outputMode())
-        .options(options)
-        .options(this.properties.getJdbcOptions().writeOptions())
-        .foreachBatch(
-            (batchDataset, batchId) -> {
-              batchDataset
-                  .write()
-                  .mode(this.properties.getSaveMode())
-                  .jdbc(
-                      this.properties.getJdbcOptions().getUrl(),
-                      table,
-                      this.properties.getJdbcOptions().connectionProperties());
-            });
+    var streamWriter =
+        dataset
+            .writeStream()
+            .outputMode(this.properties.outputMode())
+            .foreachBatch(
+                (batchDataset, batchId) -> {
+                  batchDataset
+                      .write()
+                      .mode(this.properties.getSaveMode())
+                      .jdbc(
+                          this.properties.getJdbcOptions().getUrl(),
+                          table,
+                          this.properties.getJdbcOptions().connectionProperties());
+                });
+    this.applyStreamOptions(streamWriter, options);
+    this.applyStreamOptions(streamWriter, this.properties.getJdbcOptions().writeOptions());
+    return streamWriter;
+  }
+
+  @SuppressWarnings("unchecked")
+  private void applyStreamOptions(
+      final DataStreamWriter<Row> streamWriter, final Map<String, String> options) {
+    ((WriteConfigMethods<DataStreamWriter<Row>>) streamWriter).options(options);
   }
 }

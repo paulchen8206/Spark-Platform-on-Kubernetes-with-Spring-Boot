@@ -133,8 +133,7 @@ public class SparkSubmitCommand {
       }
       if (StringUtils.isNotBlank(sparkDriverExtraJavaOptions)) {
         this.sparkConfigurations.put(
-            SPARK_DRIVER_EXTRA_JAVA_OPTIONS,
-            StringUtils.wrap(sparkDriverExtraJavaOptions.trim(), '"'));
+            SPARK_DRIVER_EXTRA_JAVA_OPTIONS, sparkDriverExtraJavaOptions.trim());
       }
 
       List<String> args = new ArrayList<>();

@@ -17,12 +17,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.task.configuration.EnableTask;
 import org.springframework.context.annotation.Bean;
-import org.springframework.kafka.annotation.EnableKafka;
 
 /** Main class for the Sales Report Spark batch job. Handles initialization and data population. */
 @Slf4j
 @EnableTask
-@EnableKafka
 @SpringBootApplication
 public class SalesReportJob {
 

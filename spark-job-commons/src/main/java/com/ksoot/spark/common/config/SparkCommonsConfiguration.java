@@ -6,6 +6,7 @@ import org.apache.spark.sql.SparkSession;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureOrder;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.context.MessageSource;
@@ -18,10 +19,14 @@ import org.springframework.retry.annotation.Retryable;
 @AutoConfiguration
 @AutoConfigureOrder(Ordered.HIGHEST_PRECEDENCE)
 @ImportAutoConfiguration(
-    classes = {SparkConnectorConfiguration.class, SpringCloudTaskConfiguration.class})
+    classes = {
+      SparkSessionConfiguration.class,
+      SparkConnectorConfiguration.class,
+      SpringCloudTaskConfiguration.class
+    })
 public class SparkCommonsConfiguration {
 
-  @ConditionalOnClass(TaskExecution.class)
+  @ConditionalOnClass({TaskExecution.class, KafkaListenerEndpointRegistry.class})
   static class SparkExecutionManagerConfiguration {
 
     @Bean
@@ -34,6 +39,7 @@ public class SparkCommonsConfiguration {
   }
 
   @ConditionalOnClass(Retryable.class)
+  @ConditionalOnBean(SparkExecutionManager.class)
   static class SparkStreamLauncherConfiguration {
 
     @Bean

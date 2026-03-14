@@ -1,4 +1,4 @@
-ARG java_image_tag=17-jammy
+ARG java_image_tag=21-jammy
 FROM eclipse-temurin:${java_image_tag}
 
 ARG spark_uid=185
@@ -26,7 +26,7 @@ RUN set -ex; \
 # Install Apache Spark
 ENV SPARK_TGZ_URL=https://archive.apache.org/dist/spark/spark-4.0.0/spark-4.0.0-bin-hadoop3.tgz \
     SPARK_TGZ_ASC_URL=https://archive.apache.org/dist/spark/spark-4.0.0/spark-4.0.0-bin-hadoop3.tgz.asc \
-    GPG_KEY=0A2D660358B6F6F8071FD16F6606986CF5A8447C
+    GPG_KEYS="0A2D660358B6F6F8071FD16F6606986CF5A8447C 4DC9676CEF9A83E98FCA02784D6620843CD87F5A"
 
 RUN set -ex; \
     export SPARK_TMP="$(mktemp -d)"; \
@@ -34,8 +34,10 @@ RUN set -ex; \
     wget -nv -O spark.tgz "$SPARK_TGZ_URL"; \
     wget -nv -O spark.tgz.asc "$SPARK_TGZ_ASC_URL"; \
     export GNUPGHOME="$(mktemp -d)"; \
-    gpg --batch --keyserver hkps://keys.openpgp.org --recv-key "$GPG_KEY" || \
-    gpg --batch --keyserver hkps://keyserver.ubuntu.com --recv-keys "$GPG_KEY"; \
+        for key in $GPG_KEYS; do \
+            gpg --batch --keyserver hkps://keys.openpgp.org --recv-key "$key" || \
+            gpg --batch --keyserver hkps://keyserver.ubuntu.com --recv-keys "$key"; \
+        done; \
     gpg --batch --verify spark.tgz.asc spark.tgz; \
     gpgconf --kill all; \
     rm -rf "$GNUPGHOME" spark.tgz.asc; \

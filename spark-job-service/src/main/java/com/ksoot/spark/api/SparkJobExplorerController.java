@@ -20,9 +20,9 @@ import jakarta.validation.constraints.NotEmpty;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.TaskExplorer;
@@ -39,22 +39,26 @@ import org.springframework.web.bind.annotation.*;
  */
 @Tag(name = "Spark Job Executions", description = "APIs")
 @Slf4j
-@RequiredArgsConstructor
 @RestController
 @RequestMapping("/v1/spark-jobs/executions")
 @ConditionalOnProperty(prefix = "spark-launcher", name = "persist-jobs", havingValue = "true")
-class SparkJobExplorerController {
-
-  // For unit testing
-  SparkJobExplorerController(TaskExplorer taskExplorer, PaginatedResourceAssembler assembler) {
-    this.taskExplorer = taskExplorer;
-    // assembler is not used directly, but included for test compatibility
-  }
+public class SparkJobExplorerController {
 
   private final Function<List<TaskExecution>, List<JobExecution>> JOB_EXECUTION_PAGE_TRANSFORMER =
       taskExecutions -> taskExecutions.stream().map(JobExecution::of).toList();
 
   private final TaskExplorer taskExplorer;
+
+  @Autowired
+  public SparkJobExplorerController(final TaskExplorer taskExplorer) {
+    this.taskExplorer = taskExplorer;
+  }
+
+  // For unit testing
+  public SparkJobExplorerController(
+      final TaskExplorer taskExplorer, final PaginatedResourceAssembler assembler) {
+    this(taskExplorer);
+  }
 
   @Operation(operationId = "list-job-executions", summary = "Gets a page of Job executions")
   @ApiResponses(

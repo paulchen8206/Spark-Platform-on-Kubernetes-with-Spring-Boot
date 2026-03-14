@@ -138,7 +138,7 @@ spec:
     spec:
       containers:
       - name: postgres
-        image: postgres:latest
+        image: postgres:15.15
         ports:
         - containerPort: 5432
         env:
@@ -406,14 +406,14 @@ spec:
         image: busybox
         command: ['sh', '-c', 'until nc -z kafka 29092; do echo "Waiting for Kafka..."; sleep 2; done']
       - name: kafka-topic-creator
-        image: bitnami/kafka:latest
+        image: confluentinc/cp-kafka:7.3.2
         #          Create 'job-stop-requests' and 'error-logs' topics on deployment
         command:
         - sh
         - -c
         - |
-          kafka-topics.sh --create --topic job-stop-requests --bootstrap-server kafka:9092 --partitions 1 --replication-factor 1 &&
-          kafka-topics.sh --create --topic error-logs --bootstrap-server kafka:9092 --partitions 1 --replication-factor 1
+          /usr/bin/kafka-topics --if-not-exists --create --topic job-stop-requests --bootstrap-server kafka:9092 --partitions 1 --replication-factor 1 &&
+          /usr/bin/kafka-topics --if-not-exists --create --topic error-logs --bootstrap-server kafka:9092 --partitions 1 --replication-factor 1
         env:
         - name: KAFKA_CFG_ZOOKEEPER_CONNECT
           value: zookeeper:2181

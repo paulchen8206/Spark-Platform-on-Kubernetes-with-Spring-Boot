@@ -3,17 +3,20 @@ package com.ksoot.spark.sales;
 import static org.apache.spark.sql.functions.col;
 import static org.apache.spark.sql.functions.sum;
 
-import com.ksoot.spark.common.connector.ArangoConnector;
 import com.ksoot.spark.common.connector.FileConnector;
 import com.ksoot.spark.common.connector.MongoConnector;
 import com.ksoot.spark.common.util.SparkUtils;
 import com.ksoot.spark.sales.conf.JobProperties;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
+import org.apache.spark.sql.RowFactory;
 import org.apache.spark.sql.SparkSession;
 import org.apache.spark.sql.types.DataTypes;
+import org.apache.spark.sql.types.StructType;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -28,8 +31,6 @@ public class SparkPipelineExecutor {
   private final FileConnector fileConnector;
 
   private final MongoConnector mongoConnector;
-
-  private final ArangoConnector arangoConnector;
 
   public void execute() {
     log.info("Generating Sales report for month: {}", this.jobProperties.getMonth());
@@ -51,10 +52,8 @@ public class SparkPipelineExecutor {
             .groupBy("product_id", "date")
             .agg(sum("sale_amount").alias("daily_sale_amount"));
 
-    Dataset<Row> productsDataset = this.arangoConnector.readAll("products");
-    SparkUtils.logDataset("Products Dataset", salesDataset);
-    productsDataset =
-        productsDataset.select(col("_key").as("product_id"), col("name").as("product_name"));
+    Dataset<Row> productsDataset = this.productsDataset();
+    SparkUtils.logDataset("Products Dataset", productsDataset);
 
     // Join with the product details dataset
     Dataset<Row> monthlySalesReport =
@@ -74,5 +73,26 @@ public class SparkPipelineExecutor {
     final String salesReportCollection = "sales_report_" + statementMonth.replace('-', '_');
     //    this.fileConnector.write(monthlySalesReport); // For testing
     this.mongoConnector.write(monthlySalesReport, salesReportCollection);
+  }
+
+  private Dataset<Row> productsDataset() {
+    final List<Row> rows = new ArrayList<>();
+    rows.add(RowFactory.create("1001", "TV"));
+    rows.add(RowFactory.create("1002", "Mobile"));
+    rows.add(RowFactory.create("1003", "Table"));
+    rows.add(RowFactory.create("1004", "Chair"));
+    rows.add(RowFactory.create("1005", "Sofa"));
+    rows.add(RowFactory.create("1006", "AC"));
+    rows.add(RowFactory.create("1007", "Bed"));
+    rows.add(RowFactory.create("1008", "Charger"));
+    rows.add(RowFactory.create("1009", "Laptop"));
+    rows.add(RowFactory.create("1010", "Tablet"));
+
+    final StructType schema =
+        new StructType()
+            .add("product_id", DataTypes.StringType, false)
+            .add("product_name", DataTypes.StringType, false);
+
+    return this.sparkSession.createDataFrame(rows, schema);
   }
 }

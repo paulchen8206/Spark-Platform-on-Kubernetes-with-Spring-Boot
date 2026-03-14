@@ -9,7 +9,6 @@ spring:
   datasource:
     # Change the ip to `minikube ip`
     url: jdbc:postgresql://localhost:5432/spark_jobs_db
-
 logging:
   logback:
     rollingpolicy:
@@ -23,7 +22,6 @@ logging:
     org.apache.hadoop: warn
     org.sparkproject: warn
 debug: false
-
 #------------------------- Spark configurations -------------------------
 spark:
   # Need to change this whenever minikube is restarted. Find using `kubectl cluster-info`
@@ -47,7 +45,6 @@ spark:
     #Always, Never, and IfNotPresent
     container.image.pullPolicy: IfNotPresent
   submit.deployMode: cluster
-
 # ===================================================================
 # Application specific properties
 # Add your own application properties here
@@ -59,6 +56,10 @@ spark-launcher:
   persist-jobs: true
   env:
     POSTGRES_URL: "jdbc:postgresql://postgres:5432/spark_jobs_db"
+    POSTGRES_USER: "${POSTGRES_USERNAME:admin}"
+    POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:admin}"
+    JDBC_USER: "${POSTGRES_USERNAME:admin}"
+    JDBC_PASSWORD: "${POSTGRES_PASSWORD:admin}"
     KAFKA_BOOTSTRAP_SERVERS: "kafka:9092"
   jobs:
     sales-report-job:

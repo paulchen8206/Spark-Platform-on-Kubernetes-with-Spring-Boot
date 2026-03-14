@@ -22,6 +22,7 @@ spec:
       labels:
         name: spark-job-service
     spec:
+      serviceAccountName: spark
       containers:
       - name: spark-job-service
         image: spark-job-service:0.0.1
@@ -33,10 +34,16 @@ spec:
         - "--spark.executor.instances=2"
         - "--spark.default.parallelism=16"
         - "--spark-launcher.env.POSTGRES_URL=jdbc:postgresql://postgres:5432/spark_jobs_db"
+        - "--spark-launcher.env.POSTGRES_USER=${POSTGRES_USERNAME}"
+        - "--spark-launcher.env.POSTGRES_PASSWORD=${POSTGRES_PASSWORD}"
         - "--spark-launcher.env.KAFKA_BOOTSTRAP_SERVERS=kafka:9092"
         - "--spark-launcher.jobs.sales-report-job.env.MONGODB_URL=mongodb://mongo:27017"
         - "--spark-launcher.jobs.sales-report-job.env.ARANGODB_URL=arango:8529"
+        - "--spark-launcher.jobs.sales-report-job.spark-config.spark.driver.userClassPathFirst=true"
+        - "--spark-launcher.jobs.sales-report-job.spark-config.spark.executor.userClassPathFirst=true"
         - "--spark-launcher.jobs.logs-analysis-job.env.JDBC_URL=jdbc:postgresql://postgres:5432"
+        - "--spark-launcher.env.JDBC_USER=${POSTGRES_USERNAME}"
+        - "--spark-launcher.env.JDBC_PASSWORD=${POSTGRES_PASSWORD}"
         env:
         #            - name: SPRING_PROFILES_ACTIVE
         #              value: minikube
@@ -58,6 +65,27 @@ spec:
           value: kafka:9092
         - name: POSTGRES_URL
           value: jdbc:postgresql://postgres:5432/spark_jobs_db
+        - name: POSTGRES_USERNAME
+          value: postgres
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: platform-secrets
+              key: postgres-password
+        - name: SPARK_LAUNCHER_ENV_POSTGRES_USER
+          value: postgres
+        - name: SPARK_LAUNCHER_ENV_POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: platform-secrets
+              key: postgres-password
+        - name: SPARK_LAUNCHER_ENV_JDBC_USER
+          value: postgres
+        - name: SPARK_LAUNCHER_ENV_JDBC_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: platform-secrets
+              key: postgres-password
         - name: JDBC_URL
           value: jdbc:postgresql://postgres:5432
         - name: PERSIST_JOBS
