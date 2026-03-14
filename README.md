@@ -359,7 +359,7 @@ flowchart LR
 
   SVC --> Submit[spark-submit\nmaster=local\ndeployMode=client]
 
-  subgraph JVM[Driver JVM (local process)]
+  subgraph JVM["Driver JVM - local process"]
     SS[SparkSession]
     EX[Executor threads]
     JAR[spark-batch-sales-report-job.jar]
