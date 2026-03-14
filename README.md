@@ -76,8 +76,8 @@ Notes:
 Deploy infrastructure and RBAC:
 
 ```bash
-kubectl apply -f infra-kubernetes-deploy.yml
-kubectl apply -f spark-rbac.yml
+kubectl apply -f k8s/infra-kubernetes-deploy.yml
+kubectl apply -f k8s/spark-rbac.yml
 kubectl config set-context --current --namespace=ksoot
 kubectl get pods -n ksoot
 ```
@@ -92,7 +92,7 @@ minikube tunnel
 
 - Build images for the modules you want to run.
 - Load images into Minikube if needed.
-- Deploy `spark-job-service` using [`spark-job-service/deployment.yml`](spark-job-service/deployment.yml) and use its REST APIs.
+- Deploy `spark-job-service` using [`k8s/deployment.yml`](k8s/deployment.yml) and use its REST APIs.
 
 Detailed steps remain in module READMEs:
 - [`spark-job-service`](spark-job-service/README.md)
@@ -101,9 +101,9 @@ Detailed steps remain in module READMEs:
 
 ## Kubernetes Configuration Files
 
-- [`infra-kubernetes-deploy.yml`](infra-kubernetes-deploy.yml): Namespace (`ksoot`) and infra workloads/services (MongoDB, ArangoDB, PostgreSQL, Zookeeper, Kafka, Kafka UI).
-- [`spark-rbac.yml`](spark-rbac.yml): Service account and RBAC bindings required by Spark driver/executor pods.
-- [`spark-job-service/deployment.yml`](spark-job-service/deployment.yml): Deployment for the Spring Boot job launcher service.
+- [`k8s/infra-kubernetes-deploy.yml`](k8s/infra-kubernetes-deploy.yml): Namespace (`ksoot`) and infra workloads/services (MongoDB, ArangoDB, PostgreSQL, Zookeeper, Kafka, Kafka UI).
+- [`k8s/spark-rbac.yml`](k8s/spark-rbac.yml): Service account and RBAC bindings required by Spark driver/executor pods.
+- [`k8s/deployment.yml`](k8s/deployment.yml): Deployment for the Spring Boot job launcher service.
 
 ## Helm
 
