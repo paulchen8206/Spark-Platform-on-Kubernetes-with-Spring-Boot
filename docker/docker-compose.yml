@@ -7,6 +7,7 @@ services:
     environment:
       CDK_ADMIN_EMAIL: 'user@discounttire.com'
       CDK_ADMIN_PASSWORD: "${CDK_ADMIN_PASSWORD:?Set CDK_ADMIN_PASSWORD in your shell or .env}"
+      CDK_ANALYST_PASSWORD: "${CDK_ANALYST_PASSWORD:?Set CDK_ANALYST_PASSWORD in your shell or .env}"
       CONDUKTOR_PLATFORM_LICENSE_KEY: ""
       CONDUKTOR_PLATFORM_KAFKA_BOOTSTRAP_SERVERS: "kafka:29092"
       CONDUKTOR_PLATFORM_SECURITY_AUTH_ENABLED: "true"
