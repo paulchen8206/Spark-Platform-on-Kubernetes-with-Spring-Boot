@@ -192,6 +192,66 @@ For job launching specifically:
 
 ## Architecture and Diagrams
 
+### Components Diagram (Mermaid)
+
+```mermaid
+flowchart LR
+  A[Client or Scheduler] --> B[spark-job-service\nSpring Boot REST API]
+  B --> C[spark-job-commons\nShared launch and connector logic]
+  B --> D[spark-batch-sales-report-job]
+  B --> E[spark-stream-logs-analysis-job]
+
+  D --> F[(MongoDB)]
+  D --> G[(PostgreSQL)]
+  D --> H[(ArangoDB)]
+
+  E --> I[(Kafka error-logs topic)]
+  E --> G
+
+  B --> J[(PostgreSQL task metadata)]
+```
+
+### Deployment Diagram (Mermaid)
+
+```mermaid
+flowchart TB
+  subgraph K8s[ksoot namespace]
+    SVC[spark-job-service Deployment/Service]
+    INFRA[(Kafka, Zookeeper, MongoDB, ArangoDB, PostgreSQL, Kafka UI)]
+    RBAC[spark ServiceAccount + RBAC]
+  end
+
+  USER[Operator or API client] -->|POST /v1/spark-jobs/start| SVC
+  SVC -->|spark-submit| DRV[Spark Driver Pod]
+  DRV --> EX1[Spark Executor Pod]
+  DRV --> EX2[Spark Executor Pod]
+  DRV --> INFRA
+  EX1 --> INFRA
+  EX2 --> INFRA
+  RBAC --> DRV
+  RBAC --> EX1
+  RBAC --> EX2
+```
+
+### End-to-End Architecture Flow (Mermaid)
+
+```mermaid
+sequenceDiagram
+  participant U as User/Client
+  participant API as spark-job-service
+  participant SP as Spark on Kubernetes
+  participant JOB as Spark Job (Batch/Streaming)
+  participant DS as Data Stores and Kafka
+
+  U->>API: Submit start request (jobName, args, sparkConfigs)
+  API->>API: Resolve effective configuration precedence
+  API->>SP: Execute spark-submit
+  SP->>JOB: Create driver and executor pods
+  JOB->>DS: Read/write datasets and topics
+  JOB-->>API: Task execution updates and logs
+  API-->>U: Job accepted/status available
+```
+
 Design sources are in [`diagrams`](diagrams):
 - [`diagrams/Spark_Deploy_Modes.drawio`](diagrams/Spark_Deploy_Modes.drawio)
 - [`diagrams/Spark_Deployment_Cluster.drawio`](diagrams/Spark_Deployment_Cluster.drawio)
