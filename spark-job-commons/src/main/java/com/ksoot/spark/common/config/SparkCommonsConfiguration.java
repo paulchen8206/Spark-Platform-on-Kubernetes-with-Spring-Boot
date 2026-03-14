@@ -11,6 +11,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.kafka.config.KafkaListenerEndpointRegistry;
@@ -27,6 +28,7 @@ import org.springframework.retry.annotation.Retryable;
 public class SparkCommonsConfiguration {
 
   @ConditionalOnClass({TaskExecution.class, KafkaListenerEndpointRegistry.class})
+  @Configuration(proxyBeanMethods = false)
   static class SparkExecutionManagerConfiguration {
 
     @Bean
@@ -40,6 +42,7 @@ public class SparkCommonsConfiguration {
 
   @ConditionalOnClass(Retryable.class)
   @ConditionalOnBean(SparkExecutionManager.class)
+  @Configuration(proxyBeanMethods = false)
   static class SparkStreamLauncherConfiguration {
 
     @Bean
