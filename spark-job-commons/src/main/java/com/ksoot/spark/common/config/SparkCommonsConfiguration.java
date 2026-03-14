@@ -41,11 +41,11 @@ public class SparkCommonsConfiguration {
   }
 
   @ConditionalOnClass(Retryable.class)
-  @ConditionalOnBean(SparkExecutionManager.class)
   @Configuration(proxyBeanMethods = false)
   static class SparkStreamLauncherConfiguration {
 
     @Bean
+    @ConditionalOnBean(SparkExecutionManager.class)
     SparkStreamLauncher sparkStreamLauncher(
         final SparkExecutionManager sparkExecutionManager, final TaskExecutor taskExecutor) {
       return new SparkStreamLauncher(sparkExecutionManager, taskExecutor);
