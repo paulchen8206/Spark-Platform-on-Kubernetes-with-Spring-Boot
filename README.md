@@ -87,14 +87,14 @@ If `kubectl port-forward -n ksoot svc/spark-job-service 8090:8090` is unstable o
 Start local infrastructure:
 
 ```bash
-export CDK_ADMIN_PASSWORD='<set-admin-password>'
-export CDK_ANALYST_PASSWORD='<set-analyst-password>'
-export DATABASE_PASSWORD='<set-postgres-password>'
-export POSTGRES_PASSWORD='<set-postgres-password>'
-export ARANGO_ROOT_PASSWORD='<set-arango-password>'
+set -a
+source .env
+set +a
 docker compose -f docker/docker-compose.yml up -d
 docker compose -f docker/docker-compose.yml ps
 ```
+
+Default local values are provided in [.env](.env). Update this file before running in shared environments.
 
 Main local endpoints from [`docker/docker-compose.yml`](docker/docker-compose.yml):
 - Conduktor UI: http://localhost:8081

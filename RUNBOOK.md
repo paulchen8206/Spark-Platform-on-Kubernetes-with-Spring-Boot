@@ -31,15 +31,15 @@ Use this path when you want to run infra locally with Docker Compose and run Spr
 ### 2.1 Start Infrastructure
 
 ```bash
-export CDK_ADMIN_PASSWORD='<set-admin-password>'
-export CDK_ANALYST_PASSWORD='<set-analyst-password>'
-export DATABASE_PASSWORD='<set-postgres-password>'
-export POSTGRES_PASSWORD='<set-postgres-password>'
-export ARANGO_ROOT_PASSWORD='<set-arango-password>'
+set -a
+source .env
+set +a
 
 docker compose -f docker/docker-compose.yml up -d
 docker compose -f docker/docker-compose.yml ps
 ```
+
+Default local values are in `.env`. Update `.env` before running in shared environments.
 
 ### 2.2 Build Artifacts
 
