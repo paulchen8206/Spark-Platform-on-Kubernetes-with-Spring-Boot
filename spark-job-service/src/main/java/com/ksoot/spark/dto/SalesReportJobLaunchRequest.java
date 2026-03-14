@@ -11,6 +11,7 @@ import java.time.YearMonth;
 import java.util.Map;
 import java.util.Objects;
 import lombok.*;
+import org.apache.commons.lang3.StringUtils;
 
 @Getter
 @ToString(callSuper = true)
@@ -34,8 +35,28 @@ public class SalesReportJobLaunchRequest extends JobLaunchRequest {
   public static SalesReportJobLaunchRequest of(
       @JsonProperty("jobName") final String jobName,
       @JsonProperty("sparkConfigs") final Map<String, Object> sparkConfigs,
-      @JsonProperty("month") final YearMonth month) {
-    return new SalesReportJobLaunchRequest(jobName, sparkConfigs, month);
+      @JsonProperty("month") final YearMonth month,
+      @JsonProperty("jobArguments") final Map<String, Object> jobArguments) {
+    return new SalesReportJobLaunchRequest(
+        jobName, sparkConfigs, Objects.nonNull(month) ? month : monthFromArgs(jobArguments));
+  }
+
+  private static YearMonth monthFromArgs(final Map<String, Object> jobArguments) {
+    if (Objects.isNull(jobArguments)) {
+      return null;
+    }
+
+    final Object monthValue = jobArguments.get("month");
+    if (Objects.isNull(monthValue)) {
+      return null;
+    }
+
+    final String rawMonth = String.valueOf(monthValue);
+    if (StringUtils.isBlank(rawMonth)) {
+      return null;
+    }
+
+    return YearMonth.parse(rawMonth);
   }
 
   @Override

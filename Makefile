@@ -20,15 +20,20 @@ ENV_FILE ?= .env
 COMPOSE_REQUIRED_VARS ?= CDK_ADMIN_PASSWORD CDK_ANALYST_PASSWORD DATABASE_PASSWORD POSTGRES_PASSWORD ARANGO_ROOT_PASSWORD
 DOCKER_COMPOSE_FILE ?= docker/docker-compose.yml
 COMPOSE_CMD = docker compose --env-file $(ENV_FILE) -f $(DOCKER_COMPOSE_FILE)
+K8S_DIR ?= k8s
+INFRA_MANIFEST ?= $(K8S_DIR)/infra-kubernetes-deploy.yml
+RBAC_MANIFEST ?= $(K8S_DIR)/spark-rbac.yml
+APP_MANIFEST ?= $(K8S_DIR)/deployment.yml
 
 KUBECTL ?= kubectl
 MINIKUBE ?= minikube
+KUBECTL_APPLY_FLAGS ?= --validate=false
 KNS := $(KUBECTL) -n $(NAMESPACE)
 MK_DOCKER_ENV = eval "$$($(MINIKUBE) -p $(MINIKUBE_PROFILE) docker-env)"
 
 .PHONY: help \
 	dc-env-check dc-up dc-ps dc-down dc-e2e \
-	mk-start mk-stop mk-delete mk-tunnel mk-docker-env mk-print-docker-env mk-build mk-image-spark-base mk-image-job-service mk-image-batch mk-image-stream mk-images mk-namespace mk-secrets mk-deploy-infra mk-deploy-rbac mk-deploy-app mk-deploy mk-rollout-status mk-pods mk-services mk-kafka-ui-health mk-port-forward mk-api-check mk-clean-job-pods mk-submit-sales mk-submit-logs mk-show-recent-pods mk-smoke mk-service-logs mk-events mk-cleanup mk-cleanup-all mk-e2e \
+	mk-start mk-stop mk-delete mk-tunnel mk-docker-env mk-print-docker-env mk-build mk-image-spark-base mk-image-job-service mk-image-batch mk-image-stream mk-images mk-k8s-preflight mk-namespace mk-secrets mk-deploy-infra mk-deploy-rbac mk-deploy-app mk-deploy mk-rollout-status mk-verify mk-pods mk-services mk-kafka-ui-health mk-port-forward mk-api-check mk-clean-job-pods mk-submit-sales mk-submit-logs mk-show-recent-pods mk-smoke mk-service-logs mk-events mk-cleanup mk-cleanup-all mk-e2e \
 	helm-prepare helm-install helm-verify helm-url helm-smoke helm-uninstall helm-e2e
 
 help: ## Show runbook-compatible targets
@@ -87,42 +92,56 @@ mk-build: ## [B] Build Maven artifacts (skip tests)
 mk-image-spark-base: ## [B] Build base Spark runtime image
 	$(MK_DOCKER_ENV) && docker build -t $(SPARK_BASE_IMAGE) -f docker/Dockerfile docker
 
-mk-image-job-service: ## [B] Build spark-job-service image
+mk-image-job-service: mk-image-spark-base ## [B] Build spark-job-service image
 	$(MK_DOCKER_ENV) && docker build -t $(SPARK_JOB_SERVICE_IMAGE) ./spark-job-service
 
-mk-image-batch: ## [B] Build batch sales job image
+mk-image-batch: mk-image-spark-base ## [B] Build batch sales job image
 	$(MK_DOCKER_ENV) && docker build -t $(SPARK_BATCH_IMAGE) ./spark-batch-sales-report-job
 
-mk-image-stream: ## [B] Build streaming logs analysis job image
+mk-image-stream: mk-image-spark-base ## [B] Build streaming logs analysis job image
 	$(MK_DOCKER_ENV) && docker build -t $(SPARK_STREAM_IMAGE) ./spark-stream-logs-analysis-job
 
 mk-images: mk-image-spark-base mk-image-job-service mk-image-batch mk-image-stream ## [B] Build all images in minikube Docker
 
-mk-namespace: ## [B] Create namespace if missing
-	$(KUBECTL) create namespace $(NAMESPACE) --dry-run=client -o yaml | $(KUBECTL) apply -f -
+mk-k8s-preflight: ## [B] Ensure minikube profile/context/auth are ready for kubectl
+	@if ! $(MINIKUBE) -p $(MINIKUBE_PROFILE) status >/dev/null 2>&1; then \
+		echo "Minikube profile '$(MINIKUBE_PROFILE)' not found. Run: make mk-start"; \
+		exit 1; \
+	fi
+	@$(KUBECTL) config use-context $(MINIKUBE_PROFILE) >/dev/null 2>&1 || true
+	@if ! $(KUBECTL) version --request-timeout=8s >/dev/null 2>&1; then \
+		echo "Kubernetes cluster unavailable or authentication required for context '$(MINIKUBE_PROFILE)'."; \
+		echo "Run: make mk-start"; \
+		exit 1; \
+	fi
 
-mk-secrets: ## [B] Create/update platform-secrets from $(PLATFORM_SECRETS_FILE)
+mk-namespace: mk-k8s-preflight ## [B] Create namespace if missing
+	$(KUBECTL) create namespace $(NAMESPACE) --dry-run=client -o yaml | $(KUBECTL) apply $(KUBECTL_APPLY_FLAGS) -f -
+
+mk-secrets: mk-k8s-preflight ## [B] Create/update platform-secrets from $(PLATFORM_SECRETS_FILE)
 	@if [[ ! -f "$(PLATFORM_SECRETS_FILE)" ]]; then \
 		echo "Secrets file not found: $(PLATFORM_SECRETS_FILE)"; \
 		exit 1; \
 	fi
-	$(KNS) apply -f $(PLATFORM_SECRETS_FILE)
+	$(KNS) apply $(KUBECTL_APPLY_FLAGS) -f $(PLATFORM_SECRETS_FILE)
 
-mk-deploy-infra: ## [B] Apply infrastructure manifests
-	$(KUBECTL) apply -f k8s/infra-kubernetes-deploy.yml
+mk-deploy-infra: mk-k8s-preflight ## [B] Apply infrastructure manifests
+	$(KUBECTL) apply $(KUBECTL_APPLY_FLAGS) -f $(INFRA_MANIFEST)
 
-mk-deploy-rbac: ## [B] Apply Spark RBAC manifests
-	$(KUBECTL) apply -f k8s/spark-rbac.yml
+mk-deploy-rbac: mk-k8s-preflight ## [B] Apply Spark RBAC manifests
+	$(KUBECTL) apply $(KUBECTL_APPLY_FLAGS) -f $(RBAC_MANIFEST)
 
-mk-deploy-app: ## [B] Apply spark-job-service deployment manifest
-	$(KUBECTL) apply -f k8s/deployment.yml
+mk-deploy-app: mk-k8s-preflight mk-image-job-service ## [B] Build image and apply spark-job-service deployment manifest
+	$(KUBECTL) apply $(KUBECTL_APPLY_FLAGS) -f $(APP_MANIFEST)
 
-mk-deploy: mk-deploy-infra mk-deploy-rbac mk-deploy-app ## [B] Apply infra + rbac + app manifests
+mk-deploy: mk-namespace mk-secrets mk-deploy-infra mk-deploy-rbac mk-deploy-app ## [B] Apply namespace + secrets + infra + rbac + app
 
-mk-rollout-status: ## [B] Wait for core deployments to be ready
+mk-rollout-status: mk-k8s-preflight ## [B] Wait for core deployments to be ready
 	$(KNS) rollout status deployment/postgres --timeout=300s
 	$(KNS) rollout status deployment/kafka-ui --timeout=300s
 	$(KNS) rollout status deployment/spark-job-service --timeout=300s
+
+mk-verify: mk-k8s-preflight mk-rollout-status mk-pods mk-services ## [B] Verify core rollouts, pods and services
 
 mk-pods: ## [B] List pods in namespace
 	$(KNS) get pods -o wide
@@ -170,9 +189,9 @@ mk-events: ## [B] Show namespace events sorted by creation time
 
 mk-cleanup: ## [B] Delete app and infra manifests (safe when cluster unavailable)
 	@if $(KUBECTL) version --request-timeout=8s >/dev/null 2>&1; then \
-		$(KUBECTL) delete --ignore-not-found=true -f k8s/deployment.yml || true; \
-		$(KUBECTL) delete --ignore-not-found=true -f k8s/spark-rbac.yml || true; \
-		$(KUBECTL) delete --ignore-not-found=true -f k8s/infra-kubernetes-deploy.yml || true; \
+		$(KUBECTL) delete --ignore-not-found=true -f $(APP_MANIFEST) || true; \
+		$(KUBECTL) delete --ignore-not-found=true -f $(RBAC_MANIFEST) || true; \
+		$(KUBECTL) delete --ignore-not-found=true -f $(INFRA_MANIFEST) || true; \
 	else \
 		echo "Skipping kubernetes manifest cleanup: cluster unavailable or auth required for current kubectl context."; \
 	fi

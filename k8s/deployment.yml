@@ -31,8 +31,8 @@ spec:
         - containerPort: 8090
           #              The configs not defined as in application.yml can be passed in args as follows
         args:
-        - "--spark.executor.instances=2"
-        - "--spark.default.parallelism=16"
+        - "--spark.executor.instances=1"
+        - "--spark.default.parallelism=8"
         - "--spark-launcher.env.POSTGRES_URL=jdbc:postgresql://postgres:5432/spark_jobs_db"
         - "--spark-launcher.env.POSTGRES_USER=${POSTGRES_USERNAME}"
         - "--spark-launcher.env.POSTGRES_PASSWORD=${POSTGRES_PASSWORD}"
