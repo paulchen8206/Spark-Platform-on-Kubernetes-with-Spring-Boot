@@ -15,6 +15,9 @@ make mk-image-job-service
 make mk-deploy-app
 make mk-rollout-status
 make mk-port-forward
+make mk-port-forward-postgres
+make mk-port-forward-kafka-ui
+make mk-port-forward-spark-ui
 make mk-api-check
 ```
 

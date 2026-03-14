@@ -179,11 +179,39 @@ kubectl run logs-submit --rm -i --restart=Never -n ksoot --image=curlimages/curl
 kubectl get pods -n ksoot --sort-by=.metadata.creationTimestamp | tail -n 12
 ```
 
-#### 3.2.7 Optional API Access via Port Forward
+#### 3.2.7 Host Access via Port Forward (Optional)
+
+Use these when you need to access in-cluster endpoints directly from your host for troubleshooting or UI checks. Keep each command running in its own terminal while you use the forwarded port.
+
+Common forwards:
 
 ```bash
+# Spark Job Service API
 kubectl port-forward -n ksoot svc/spark-job-service 8090:8090
+
+# PostgreSQL
+kubectl port-forward -n ksoot svc/postgres 5432:5432
+
+# Kafka UI
+kubectl port-forward -n ksoot svc/kafka-ui 8100:8100
+
+# Spark UI for currently running driver pod (batch/stream)
+DRIVER_POD=$(kubectl get pods -n ksoot -l spark-role=driver --field-selector=status.phase=Running -o jsonpath='{.items[0].metadata.name}')
+kubectl port-forward -n ksoot pod/${DRIVER_POD} 4040:4040
 ```
+
+Equivalent Make targets:
+
+```bash
+make mk-port-forward
+make mk-port-forward-postgres
+make mk-port-forward-kafka-ui
+make mk-port-forward-spark-ui
+```
+
+Spark UI opens at `http://localhost:4040`.
+
+If the selected driver has already completed, choose another running driver pod from `kubectl get pods -n ksoot -l spark-role=driver`.
 
 If it fails with exit code `1`:
 

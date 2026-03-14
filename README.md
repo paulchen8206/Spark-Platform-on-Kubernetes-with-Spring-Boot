@@ -75,12 +75,18 @@ make mk-pods mk-services
 # Submit smoke jobs (in-cluster)
 make mk-smoke
 
+# Host access via port-forward (each in its own terminal)
+make mk-port-forward
+make mk-port-forward-postgres
+make mk-port-forward-kafka-ui
+make mk-port-forward-spark-ui
+
 # Cleanup
 make mk-cleanup
 make mk-cleanup-all
 ```
 
-If `kubectl port-forward -n ksoot svc/spark-job-service 8090:8090` is unstable on your machine, prefer the in-cluster smoke commands (`make mk-smoke`) for job submission and validation.
+If host port-forward is unstable on your machine, prefer the in-cluster smoke commands (`make mk-smoke`) for job submission and validation.
 
 ### Docker Compose
 

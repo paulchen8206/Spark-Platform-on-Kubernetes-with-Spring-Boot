@@ -33,7 +33,7 @@ MK_DOCKER_ENV = eval "$$($(MINIKUBE) -p $(MINIKUBE_PROFILE) docker-env)"
 
 .PHONY: help \
 	dc-env-check dc-up dc-ps dc-down dc-e2e \
-	mk-start mk-stop mk-delete mk-tunnel mk-docker-env mk-print-docker-env mk-build mk-image-spark-base mk-image-job-service mk-image-batch mk-image-stream mk-images mk-k8s-preflight mk-namespace mk-secrets mk-deploy-infra mk-deploy-rbac mk-deploy-app mk-deploy mk-rollout-status mk-verify mk-pods mk-services mk-kafka-ui-health mk-port-forward mk-api-check mk-clean-job-pods mk-submit-sales mk-submit-logs mk-show-recent-pods mk-smoke mk-service-logs mk-events mk-cleanup mk-cleanup-all mk-e2e \
+	mk-start mk-stop mk-delete mk-tunnel mk-docker-env mk-print-docker-env mk-build mk-image-spark-base mk-image-job-service mk-image-batch mk-image-stream mk-images mk-k8s-preflight mk-namespace mk-secrets mk-deploy-infra mk-deploy-rbac mk-deploy-app mk-deploy mk-rollout-status mk-verify mk-pods mk-services mk-kafka-ui-health mk-port-forward mk-port-forward-postgres mk-port-forward-kafka-ui mk-port-forward-spark-ui mk-api-check mk-clean-job-pods mk-submit-sales mk-submit-logs mk-show-recent-pods mk-smoke mk-service-logs mk-events mk-cleanup mk-cleanup-all mk-e2e \
 	helm-prepare helm-install helm-verify helm-url helm-smoke helm-uninstall helm-e2e
 
 help: ## Show runbook-compatible targets
@@ -154,6 +154,22 @@ mk-kafka-ui-health: ## [B] Check Kafka UI in-cluster health endpoint
 
 mk-port-forward: ## [B] Port-forward spark-job-service to localhost:8090
 	$(KNS) port-forward svc/spark-job-service 8090:8090
+
+mk-port-forward-postgres: ## [B] Port-forward postgres to localhost:5432
+	$(KNS) port-forward svc/postgres 5432:5432
+
+mk-port-forward-kafka-ui: ## [B] Port-forward kafka-ui to localhost:8100
+	$(KNS) port-forward svc/kafka-ui 8100:8100
+
+mk-port-forward-spark-ui: ## [B] Port-forward current running Spark driver UI to localhost:4040
+	@DRIVER_POD=$$($(KNS) get pods -l spark-role=driver --field-selector=status.phase=Running -o jsonpath='{.items[0].metadata.name}'); \
+	if [[ -z "$$DRIVER_POD" ]]; then \
+		echo "No running Spark driver pod found in namespace $(NAMESPACE)."; \
+		echo "Run: make mk-pods"; \
+		exit 1; \
+	fi; \
+	echo "Forwarding Spark UI for $$DRIVER_POD to http://localhost:4040"; \
+	$(KNS) port-forward pod/$$DRIVER_POD 4040:4040
 
 mk-api-check: ## [B] Check spark-job-service OpenAPI endpoint on localhost:8090
 	curl -s -o /tmp/spark_job_service_response.json -w '%{http_code}' http://localhost:8090/v3/api-docs && echo

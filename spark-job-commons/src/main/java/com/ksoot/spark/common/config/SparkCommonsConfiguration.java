@@ -8,6 +8,7 @@ import org.springframework.boot.autoconfigure.AutoConfigureOrder;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
@@ -30,6 +31,12 @@ public class SparkCommonsConfiguration {
   @ConditionalOnClass({TaskExecution.class, KafkaListenerEndpointRegistry.class})
   @Configuration(proxyBeanMethods = false)
   static class SparkExecutionManagerConfiguration {
+
+    @Bean
+    @ConditionalOnMissingBean(KafkaListenerEndpointRegistry.class)
+    KafkaListenerEndpointRegistry kafkaListenerEndpointRegistry() {
+      return new KafkaListenerEndpointRegistry();
+    }
 
     @Bean
     SparkExecutionManager sparkExecutionManager(
