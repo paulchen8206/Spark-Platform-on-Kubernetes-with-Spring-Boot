@@ -8,6 +8,12 @@ This runbook is organized into three distinct end-to-end paths:
 
 Choose one path and follow it start-to-finish.
 
+## How to Read These Diagrams
+
+- Runtime Dataflow Diagram: shows request and data movement between API, Spark, and storage systems.
+- Configuration Precedence Diagram: shows override order; the right-most source wins when values conflict.
+- Cluster Deployment Diagram: shows Kubernetes runtime topology (service, driver, executors, RBAC, and infra dependencies).
+
 ## Runtime Dataflow Diagram
 
 ```mermaid
@@ -22,6 +28,20 @@ flowchart LR
 
   SJS -->|Persist task metadata| Meta[(PostgreSQL task metadata)]
   Client -->|Execution/status APIs| SJS
+```
+
+## Configuration Precedence Diagram
+
+```mermaid
+flowchart LR
+  A[sales-report-job\napplication.yml\nspark.executor.instances=1]
+  B[spark-job-service\napplication.yml\njobs.sales-report-job.spark-config\nspark.executor.instances=2]
+  C[spark-job-service\napplication.yml\nspark.executor.instances=3]
+  D[spark-job-service\ndeployment.yml args\n--spark.executor.instances=5]
+  E[Job start request\nsparkConfigs\nspark.executor.instances=4]
+  F[Final effective config\nspark.executor.instances=4]
+
+  A --> B --> C --> D --> E --> F
 ```
 
 ## 1. Common Prerequisites
@@ -109,6 +129,51 @@ docker compose -f docker/docker-compose.yml down
 ## 3. End-to-End B: Minikube + Kubernetes Manifests
 
 Use this path for full Kubernetes execution using the repository manifests.
+
+### 3.0 Cluster Deployment Diagram
+
+```mermaid
+flowchart TB
+  subgraph K8s[ksoot namespace]
+    SVC[spark-job-service Deployment]
+    SA[spark ServiceAccount + RBAC]
+    KAPI[kubernetes.default.svc]
+    DRV[Spark Driver Pod]
+    EX1[Spark Executor Pod 1]
+    EX2[Spark Executor Pod 2]
+    EX3[Spark Executor Pod 3]
+    KAFKA[(Kafka)]
+    MONGO[(MongoDB)]
+    PG[(PostgreSQL)]
+  end
+
+  User[REST client or Scheduler] --> SVC
+  Req[SalesReportJobLaunchRequest\nmonth, correlationId, sparkConfigs] --> SVC
+
+  SVC --> Submit[spark-submit\nmaster=k8s://kubernetes.default.svc\ndeployMode=cluster]
+  Submit --> KAPI
+  KAPI --> DRV
+  DRV --> EX1
+  DRV --> EX2
+  DRV --> EX3
+
+  SA --> DRV
+  SA --> EX1
+  SA --> EX2
+  SA --> EX3
+
+  EX1 --> MONGO
+  EX2 --> MONGO
+  EX3 --> MONGO
+
+  EX1 --> PG
+  EX2 --> PG
+  EX3 --> PG
+
+  EX1 --> KAFKA
+  EX2 --> KAFKA
+  EX3 --> KAFKA
+```
 
 ### 3.1 Quick Path (Makefile)
 

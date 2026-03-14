@@ -248,6 +248,20 @@ For job launching specifically:
 3. `spark-job-service` application configuration
 4. Individual job module defaults (lowest precedence)
 
+### Configuration Precedence Diagram (Mermaid)
+
+```mermaid
+flowchart LR
+  A[sales-report-job\napplication.yml\nspark.executor.instances=1]
+  B[spark-job-service\napplication.yml\njobs.sales-report-job.spark-config\nspark.executor.instances=2]
+  C[spark-job-service\napplication.yml\nspark.executor.instances=3]
+  D[spark-job-service\ndeployment.yml args\n--spark.executor.instances=5]
+  E[Job start request\nsparkConfigs\nspark.executor.instances=4]
+  F[Final effective config\nspark.executor.instances=4]
+
+  A --> B --> C --> D --> E --> F
+```
+
 ## Architecture and Diagrams
 
 ### Components Diagram (Mermaid)
@@ -324,6 +338,61 @@ sequenceDiagram
   JOB->>DS: Read/write datasets and topics
   JOB-->>API: Task execution updates and logs
   API-->>U: Job accepted/status available
+```
+
+### Local Deploy View (Mermaid)
+
+```mermaid
+flowchart LR
+  User[REST client or Scheduler] --> SVC[spark-job-service\nlocal profile]
+  Req[SalesReportJobLaunchRequest\nmonth, sparkConfigs] --> SVC
+
+  subgraph Configs[Configuration Inputs]
+    C1[spark-job-service\napplication-local.yml]
+    C2[M2_REPO jar path]
+    C3[SPARK_HOME]
+  end
+
+  C1 --> SVC
+  C2 --> Submit
+  C3 --> Submit
+
+  SVC --> Submit[spark-submit\nmaster=local\ndeployMode=client]
+
+  subgraph JVM[Driver JVM (local process)]
+    SS[SparkSession]
+    EX[Executor threads]
+    JAR[spark-batch-sales-report-job.jar]
+  end
+
+  Submit --> SS
+  SS --> EX
+  JAR --> SS
+
+  EX --> Mongo[(MongoDB sales_report_YYYY_MM)]
+  EX --> Postgres[(PostgreSQL task metadata)]
+```
+
+### Deploy Modes View (Mermaid)
+
+```mermaid
+flowchart LR
+  Start[Job start request] --> Decide{spark.submit.deployMode}
+
+  Decide -->|client/local| Local[spark-submit local\nDriver JVM on service host]
+  Decide -->|cluster/k8s| Cluster[spark-submit k8s\nDriver Pod on Kubernetes]
+
+  Local --> LocalExec[Local executors/threads]
+  Cluster --> PodExec[Executor pods]
+
+  LocalExec --> Targets[(MongoDB / PostgreSQL / Kafka)]
+  PodExec --> Targets
+
+  note1[Local mode\nFast debug, simpler networking]
+  note2[Cluster mode\nProduction-like scheduling and isolation]
+
+  Local -.-> note1
+  Cluster -.-> note2
 ```
 
 Design sources are in [`diagrams`](diagrams):
