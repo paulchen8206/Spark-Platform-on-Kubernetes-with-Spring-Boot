@@ -46,7 +46,7 @@ chmod -R +x cmd/*
 3. Run with local profile:
 
 ```bash
-./mvnw spring-boot:run -Dspring-boot.run.profiles=local
+mvn spring-boot:run -Dspring-boot.run.profiles=local
 ```
 
 You can also run [SparkJobService.java](src/main/java/com/ksoot/spark/SparkJobService.java) from IDE.
@@ -58,7 +58,7 @@ You can also run [SparkJobService.java](src/main/java/com/ksoot/spark/SparkJobSe
 3. Run with minikube profile:
 
 ```bash
-./mvnw spring-boot:run -Dspring-boot.run.profiles=minikube
+mvn spring-boot:run -Dspring-boot.run.profiles=minikube
 ```
 
 Swagger UI:
@@ -79,10 +79,13 @@ curl -X POST 'http://localhost:8090/v1/spark-jobs/start' \
   -H 'Content-Type: application/json' \
   -d '{
     "jobName": "sales-report-job",
-    "correlationId": "71643ba2-1177-4e10-a43b-a21177de1022",
-    "month": "2024-11"
+    "jobArguments": {
+      "month": "2024-11"
+    }
   }'
 ```
+
+`correlationId` can be provided optionally; if omitted, the service generates one.
 
 ### Stop Spark Job
 
@@ -117,13 +120,13 @@ GET /v1/spark-jobs/executions/by-correlation-id/{correlationId}
 ## Build
 
 ```bash
-./mvnw clean install
+mvn clean install
 ```
 
 ## Testing
 
 ```bash
-./mvnw test
+mvn test
 ```
 
 ## References

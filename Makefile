@@ -1,155 +1,166 @@
 SHELL := /bin/bash
+.DEFAULT_GOAL := help
 
 NAMESPACE ?= ksoot
 MINIKUBE_PROFILE ?= minikube
+MINIKUBE_CPUS ?= 4
+MINIKUBE_MEMORY ?= 6144
 
 SPARK_BASE_IMAGE ?= ksoot/spark:4.0.0
 SPARK_JOB_SERVICE_IMAGE ?= spark-job-service:0.0.1
 SPARK_BATCH_IMAGE ?= spark-batch-sales-report-job:0.0.1
 SPARK_STREAM_IMAGE ?= spark-stream-logs-analysis-job:0.0.1
+CURL_IMAGE ?= curlimages/curl:8.10.1
 
 SALES_MONTH ?= 2024-08
+
+KUBECTL ?= kubectl
+MINIKUBE ?= minikube
+KNS := $(KUBECTL) -n $(NAMESPACE)
+MK_DOCKER_ENV = eval "$$($(MINIKUBE) -p $(MINIKUBE_PROFILE) docker-env)"
 
 PLATFORM_POSTGRES_PASSWORD ?=
 PLATFORM_ARANGO_ROOT_PASSWORD ?=
 PLATFORM_CDK_ADMIN_PASSWORD ?=
 PLATFORM_CONDUKTOR_ANALYST_PASSWORD ?=
 
-.PHONY: help minikube-start minikube-stop minikube-delete minikube-tunnel docker-env \
+.PHONY: help minikube-start minikube-stop stop-minikube minikube-delete cleanup-minikube minikube-tunnel docker-env \
 	build image-spark-base image-job-service image-batch image-stream images \
 	namespace secrets deploy-infra deploy-rbac deploy-app deploy rollout-status \
 	pods services kafka-ui-health spark-job-service-port-forward spark-job-service-api-check \
 	clean-job-pods submit-sales submit-logs smoke show-recent-pods \
-	service-logs events cleanup helm-install
+	service-logs events cleanup cleanup-all helm-install
 
-help:
-	@echo "Runbook-compatible targets:"
-	@echo "  make minikube-start             # Start minikube with runbook defaults"
-	@echo "  make build                      # mvn clean package -DskipTests"
-	@echo "  make images                     # Build all images into minikube Docker"
-	@echo "  make namespace secrets          # Create namespace and platform-secrets"
-	@echo "  make deploy                     # Apply infra + rbac + app manifests"
-	@echo "  make rollout-status             # Wait for core deployments"
-	@echo "  make smoke                      # Clean old pods + submit sales/logs + show pods"
-	@echo "  make cleanup                    # Delete app and infra manifests"
+help: ## Show runbook-compatible targets
+	@awk 'BEGIN {FS = ":.*##"; printf "Runbook-compatible targets:\n"} /^[a-zA-Z0-9_.-]+:.*##/ {printf "  make %-25s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
-minikube-start:
-	minikube start --driver=docker --cpus=4 --memory=6144 -p $(MINIKUBE_PROFILE)
-	kubectl config use-context $(MINIKUBE_PROFILE)
-	kubectl get nodes
+minikube-start: ## Start minikube with runbook defaults
+	$(MINIKUBE) start --driver=docker --cpus=$(MINIKUBE_CPUS) --memory=$(MINIKUBE_MEMORY) -p $(MINIKUBE_PROFILE)
+	$(KUBECTL) config use-context $(MINIKUBE_PROFILE)
+	$(KUBECTL) get nodes
 
-minikube-stop:
-	minikube stop -p $(MINIKUBE_PROFILE)
+minikube-stop: ## Stop minikube profile
+	$(MINIKUBE) stop -p $(MINIKUBE_PROFILE)
 
-minikube-delete:
-	minikube delete -p $(MINIKUBE_PROFILE)
+stop-minikube: minikube-stop ## Alias to stop minikube profile
 
-minikube-tunnel:
-	minikube tunnel -p $(MINIKUBE_PROFILE)
+minikube-delete: ## Delete minikube profile/container
+	$(MINIKUBE) delete -p $(MINIKUBE_PROFILE) || true
 
-docker-env:
+cleanup-minikube: minikube-delete ## Cleanup minikube profile/container
+
+minikube-tunnel: ## Start minikube tunnel for LoadBalancer access
+	$(MINIKUBE) tunnel -p $(MINIKUBE_PROFILE)
+
+docker-env: ## Print command to switch Docker CLI to minikube daemon
 	@echo 'Run this in your shell:'
 	@echo 'eval "$$($(MAKE) -s print-docker-env)"'
 
-print-docker-env:
-	@minikube -p $(MINIKUBE_PROFILE) docker-env
+print-docker-env: ## Output minikube docker-env exports
+	@$(MINIKUBE) -p $(MINIKUBE_PROFILE) docker-env
 
-build:
+build: ## Build Maven artifacts (skip tests)
 	mvn clean package -DskipTests
 
-image-spark-base:
-	eval "$$(minikube -p $(MINIKUBE_PROFILE) docker-env)" && docker build -t $(SPARK_BASE_IMAGE) -f docker/Dockerfile docker
+image-spark-base: ## Build base Spark runtime image
+	$(MK_DOCKER_ENV) && docker build -t $(SPARK_BASE_IMAGE) -f docker/Dockerfile docker
 
-image-job-service:
-	eval "$$(minikube -p $(MINIKUBE_PROFILE) docker-env)" && docker build -t $(SPARK_JOB_SERVICE_IMAGE) ./spark-job-service
+image-job-service: ## Build spark-job-service image
+	$(MK_DOCKER_ENV) && docker build -t $(SPARK_JOB_SERVICE_IMAGE) ./spark-job-service
 
-image-batch:
-	eval "$$(minikube -p $(MINIKUBE_PROFILE) docker-env)" && docker build -t $(SPARK_BATCH_IMAGE) ./spark-batch-sales-report-job
+image-batch: ## Build batch sales job image
+	$(MK_DOCKER_ENV) && docker build -t $(SPARK_BATCH_IMAGE) ./spark-batch-sales-report-job
 
-image-stream:
-	eval "$$(minikube -p $(MINIKUBE_PROFILE) docker-env)" && docker build -t $(SPARK_STREAM_IMAGE) ./spark-stream-logs-analysis-job
+image-stream: ## Build streaming logs analysis job image
+	$(MK_DOCKER_ENV) && docker build -t $(SPARK_STREAM_IMAGE) ./spark-stream-logs-analysis-job
 
-images: image-spark-base image-job-service image-batch image-stream
+images: image-spark-base image-job-service image-batch image-stream ## Build all images in minikube Docker
 
-namespace:
-	kubectl create namespace $(NAMESPACE) --dry-run=client -o yaml | kubectl apply -f -
+namespace: ## Create namespace if missing
+	$(KUBECTL) create namespace $(NAMESPACE) --dry-run=client -o yaml | $(KUBECTL) apply -f -
 
-secrets:
+secrets: ## Create/update platform-secrets (requires password vars)
 	@if [[ -z "$(PLATFORM_POSTGRES_PASSWORD)" || -z "$(PLATFORM_ARANGO_ROOT_PASSWORD)" || -z "$(PLATFORM_CDK_ADMIN_PASSWORD)" || -z "$(PLATFORM_CONDUKTOR_ANALYST_PASSWORD)" ]]; then \
 		echo "Set PLATFORM_POSTGRES_PASSWORD, PLATFORM_ARANGO_ROOT_PASSWORD, PLATFORM_CDK_ADMIN_PASSWORD, PLATFORM_CONDUKTOR_ANALYST_PASSWORD"; \
 		exit 1; \
 	fi
-	kubectl create secret generic platform-secrets -n $(NAMESPACE) \
+	$(KUBECTL) create secret generic platform-secrets -n $(NAMESPACE) \
 	  --from-literal=postgres-password='$(PLATFORM_POSTGRES_PASSWORD)' \
 	  --from-literal=arango-root-password='$(PLATFORM_ARANGO_ROOT_PASSWORD)' \
 	  --from-literal=cdk-admin-password='$(PLATFORM_CDK_ADMIN_PASSWORD)' \
 	  --from-literal=conduktor-analyst-password='$(PLATFORM_CONDUKTOR_ANALYST_PASSWORD)' \
-	  --dry-run=client -o yaml | kubectl apply -f -
+	  --dry-run=client -o yaml | $(KUBECTL) apply -f -
 
-deploy-infra:
-	kubectl apply -f k8s/infra-kubernetes-deploy.yml
+deploy-infra: ## Apply infrastructure manifests
+	$(KUBECTL) apply -f k8s/infra-kubernetes-deploy.yml
 
-deploy-rbac:
-	kubectl apply -f k8s/spark-rbac.yml
+deploy-rbac: ## Apply Spark RBAC manifests
+	$(KUBECTL) apply -f k8s/spark-rbac.yml
 
-deploy-app:
-	kubectl apply -f k8s/deployment.yml
+deploy-app: ## Apply spark-job-service deployment manifest
+	$(KUBECTL) apply -f k8s/deployment.yml
 
-deploy: deploy-infra deploy-rbac deploy-app
+deploy: deploy-infra deploy-rbac deploy-app ## Apply infra + rbac + app manifests
 
-rollout-status:
-	kubectl rollout status deployment/postgres -n $(NAMESPACE) --timeout=300s
-	kubectl rollout status deployment/kafka-ui -n $(NAMESPACE) --timeout=300s
-	kubectl rollout status deployment/spark-job-service -n $(NAMESPACE) --timeout=300s
+rollout-status: ## Wait for core deployments to be ready
+	$(KNS) rollout status deployment/postgres --timeout=300s
+	$(KNS) rollout status deployment/kafka-ui --timeout=300s
+	$(KNS) rollout status deployment/spark-job-service --timeout=300s
 
-pods:
-	kubectl get pods -n $(NAMESPACE) -o wide
+pods: ## List pods in namespace
+	$(KNS) get pods -o wide
 
-services:
-	kubectl get svc -n $(NAMESPACE)
+services: ## List services in namespace
+	$(KNS) get svc
 
-kafka-ui-health:
-	kubectl run kafka-ui-check --rm -i --restart=Never -n $(NAMESPACE) --image=busybox:1.36 -- wget -qO- http://kafka-ui:8100/actuator/health
+kafka-ui-health: ## Check Kafka UI in-cluster health endpoint
+	$(KNS) run kafka-ui-check --rm -i --restart=Never --image=busybox:1.36 -- wget -qO- http://kafka-ui:8100/actuator/health
 
-spark-job-service-port-forward:
-	kubectl port-forward -n $(NAMESPACE) svc/spark-job-service 8090:8090
+spark-job-service-port-forward: ## Port-forward spark-job-service to localhost:8090
+	$(KNS) port-forward svc/spark-job-service 8090:8090
 
-spark-job-service-api-check:
+spark-job-service-api-check: ## Check spark-job-service OpenAPI endpoint on localhost:8090
 	curl -s -o /tmp/spark_job_service_response.json -w '%{http_code}' http://localhost:8090/v3/api-docs && echo
 	head -c 220 /tmp/spark_job_service_response.json
 
-clean-job-pods:
-	kubectl get pods -n $(NAMESPACE) --no-headers \
+clean-job-pods: ## Delete completed/failed Spark job pods
+	$(KNS) get pods --no-headers \
 	  | awk '/(sales-report-job|logs-analysis-job)/ && ($$3=="Error" || $$3=="Completed" || $$3=="Failed") {print $$1}' \
-	  | xargs -r kubectl delete pod -n $(NAMESPACE)
+	  | xargs -r $(KNS) delete pod
 
-submit-sales:
-	kubectl run sales-submit --rm -i --restart=Never -n $(NAMESPACE) --image=curlimages/curl:8.10.1 -- \
+submit-sales: ## Submit sales-report batch job
+	$(KNS) run sales-submit --rm -i --restart=Never --image=$(CURL_IMAGE) -- \
 	  -sS -X POST http://spark-job-service:8090/v1/spark-jobs/start \
 	  -H 'Content-Type: application/json' \
 	  -d '{"jobName":"sales-report-job","jobArguments":{"month":"$(SALES_MONTH)"}}'
 
-submit-logs:
-	kubectl run logs-submit --rm -i --restart=Never -n $(NAMESPACE) --image=curlimages/curl:8.10.1 -- \
+submit-logs: ## Submit logs-analysis streaming job
+	$(KNS) run logs-submit --rm -i --restart=Never --image=$(CURL_IMAGE) -- \
 	  -sS -X POST http://spark-job-service:8090/v1/spark-jobs/start \
 	  -H 'Content-Type: application/json' \
 	  -d '{"jobName":"logs-analysis-job"}'
 
-show-recent-pods:
-	kubectl get pods -n $(NAMESPACE) --sort-by=.metadata.creationTimestamp | tail -n 12
+show-recent-pods: ## Show most recent pods in namespace
+	$(KNS) get pods --sort-by=.metadata.creationTimestamp | tail -n 12
 
-smoke: clean-job-pods submit-sales submit-logs show-recent-pods
+smoke: clean-job-pods submit-sales submit-logs show-recent-pods ## Clean old pods, submit jobs, and show latest pods
 
-service-logs:
-	kubectl logs -n $(NAMESPACE) deployment/spark-job-service -f
+service-logs: ## Tail spark-job-service logs
+	$(KNS) logs deployment/spark-job-service -f
 
-events:
-	kubectl get events -n $(NAMESPACE) --sort-by=.metadata.creationTimestamp
+events: ## Show namespace events sorted by creation time
+	$(KNS) get events --sort-by=.metadata.creationTimestamp
 
-cleanup:
-	kubectl delete -f k8s/deployment.yml
-	kubectl delete -f k8s/spark-rbac.yml
-	kubectl delete -f k8s/infra-kubernetes-deploy.yml
+cleanup: ## Delete app and infra manifests (safe when cluster unavailable)
+	@if $(KUBECTL) version --request-timeout=8s >/dev/null 2>&1; then \
+		$(KUBECTL) delete --ignore-not-found=true -f k8s/deployment.yml || true; \
+		$(KUBECTL) delete --ignore-not-found=true -f k8s/spark-rbac.yml || true; \
+		$(KUBECTL) delete --ignore-not-found=true -f k8s/infra-kubernetes-deploy.yml || true; \
+	else \
+		echo "Skipping kubernetes manifest cleanup: cluster unavailable or auth required for current kubectl context."; \
+	fi
 
-helm-install:
+cleanup-all: cleanup cleanup-minikube ## Cleanup manifests and delete minikube
+
+helm-install: ## Install/upgrade Helm chart with existing platform-secrets
 	helm upgrade --install local-release ./helm -f helm/values-dev.yaml --set platformSecrets.existingSecret=platform-secrets

@@ -161,10 +161,13 @@ curl -X POST 'http://localhost:8090/v1/spark-jobs/start' \
   -H 'Content-Type: application/json' \
   -d '{
     "jobName": "sales-report-job",
-    "correlationId": "71643ba2-1177-4e10-a43b-a21177de1022",
-    "month": "2024-11"
+    "jobArguments": {
+      "month": "2024-11"
+    }
   }'
 ```
+
+Note: `correlationId` is optional. If not provided, the service generates one.
 
 Stop job:
 
@@ -241,6 +244,12 @@ kubectl rollout status deployment/spark-job-service -n ksoot --timeout=300s
 ```
 
 ## 9. Cleanup
+
+Preferred Makefile command for full teardown:
+
+```bash
+make cleanup-all
+```
 
 Remove app and infrastructure:
 

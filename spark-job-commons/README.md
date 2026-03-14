@@ -133,8 +133,8 @@ throw JobProblem.of("IOException while reading file").cause(e).build();
 ## Build and Test
 
 ```bash
-./mvnw clean install
-./mvnw test
+mvn clean install
+mvn test
 ```
 
 ## References

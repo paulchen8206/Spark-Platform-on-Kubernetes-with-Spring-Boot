@@ -2,7 +2,7 @@
 
 Batch Spark job that generates monthly sales reports by combining:
 - Sales transactions from MongoDB.
-- Product metadata from ArangoDB.
+- Product reference data from an in-memory lookup dataset.
 
 Main class: [SalesReportJob](src/main/java/com/ksoot/spark/sales/SalesReportJob.java)
 
@@ -17,7 +17,7 @@ Implementation entry point: [SparkPipelineExecutor](src/main/java/com/ksoot/spar
 Flow:
 1. Read sales data from MongoDB.
 2. Filter records by the target month.
-3. Join with product data from ArangoDB.
+3. Join with in-memory product reference data.
 4. Aggregate daily sales.
 5. Write the result back to MongoDB as `sales_report_YYYY_MM`.
 
@@ -32,7 +32,6 @@ Frequently used properties:
 - `ksoot.job.correlation-id` (env: `CORRELATION_ID`): execution tracking id.
 - `ksoot.job.persist` (env: `PERSIST_JOB`): enable Spring Cloud Task persistence.
 - `ksoot.connector.mongo-options.*`: MongoDB connection.
-- `ksoot.connector.arango-options.*`: ArangoDB connection.
 
 Connector configuration details are documented in [Connectors](../spark-job-commons/README.md#connectors).
 
@@ -54,7 +53,7 @@ Also enable IntelliJ option to include `provided` dependencies on classpath.
 ### Maven
 
 ```bash
-./mvnw spring-boot:run -Dspring-boot.run.profiles=local
+mvn spring-boot:run -Dspring-boot.run.profiles=local
 ```
 
 ## Running via Job Service
@@ -68,8 +67,9 @@ curl -X POST 'http://localhost:8090/v1/spark-jobs/start' \
   -H 'Content-Type: application/json' \
   -d '{
     "jobName": "sales-report-job",
-    "correlationId": "71643ba2-1177-4e10-a43b-a21177de1022",
-    "month": "2024-11"
+    "jobArguments": {
+      "month": "2024-11"
+    }
   }'
 ```
 
@@ -86,7 +86,7 @@ Recommended path is launching through `spark-job-service` with the `minikube` pr
 Build jar:
 
 ```bash
-./mvnw clean install
+mvn clean install
 ```
 
 Build module image:
@@ -98,7 +98,7 @@ docker image build . -t spark-batch-sales-report-job:0.0.1 -f Dockerfile
 Run tests:
 
 ```bash
-./mvnw test
+mvn test
 ```
 
 ## References

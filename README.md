@@ -22,7 +22,7 @@ This repository includes:
 ### Prerequisites
 
 - Java 21
-- Maven 3.9+ (or use the included `./mvnw`)
+- Maven 3.9+
 - Docker and Docker Compose
 - Optional for Kubernetes workflows:
   - `kubectl`
@@ -34,7 +34,7 @@ This repository includes:
 From repository root:
 
 ```bash
-./mvnw clean install
+mvn clean install
 ```
 
 ## Local Development
@@ -53,6 +53,12 @@ make namespace secrets \
   PLATFORM_CONDUKTOR_ANALYST_PASSWORD='<set-analyst-password>'
 make deploy rollout-status
 make smoke
+```
+
+To see all available operational targets:
+
+```bash
+make help
 ```
 
 If `kubectl port-forward -n ksoot svc/spark-job-service 8090:8090` is unstable on your machine, prefer the in-cluster smoke commands (`make smoke`) for job submission and validation.
@@ -221,7 +227,7 @@ flowchart LR
 
   D --> F[(MongoDB)]
   D --> G[(PostgreSQL)]
-  D --> H[(ArangoDB)]
+  D --> P[(In-memory product reference)]
 
   E --> I[(Kafka error-logs topic)]
   E --> G

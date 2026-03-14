@@ -51,7 +51,7 @@ Also enable IntelliJ option to include `provided` dependencies on classpath.
 ### Maven
 
 ```bash
-./mvnw spring-boot:run -Dspring-boot.run.profiles=local
+mvn spring-boot:run -Dspring-boot.run.profiles=local
 ```
 
 ## Running via Job Service
@@ -64,8 +64,7 @@ Example:
 curl -X POST 'http://localhost:8090/v1/spark-jobs/start' \
   -H 'Content-Type: application/json' \
   -d '{
-    "jobName": "logs-analysis-job",
-    "correlationId": "71643ba2-1177-4e10-a43b-a21177de1022"
+    "jobName": "logs-analysis-job"
   }'
 ```
 
@@ -82,7 +81,7 @@ Recommended path is launching through `spark-job-service` with the `minikube` pr
 Build jar:
 
 ```bash
-./mvnw clean install
+mvn clean install
 ```
 
 Build module image:
@@ -94,7 +93,7 @@ docker image build . -t spark-stream-logs-analysis-job:0.0.1 -f Dockerfile
 Run tests:
 
 ```bash
-./mvnw test
+mvn test
 ```
 
 ## References
