@@ -18,6 +18,8 @@ SALES_MONTH ?= 2024-08
 PLATFORM_SECRETS_FILE ?= k8s/platform-secrets-dev.yaml
 ENV_FILE ?= .env
 COMPOSE_REQUIRED_VARS ?= CDK_ADMIN_PASSWORD CDK_ANALYST_PASSWORD DATABASE_PASSWORD POSTGRES_PASSWORD ARANGO_ROOT_PASSWORD
+DOCKER_COMPOSE_FILE ?= docker/docker-compose.yml
+COMPOSE_CMD = docker compose --env-file $(ENV_FILE) -f $(DOCKER_COMPOSE_FILE)
 
 KUBECTL ?= kubectl
 MINIKUBE ?= minikube
@@ -48,13 +50,13 @@ dc-env-check: ## [A] Validate required env vars for Docker Compose
 	if [[ $$missing -ne 0 ]]; then exit 1; fi
 
 dc-up: dc-env-check ## [A] Start Docker Compose infrastructure
-	set -a; source $(ENV_FILE); set +a; docker compose -f docker/docker-compose.yml up -d
+	$(COMPOSE_CMD) up -d
 
-dc-ps: ## [A] Show Docker Compose services
-	docker compose -f docker/docker-compose.yml ps
+dc-ps: dc-env-check ## [A] Show Docker Compose services
+	$(COMPOSE_CMD) ps
 
-dc-down: ## [A] Stop Docker Compose infrastructure
-	docker compose -f docker/docker-compose.yml down
+dc-down: dc-env-check ## [A] Stop Docker Compose infrastructure
+	$(COMPOSE_CMD) down
 
 dc-e2e: dc-up dc-ps ## [A] Run Docker Compose end-to-end startup
 
