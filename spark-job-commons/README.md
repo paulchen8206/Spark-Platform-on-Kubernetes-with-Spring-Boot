@@ -51,6 +51,45 @@ Common options:
 - `save-mode`: batch write save mode (`Append`, `Overwrite`, `ErrorIfExists`, `Ignore`).
 - `output-mode`: streaming sink output mode (`Append`, `Complete`, `Update`).
 
+## Design Pattern
+
+This module uses the Factory pattern for connector selection:
+- [ConnectorFactory](src/main/java/com/ksoot/spark/common/connector/ConnectorFactory.java) resolves connector instances by type.
+- [ConnectorType](src/main/java/com/ksoot/spark/common/connector/ConnectorType.java) provides supported connector keys.
+
+This keeps connector creation and runtime availability checks in one place.
+
+### Class Diagram
+
+```mermaid
+classDiagram
+  class ConnectorType {
+    <<enumeration>>
+    FILE
+    JDBC
+    MONGO
+    ARANGO
+    KAFKA
+  }
+
+  class ConnectorFactory {
+    +connector(connectorType)
+  }
+
+  class FileConnector
+  class JdbcConnector
+  class MongoConnector
+  class ArangoConnector
+  class KafkaConnector
+
+  ConnectorFactory ..> ConnectorType : selects by
+  ConnectorFactory --> FileConnector : returns
+  ConnectorFactory --> JdbcConnector : returns
+  ConnectorFactory --> MongoConnector : returns
+  ConnectorFactory --> ArangoConnector : returns
+  ConnectorFactory --> KafkaConnector : returns
+```
+
 ### Connector Configuration Examples
 
 File options:

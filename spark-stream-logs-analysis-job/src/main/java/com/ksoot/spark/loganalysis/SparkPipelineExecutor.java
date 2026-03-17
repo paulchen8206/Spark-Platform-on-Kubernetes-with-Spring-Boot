@@ -1,19 +1,15 @@
 package com.ksoot.spark.loganalysis;
 
-import static org.apache.spark.sql.functions.col;
-import static org.apache.spark.sql.functions.regexp_extract;
-
 import com.ksoot.spark.common.SparkStreamLauncher;
 import com.ksoot.spark.common.config.properties.ConnectorProperties;
 import com.ksoot.spark.common.connector.JdbcConnector;
 import com.ksoot.spark.common.connector.KafkaConnector;
-import com.ksoot.spark.loganalysis.conf.JobProperties;
+import com.ksoot.spark.loganalysis.parser.ErrorLogParserStrategy;
 import java.util.concurrent.TimeoutException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
-import org.apache.spark.sql.SparkSession;
 import org.apache.spark.sql.streaming.DataStreamWriter;
 import org.apache.spark.sql.streaming.StreamingQueryException;
 import org.springframework.stereotype.Component;
@@ -23,14 +19,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class SparkPipelineExecutor {
 
-  private static final String LOG_REGEX =
-      "(?<=^)(\\S+T\\S+)(\\s+ERROR\\s+\\d+\\s+---\\s+\\[([a-zA-Z0-9-]+)\\].*)(:.*)";
-
   private static final String ERROR_LOGS_TABLE = "error_logs";
-
-  private final SparkSession sparkSession;
-
-  private final JobProperties jobProperties;
 
   private final ConnectorProperties connectorProperties;
 
@@ -40,6 +29,8 @@ public class SparkPipelineExecutor {
 
   private final SparkStreamLauncher sparkStreamLauncher;
 
+  private final ErrorLogParserStrategy errorLogParserStrategy;
+
   public void execute() {
     Dataset<Row> kafkaLogs =
         this.kafkaConnector.readStream(this.connectorProperties.getKafkaOptions().getTopic());
@@ -48,13 +39,7 @@ public class SparkPipelineExecutor {
     // Just for testing
     //    this.writeToConsole(errorLogs);
 
-    Dataset<Row> errorLogs =
-        logLines
-            .filter(col("log_line").rlike(LOG_REGEX))
-            .select(
-                regexp_extract(col("log_line"), LOG_REGEX, 1).alias("datetime"),
-                regexp_extract(col("log_line"), LOG_REGEX, 3).alias("application"),
-                regexp_extract(col("log_line"), LOG_REGEX, 4).alias("error_message"));
+    Dataset<Row> errorLogs = this.errorLogParserStrategy.parse(logLines);
 
     DataStreamWriter<Row> logsStreamWriter =
         this.jdbcConnector.writeStream(errorLogs, ERROR_LOGS_TABLE);
@@ -63,6 +48,7 @@ public class SparkPipelineExecutor {
   }
 
   // Just for testing
+  @SuppressWarnings("unused")
   private void writeToConsole(final Dataset<Row> errorLogs) {
     try {
       errorLogs

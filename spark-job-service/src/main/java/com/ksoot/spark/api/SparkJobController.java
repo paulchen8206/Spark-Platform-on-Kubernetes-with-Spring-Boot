@@ -2,6 +2,7 @@ package com.ksoot.spark.api;
 
 import com.ksoot.spark.dto.JobLaunchRequest;
 import com.ksoot.spark.launcher.SparkJobLauncher;
+import com.ksoot.spark.validation.JobLaunchRequestValidationChain;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -22,6 +23,8 @@ class SparkJobController {
 
   private final SparkJobLauncher sparkJobLauncher;
 
+  private final JobLaunchRequestValidationChain validationChain;
+
   @Operation(operationId = "start-spark-job", summary = "Start Spark Job")
   @ApiResponses(
       value = {
@@ -34,6 +37,8 @@ class SparkJobController {
       })
   @PostMapping("/start")
   ResponseEntity<String> startSparkJob(@RequestBody @Valid JobLaunchRequest jobLaunchRequest) {
+    this.validationChain.validate(jobLaunchRequest);
+
     log.info(
         "Start Spark Job: {} request received with correlation id: {}",
         jobLaunchRequest.getJobName(),

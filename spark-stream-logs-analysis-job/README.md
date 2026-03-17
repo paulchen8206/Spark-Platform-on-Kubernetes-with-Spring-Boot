@@ -46,6 +46,37 @@ Flow:
 
 The stream launcher and retry behavior are provided by commons utilities.
 
+## Design Pattern
+
+This module uses the Strategy pattern for log parsing:
+- Strategy interface: [ErrorLogParserStrategy](src/main/java/com/ksoot/spark/loganalysis/parser/ErrorLogParserStrategy.java)
+- Default strategy: [RegexErrorLogParserStrategy](src/main/java/com/ksoot/spark/loganalysis/parser/RegexErrorLogParserStrategy.java)
+- Used by pipeline: [SparkPipelineExecutor](src/main/java/com/ksoot/spark/loganalysis/SparkPipelineExecutor.java)
+
+This allows parser logic to be swapped without changing stream orchestration.
+
+### Class Diagram
+
+```mermaid
+classDiagram
+  class SparkPipelineExecutor {
+    -ErrorLogParserStrategy errorLogParserStrategy
+    +execute()
+  }
+
+  class ErrorLogParserStrategy {
+    <<interface>>
+    +parse(logLines)
+  }
+
+  class RegexErrorLogParserStrategy {
+    +parse(logLines)
+  }
+
+  SparkPipelineExecutor --> ErrorLogParserStrategy : uses
+  RegexErrorLogParserStrategy ..|> ErrorLogParserStrategy
+```
+
 ## Dataflow Diagram
 
 ```mermaid

@@ -49,6 +49,43 @@ make mk-submit-logs
   - [SparkExampleJobLaunchRequest](src/main/java/com/ksoot/spark/dto/SparkExampleJobLaunchRequest.java)
 - Uses [SparkSubmitJobLauncher](src/main/java/com/ksoot/spark/launcher/SparkSubmitJobLauncher.java) to build and execute `spark-submit` commands.
 
+## Design Pattern
+
+This module uses a Chain of Responsibility for request validation before job launch:
+- [JobLaunchRequestValidationChain](src/main/java/com/ksoot/spark/validation/JobLaunchRequestValidationChain.java) executes registered validators.
+- Validator contract: [JobLaunchRequestValidator](src/main/java/com/ksoot/spark/validation/JobLaunchRequestValidator.java).
+- Default handlers: [JobNameValidator](src/main/java/com/ksoot/spark/validation/JobNameValidator.java), [CorrelationIdValidator](src/main/java/com/ksoot/spark/validation/CorrelationIdValidator.java).
+- Applied in controller: [SparkJobController](src/main/java/com/ksoot/spark/api/SparkJobController.java).
+
+### Class Diagram
+
+```mermaid
+classDiagram
+  class SparkJobController {
+    -SparkJobLauncher sparkJobLauncher
+    -JobLaunchRequestValidationChain validationChain
+    +startSparkJob(jobLaunchRequest)
+  }
+
+  class JobLaunchRequestValidationChain {
+    -List~JobLaunchRequestValidator~ validators
+    +validate(jobLaunchRequest)
+  }
+
+  class JobLaunchRequestValidator {
+    <<interface>>
+    +validate(jobLaunchRequest)
+  }
+
+  class JobNameValidator
+  class CorrelationIdValidator
+
+  SparkJobController --> JobLaunchRequestValidationChain : uses
+  JobLaunchRequestValidationChain --> JobLaunchRequestValidator : iterates
+  JobNameValidator ..|> JobLaunchRequestValidator
+  CorrelationIdValidator ..|> JobLaunchRequestValidator
+```
+
 ## Dataflow Diagram
 
 ```mermaid

@@ -49,6 +49,35 @@ Flow:
 
 Sample data bootstrap: [DataPopulator](src/main/java/com/ksoot/spark/sales/DataPopulator.java)
 
+## Design Pattern
+
+This module uses the Template Method pattern for pipeline orchestration:
+- Template base: [SalesReportPipelineTemplate](src/main/java/com/ksoot/spark/sales/pipeline/SalesReportPipelineTemplate.java)
+- Concrete pipeline steps: [SparkPipelineExecutor](src/main/java/com/ksoot/spark/sales/SparkPipelineExecutor.java)
+
+The template fixes execution order (load, transform, join, persist) while allowing step customization.
+
+### Class Diagram
+
+```mermaid
+classDiagram
+  class SalesReportPipelineTemplate {
+    +run()
+    #loadSales()
+    #aggregateSales(salesDataset)
+    #loadProducts()
+    #buildReport(aggregatedSales, productsDataset)
+    #persist(reportDataset)
+  }
+
+  class SparkPipelineExecutor {
+    -SalesReportPipelineTemplate pipelineTemplate
+    +execute()
+  }
+
+  SparkPipelineExecutor --> SalesReportPipelineTemplate : creates anonymous implementation
+```
+
 ## Dataflow Diagram
 
 ```mermaid
