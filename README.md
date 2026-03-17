@@ -17,6 +17,73 @@ This repository includes:
 - [`spark-batch-sales-report-job`](spark-batch-sales-report-job/README.md): Sample batch pipeline.
 - [`spark-stream-logs-analysis-job`](spark-stream-logs-analysis-job/README.md): Sample streaming pipeline.
 
+## Common Spring Boot Patterns Used in This Project
+
+### 1) Dependency Injection (Constructor-based)
+
+Core components are wired through constructor injection for immutability and testability.
+
+Examples:
+- [`SparkJobController`](spark-job-service/src/main/java/com/ksoot/spark/api/SparkJobController.java)
+- [`SparkPipelineExecutor` (stream)](spark-stream-logs-analysis-job/src/main/java/com/ksoot/spark/loganalysis/SparkPipelineExecutor.java)
+
+### 2) REST Controller Layer
+
+HTTP APIs are implemented with request mapping, validation, and response composition.
+
+Example:
+- [`SparkJobController`](spark-job-service/src/main/java/com/ksoot/spark/api/SparkJobController.java)
+
+### 3) Java Config + Bean Factory Methods
+
+Beans are declared in dedicated configuration classes using `@Configuration` + `@Bean`.
+
+Example:
+- [`SparkJobServiceConfiguration`](spark-job-service/src/main/java/com/ksoot/spark/conf/SparkJobServiceConfiguration.java)
+
+### 4) Externalized Type-safe Configuration
+
+Configuration values are bound into typed POJOs using `@ConfigurationProperties` and validated.
+
+Example:
+- [`ConnectorProperties`](spark-job-commons/src/main/java/com/ksoot/spark/common/config/properties/ConnectorProperties.java)
+
+### 5) Auto-Configuration + Conditional Beans
+
+Commons module uses Spring Boot auto-configuration and conditionals to register beans only when prerequisites exist.
+
+Example:
+- [`SparkCommonsConfiguration`](spark-job-commons/src/main/java/com/ksoot/spark/common/config/SparkCommonsConfiguration.java)
+
+### 6) Startup Runner Pattern
+
+Batch and streaming jobs trigger execution through `ApplicationRunner` at application startup.
+
+Examples:
+- [`SalesReportJob`](spark-batch-sales-report-job/src/main/java/com/ksoot/spark/sales/SalesReportJob.java)
+- [`LogAnalysisJob`](spark-stream-logs-analysis-job/src/main/java/com/ksoot/spark/loganalysis/LogAnalysisJob.java)
+
+### 7) Event/Listener-driven Lifecycle Handling
+
+Task lifecycle hooks and Kafka listeners are used for job lifecycle updates and stop-signal handling.
+
+Example:
+- [`SparkExecutionManager`](spark-job-commons/src/main/java/com/ksoot/spark/common/SparkExecutionManager.java)
+
+### 8) Validation Pipeline (Chain of Responsibility style)
+
+Job request validators are composed and executed in order before launch.
+
+Example:
+- [`JobLaunchRequestValidationChain`](spark-job-service/src/main/java/com/ksoot/spark/validation/JobLaunchRequestValidationChain.java)
+
+### 9) Module-level Design Patterns
+
+Alongside Spring Boot patterns, modules also use classic GoF patterns:
+- Factory: [`ConnectorFactory`](spark-job-commons/src/main/java/com/ksoot/spark/common/connector/ConnectorFactory.java)
+- Template Method: [`SalesReportPipelineTemplate`](spark-batch-sales-report-job/src/main/java/com/ksoot/spark/sales/pipeline/SalesReportPipelineTemplate.java)
+- Strategy: [`ErrorLogParserStrategy`](spark-stream-logs-analysis-job/src/main/java/com/ksoot/spark/loganalysis/parser/ErrorLogParserStrategy.java)
+
 ### Maven Components Organization (Mermaid)
 
 ```mermaid
