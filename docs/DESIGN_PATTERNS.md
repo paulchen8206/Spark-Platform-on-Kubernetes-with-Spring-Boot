@@ -129,8 +129,8 @@ classDiagram
   class SparkExecutionManager
   class SparkStreamLauncher
 
-  SparkCommonsConfiguration +-- SparkExecutionManagerConfiguration
-  SparkCommonsConfiguration +-- SparkStreamLauncherConfiguration
+  SparkCommonsConfiguration *-- SparkExecutionManagerConfiguration
+  SparkCommonsConfiguration *-- SparkStreamLauncherConfiguration
   SparkExecutionManagerConfiguration --> SparkExecutionManager : creates bean when conditions match
   SparkStreamLauncherConfiguration --> SparkStreamLauncher : creates bean when conditions match
 ```
