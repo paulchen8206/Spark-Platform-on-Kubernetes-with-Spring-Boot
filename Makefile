@@ -16,6 +16,8 @@ CURL_IMAGE ?= curlimages/curl:8.10.1
 SPARK_UI_LOCAL_PORT ?= 4040
 KAFKA_UI_LOCAL_PORT ?= 8100
 ARANGO_LOCAL_PORT ?= 8529
+POSTGRES_CONDUKTOR_LOCAL_PORT ?= 5432
+POSTGRES_SPARK_LOCAL_PORT ?= 5433
 
 SALES_MONTH ?= $(shell date +%Y-%m)
 PLATFORM_SECRETS_FILE ?= k8s/platform-secrets-dev.yaml
@@ -174,9 +176,9 @@ mk-kafka-ui-health: ## [B] Check Kafka UI in-cluster health endpoint
 mk-port-forward: ## [B] Port-forward spark-job-service to localhost:8090
 	$(KNS) port-forward svc/spark-job-service 8090:8090
 
-mk-port-forward-postgres: ## [B] Port-forward postgres-conduktor:5432 and postgres-spark:5433 to localhost
-	$(KNS) port-forward svc/postgres-conduktor 5432:5432 &
-	$(KNS) port-forward svc/postgres-spark 5433:5432
+mk-port-forward-postgres: ## [B] Port-forward postgres-conduktor and postgres-spark to localhost configurable ports
+	$(KNS) port-forward svc/postgres-conduktor $(POSTGRES_CONDUKTOR_LOCAL_PORT):5432 &
+	$(KNS) port-forward svc/postgres-spark $(POSTGRES_SPARK_LOCAL_PORT):5432
 
 mk-port-forward-kafka-ui: ## [B] Port-forward kafka-ui to localhost:$(KAFKA_UI_LOCAL_PORT)
 	$(KNS) port-forward svc/kafka-ui $(KAFKA_UI_LOCAL_PORT):8100
