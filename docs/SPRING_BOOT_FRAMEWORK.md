@@ -1,4 +1,4 @@
-# Spring Boot Framework Patterns
+# Spring Boot Framework
 
 This document covers the Spring Boot architecture layers and request flow as implemented across this project. Each section maps directly to concrete classes and annotations in use.
 
