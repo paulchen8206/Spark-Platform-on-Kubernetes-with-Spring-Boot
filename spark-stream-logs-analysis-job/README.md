@@ -2,7 +2,7 @@
 
 Streaming Spark job that reads application logs from Kafka and writes parsed error records into PostgreSQL.
 
-Main class: [LogAnalysisJob](src/main/java/com/ksoot/spark/loganalysis/LogAnalysisJob.java)
+Main class: [LogAnalysisJob](src/main/java/com/aiks/spark/loganalysis/LogAnalysisJob.java)
 
 ## Installation
 
@@ -12,7 +12,7 @@ For prerequisites and infrastructure setup, see [Installation](../README.md#inst
 
 The module Dockerfile is minimal and validated for Spark-on-Kubernetes execution in this project.
 
-- Base image: `ksoot/spark:4.0.0`
+- Base image: `aiks/spark:4.0.0`
 - Artifact copied: `target/spark-stream-logs-analysis-job-*.jar` to `$SPARK_JOB_APPS_DIR/spark-stream-logs-analysis-job.jar`
 - Entrypoint: `/opt/entrypoint.sh` (provided by the base image)
 
@@ -36,10 +36,10 @@ make mk-smoke
 
 ## Pipeline Summary
 
-Implementation entry point: [SparkPipelineExecutor](src/main/java/com/ksoot/spark/loganalysis/SparkPipelineExecutor.java)
+Implementation entry point: [SparkPipelineExecutor](src/main/java/com/aiks/spark/loganalysis/SparkPipelineExecutor.java)
 
 Flow:
-1. Generate sample log events to Kafka via [LogsGenerator](src/main/java/com/ksoot/spark/loganalysis/LogsGenerator.java) (for local test data).
+1. Generate sample log events to Kafka via [LogsGenerator](src/main/java/com/aiks/spark/loganalysis/LogsGenerator.java) (for local test data).
 2. Read stream from Kafka topic `error-logs`.
 3. Parse and filter error events.
 4. Write results to PostgreSQL table `error_logs` in database `error_logs_db`.
@@ -49,9 +49,9 @@ The stream launcher and retry behavior are provided by commons utilities.
 ## Design Pattern
 
 This module uses the Strategy pattern for log parsing:
-- Strategy interface: [ErrorLogParserStrategy](src/main/java/com/ksoot/spark/loganalysis/parser/ErrorLogParserStrategy.java)
-- Default strategy: [RegexErrorLogParserStrategy](src/main/java/com/ksoot/spark/loganalysis/parser/RegexErrorLogParserStrategy.java)
-- Used by pipeline: [SparkPipelineExecutor](src/main/java/com/ksoot/spark/loganalysis/SparkPipelineExecutor.java)
+- Strategy interface: [ErrorLogParserStrategy](src/main/java/com/aiks/spark/loganalysis/parser/ErrorLogParserStrategy.java)
+- Default strategy: [RegexErrorLogParserStrategy](src/main/java/com/aiks/spark/loganalysis/parser/RegexErrorLogParserStrategy.java)
+- Used by pipeline: [SparkPipelineExecutor](src/main/java/com/aiks/spark/loganalysis/SparkPipelineExecutor.java)
 
 This allows parser logic to be swapped without changing stream orchestration.
 
@@ -91,11 +91,11 @@ flowchart LR
 Primary file: [application.yml](src/main/resources/config/application.yml)
 
 Frequently used properties:
-- `ksoot.job.correlation-id` (env: `CORRELATION_ID`)
-- `ksoot.job.persist` (env: `PERSIST_JOB`)
-- `ksoot.connector.kafka-options.topic` (env: `KAFKA_ERROR_LOGS_TOPIC`)
-- `ksoot.connector.jdbc-options.url` (env: `JDBC_URL`)
-- `ksoot.connector.kafka-options.fail-on-data-loss` (env: `KAFKA_FAIL_ON_DATA_LOSS`)
+- `aiks.job.correlation-id` (env: `CORRELATION_ID`)
+- `aiks.job.persist` (env: `PERSIST_JOB`)
+- `aiks.connector.kafka-options.topic` (env: `KAFKA_ERROR_LOGS_TOPIC`)
+- `aiks.connector.jdbc-options.url` (env: `JDBC_URL`)
+- `aiks.connector.kafka-options.fail-on-data-loss` (env: `KAFKA_FAIL_ON_DATA_LOSS`)
 
 Connector configuration details are documented in [Connectors](../spark-job-commons/README.md#connectors).
 
@@ -105,7 +105,7 @@ Local overrides: [application-local.yml](src/main/resources/config/application-l
 
 ### IntelliJ
 
-Run [LogAnalysisJob](src/main/java/com/ksoot/spark/loganalysis/LogAnalysisJob.java) with VM options:
+Run [LogAnalysisJob](src/main/java/com/aiks/spark/loganalysis/LogAnalysisJob.java) with VM options:
 
 ```text
 -Dspring.profiles.active=local

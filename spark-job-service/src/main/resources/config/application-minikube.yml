@@ -38,7 +38,7 @@ spark:
   #      -DMONGODB_URL=mongodb://192.168.1.6:27017
   #      -DSPARK_OUTPUT_PATH=spark-output
   kubernetes:
-    namespace: ksoot
+    namespace: aiks
     authenticate.driver.serviceAccountName: spark
     driverEnv:
       SPARK_USER: spark

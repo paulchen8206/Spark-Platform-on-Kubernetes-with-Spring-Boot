@@ -1,7 +1,7 @@
 {
   "properties": [
     {
-      "name": "ksoot.job.month",
+      "name": "aiks.job.month",
       "type": "java.time.YearMonth",
       "defaultValue": "",
       "description": "Statement Month. Current month is taken as default if not supplied. Ex: 2024-11."

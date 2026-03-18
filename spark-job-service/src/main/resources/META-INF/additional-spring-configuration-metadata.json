@@ -26,7 +26,7 @@
     },
     {
       "name": "spark-launcher.jobs",
-      "type": "java.util.Map<java.lang.String, com.ksoot.spark.conf.SparkJobProperties>",
+      "type": "java.util.Map<java.lang.String, com.aiks.spark.conf.SparkJobProperties>",
       "defaultValue": "client",
       "description": "Individual Spark Job properties. The properties inherited from global spark properties. So that the job can override and unset the global spark properties."
     },

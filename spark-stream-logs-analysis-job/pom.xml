@@ -3,12 +3,12 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>com.ksoot.spark</groupId>
+        <groupId>com.aiks.spark</groupId>
         <artifactId>spring-boot-spark-kubernetes</artifactId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
 
-    <!--        <groupId>com.ksoot.spark</groupId>-->
+    <!--        <groupId>com.aiks.spark</groupId>-->
     <artifactId>spark-stream-logs-analysis-job</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>spark-stream-logs-analysis-job</name>
@@ -89,7 +89,7 @@
             <artifactId>spark-sql-kafka-${spark-connector-kafka.version}_${scala.compact.version}</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.ksoot.spark</groupId>
+            <groupId>com.aiks.spark</groupId>
             <artifactId>spark-job-commons</artifactId>
             <version>${project.version}</version>
         </dependency>

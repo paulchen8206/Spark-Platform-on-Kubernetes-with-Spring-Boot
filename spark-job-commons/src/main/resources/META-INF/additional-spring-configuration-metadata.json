@@ -1,199 +1,199 @@
 {
   "properties": [
     {
-      "name": "ksoot.hadoop-dll",
+      "name": "aiks.hadoop-dll",
       "type": "java.lang.String",
       "defaultValue": "",
       "description": "Hadoop dll file path. Required only while running the job on <b>Windows machine</b>."
     },
     {
-      "name": "ksoot.job.correlationId",
+      "name": "aiks.job.correlationId",
       "type": "java.lang.String",
       "defaultValue": "",
       "description": "Unique correlation id for each Job execution."
     },
     {
-      "name": "ksoot.job.persist",
+      "name": "aiks.job.persist",
       "type": "java.lang.Boolean",
       "defaultValue": "false",
       "description": "Whether to persist Jobs status in Database."
     },
     {
-      "name": "ksoot.job.job-stop-topic",
+      "name": "aiks.job.job-stop-topic",
       "type": "java.lang.String",
       "defaultValue": "job-stop-requests",
       "description": "Kafka topic name to listen to receive Job stop requests."
     },
     {
-      "name": "ksoot.connector.save-mode",
+      "name": "aiks.connector.save-mode",
       "type": "java.lang.String",
       "defaultValue": "Overwrite",
       "description": "To specify the expected behavior of saving a DataFrame to a data source. Applicable in Spark Batch jobs only."
     },
     {
-      "name": "ksoot.connector.output-mode",
+      "name": "aiks.connector.output-mode",
       "type": "java.lang.String",
       "defaultValue": "Append",
       "description": "Describes what data will be written to a streaming sink when there is new data available in a streaming Dataset. Applicable in Spark Streaming jobs only."
     },
     {
-      "name": "ksoot.connector.file-options.format",
+      "name": "aiks.connector.file-options.format",
       "type": "java.lang.String",
       "defaultValue": "csv",
       "description": "Input file format. 'csv' or 'parquet'."
     },
     {
-      "name": "ksoot.connector.file-options.header",
+      "name": "aiks.connector.file-options.header",
       "type": "java.lang.Boolean",
       "defaultValue": true,
       "description": "Whether to consider first row as as header row in an input file. Column names would be the columns in Spark dataset."
     },
     {
-      "name": "ksoot.connector.file-options.merge",
+      "name": "aiks.connector.file-options.merge",
       "type": "java.lang.String",
       "defaultValue": "false",
       "description": "Whether to merge output in single file."
     },
     {
-      "name": "ksoot.connector.file-options.path",
+      "name": "aiks.connector.file-options.path",
       "type": "java.lang.String",
       "defaultValue": "false",
       "description": "Output path where output will be saved."
     },
     {
-      "name": "ksoot.connector.jdbc-options.url",
+      "name": "aiks.connector.jdbc-options.url",
       "type": "java.lang.String",
       "defaultValue": "",
       "description": "Database url."
     },
     {
-      "name": "ksoot.connector.jdbc-options.driver",
+      "name": "aiks.connector.jdbc-options.driver",
       "type": "java.lang.String",
       "defaultValue": "org.postgresql.Driver",
       "description": "Database driver name."
     },
     {
-      "name": "ksoot.connector.jdbc-options.database",
+      "name": "aiks.connector.jdbc-options.database",
       "type": "java.lang.String",
       "defaultValue": "",
       "description": "Ingestion Database name."
     },
     {
-      "name": "ksoot.connector.jdbc-options.username",
+      "name": "aiks.connector.jdbc-options.username",
       "type": "java.lang.String",
       "defaultValue": "postgres",
       "description": "Database username."
     },
     {
-      "name": "ksoot.connector.jdbc-options.password",
+      "name": "aiks.connector.jdbc-options.password",
       "type": "java.lang.String",
       "defaultValue": "admin",
       "description": "Database password."
     },
     {
-      "name": "ksoot.connector.jdbc-options.fetchsize",
+      "name": "aiks.connector.jdbc-options.fetchsize",
       "type": "java.lang.Integer",
       "defaultValue": "1000",
       "description": "The JDBC fetch size, which determines how many rows to fetch per round trip. Applicable only while reading. This can help performance on JDBC drivers which default to low fetch size (e.g. Oracle with 10 rows)."
     },
     {
-      "name": "ksoot.connector.jdbc-options.batchsize",
+      "name": "aiks.connector.jdbc-options.batchsize",
       "type": "java.lang.Integer",
       "defaultValue": "1000",
       "description": "In spark sql this option decide how many rows to insert per round trip. Applicable only while writing."
     },
     {
-      "name": "ksoot.connector.jdbc-options.isolation-level",
+      "name": "aiks.connector.jdbc-options.isolation-level",
       "type": "java.lang.String",
       "defaultValue": "READ_UNCOMMITTED",
       "description": "The transaction isolation level, which applies to current connection. Applicable only while writing. It can be one of NONE, READ_COMMITTED, READ_UNCOMMITTED, REPEATABLE_READ, or SERIALIZABLE, corresponding to standard transaction isolation levels defined by JDBC's Connection object, with default of READ_UNCOMMITTED. Please refer the documentation in java.sql.Connection."
     },
     {
-      "name": "ksoot.connector.mongo-options.url",
+      "name": "aiks.connector.mongo-options.url",
       "type": "java.lang.String",
       "defaultValue": "mongodb://localhost:27017",
       "description": "MongoDB connection url."
     },
     {
-      "name": "ksoot.connector.mongo-options.database",
+      "name": "aiks.connector.mongo-options.database",
       "type": "java.lang.String",
       "defaultValue": "",
       "description": "MongoDB database name."
     },
     {
-      "name": "ksoot.connector.arango-options.endpoints",
+      "name": "aiks.connector.arango-options.endpoints",
       "type": "java.util.List<java.lang.String>",
       "defaultValue": "localhost:8529",
       "description": "ArangoDB connection urls."
     },
     {
-      "name": "ksoot.connector.arango-options.database",
+      "name": "aiks.connector.arango-options.database",
       "type": "java.lang.String",
       "defaultValue": "_system",
       "description": "ArangoDB database name."
     },
     {
-      "name": "ksoot.connector.arango-options.username",
+      "name": "aiks.connector.arango-options.username",
       "type": "java.lang.String",
       "defaultValue": "root",
       "description": "ArangoDB username."
     },
     {
-      "name": "ksoot.connector.arango-options.password",
+      "name": "aiks.connector.arango-options.password",
       "type": "java.lang.String",
       "defaultValue": "",
       "description": "ArangoDB password."
     },
     {
-      "name": "ksoot.connector.arango-options.sslEnabled",
+      "name": "aiks.connector.arango-options.sslEnabled",
       "type": "java.lang.Boolean",
       "defaultValue": "",
       "description": "Whether to enable SSL."
     },
     {
-      "name": "ksoot.connector.arango-options.sslCertValue",
+      "name": "aiks.connector.arango-options.sslCertValue",
       "type": "java.lang.String",
       "defaultValue": "",
       "description": "Ssl cert value."
     },
     {
-      "name": "ksoot.connector.arango-options.cursor-ttl",
+      "name": "aiks.connector.arango-options.cursor-ttl",
       "type": "java.lang.String",
       "defaultValue": "PT30S",
       "description": "Cursor ttl."
     },
     {
-      "name": "ksoot.connector.kafka-options.bootstrap-servers",
+      "name": "aiks.connector.kafka-options.bootstrap-servers",
       "type": "java.lang.String",
       "defaultValue": "localhost:9092",
       "description": "Kafka Bootstrap servers."
     },
     {
-      "name": "ksoot.connector.kafka-options.topic",
+      "name": "aiks.connector.kafka-options.topic",
       "type": "java.lang.String",
       "defaultValue": "",
       "description": "Kafka topic where to write output."
     },
     {
-      "name": "ksoot.connector.kafka-options.key-serializer",
+      "name": "aiks.connector.kafka-options.key-serializer",
       "type": "java.lang.String",
       "defaultValue": "org.apache.kafka.common.serialization.StringSerializer",
       "description": "Kafka Key serializer type."
     },
     {
-      "name": "ksoot.connector.kafka-options.value-serializer",
+      "name": "aiks.connector.kafka-options.value-serializer",
       "type": "java.lang.String",
       "defaultValue": "org.apache.kafka.common.serialization.ByteArraySerializer",
       "description": "Kafka val serializer type."
     },
     {
-      "name": "ksoot.connector.kafka-options.fail-on-data-loss",
+      "name": "aiks.connector.kafka-options.fail-on-data-loss",
       "type": "java.lang.Boolean",
       "defaultValue": "true",
       "description": "Whether to fail the query when it's possible that data is lost (e.g., topics are deleted, or offsets are out of range). This may be a false alarm. You can disable it when it doesn't work as you expected."
     },
     {
-      "name": "ksoot.connector.kafka-options.starting-offsets",
+      "name": "aiks.connector.kafka-options.starting-offsets",
       "type": "java.lang.String",
       "defaultValue": "latest",
       "description": "The start point when a query is started, either \"earliest\" which is from the earliest offsets, \"latest\" which is just from the latest offsets, or a json string specifying a starting offset for each TopicPartition. In the json, -2 as an offset can be used to refer to earliest, -1 to latest. Note: For batch queries, latest (either implicitly or by using -1 in json) is not allowed. For streaming queries, this only applies when a new query is started, and that resuming will always pick up from where the query left off. Newly discovered partitions during a query will start at earliest."
@@ -201,7 +201,7 @@
   ],
   "hints": [
     {
-      "name": "ksoot.connector.file-options.format",
+      "name": "aiks.connector.file-options.format",
       "values": [
         {
           "value": "csv",
@@ -226,7 +226,7 @@
       ]
     },
     {
-      "name": "ksoot.connector.save-mode",
+      "name": "aiks.connector.save-mode",
       "values": [
         {
           "value": "Append",
@@ -247,7 +247,7 @@
       ]
     },
     {
-      "name": "ksoot.connector.output-mode",
+      "name": "aiks.connector.output-mode",
       "values": [
         {
           "value": "Append",
@@ -264,7 +264,7 @@
       ]
     },
     {
-      "name": "ksoot.connector.jdbc-options.isolation-level",
+      "name": "aiks.connector.jdbc-options.isolation-level",
       "values": [
         {
           "value": "READ_UNCOMMITTED",
@@ -289,7 +289,7 @@
       ]
     },
     {
-      "name": "ksoot.connector.kafka-options.fail-on-data-loss",
+      "name": "aiks.connector.kafka-options.fail-on-data-loss",
       "values": [
         {
           "value": "true",

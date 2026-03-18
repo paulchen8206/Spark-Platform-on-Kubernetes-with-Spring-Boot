@@ -135,7 +135,7 @@ Use this path for full Kubernetes execution using the repository manifests.
 
 ```mermaid
 flowchart TB
-  subgraph K8s[ksoot namespace]
+  subgraph K8s[aiks namespace]
     SVC[spark-job-service Deployment]
     SA[spark ServiceAccount + RBAC]
     KAPI[kubernetes.default.svc]
@@ -219,7 +219,7 @@ minikube tunnel
 eval "$(minikube -p minikube docker-env)"
 mvn clean package -DskipTests
 
-docker build -t ksoot/spark:4.0.0 -f docker/Dockerfile docker
+docker build -t aiks/spark:4.0.0 -f docker/Dockerfile docker
 docker build -t spark-job-service:0.0.1 ./spark-job-service
 docker build -t spark-batch-sales-report-job:0.0.1 ./spark-batch-sales-report-job
 docker build -t spark-stream-logs-analysis-job:0.0.1 ./spark-stream-logs-analysis-job
@@ -228,8 +228,8 @@ docker build -t spark-stream-logs-analysis-job:0.0.1 ./spark-stream-logs-analysi
 #### 3.2.3 Create Namespace and Secrets
 
 ```bash
-kubectl create namespace ksoot --dry-run=client -o yaml | kubectl apply -f -
-kubectl apply -n ksoot -f k8s/platform-secrets-dev.yaml
+kubectl create namespace aiks --dry-run=client -o yaml | kubectl apply -f -
+kubectl apply -n aiks -f k8s/platform-secrets-dev.yaml
 ```
 
 #### 3.2.4 Deploy Infra + RBAC + App
@@ -243,11 +243,11 @@ kubectl apply -f k8s/deployment.yml
 #### 3.2.5 Verify Rollout
 
 ```bash
-kubectl rollout status deployment/postgres -n ksoot --timeout=300s
-kubectl rollout status deployment/kafka-ui -n ksoot --timeout=300s
-kubectl rollout status deployment/spark-job-service -n ksoot --timeout=300s
-kubectl get pods -n ksoot -o wide
-kubectl get svc -n ksoot
+kubectl rollout status deployment/postgres -n aiks --timeout=300s
+kubectl rollout status deployment/kafka-ui -n aiks --timeout=300s
+kubectl rollout status deployment/spark-job-service -n aiks --timeout=300s
+kubectl get pods -n aiks -o wide
+kubectl get svc -n aiks
 ```
 
 #### 3.2.6 Submit Jobs (In-cluster, no port-forward needed)
@@ -255,17 +255,17 @@ kubectl get svc -n ksoot
 ```bash
 CURRENT_MONTH=$(date +%Y-%m)
 
-kubectl run sales-submit --rm -i --restart=Never -n ksoot --image=curlimages/curl:8.10.1 -- \
+kubectl run sales-submit --rm -i --restart=Never -n aiks --image=curlimages/curl:8.10.1 -- \
   -sS -X POST http://spark-job-service:8090/v1/spark-jobs/start \
   -H 'Content-Type: application/json' \
   -d '{"jobName":"sales-report-job","jobArguments":{"month":"'"$$CURRENT_MONTH"'"}}'
 
-kubectl run logs-submit --rm -i --restart=Never -n ksoot --image=curlimages/curl:8.10.1 -- \
+kubectl run logs-submit --rm -i --restart=Never -n aiks --image=curlimages/curl:8.10.1 -- \
   -sS -X POST http://spark-job-service:8090/v1/spark-jobs/start \
   -H 'Content-Type: application/json' \
   -d '{"jobName":"logs-analysis-job"}'
 
-kubectl get pods -n ksoot --sort-by=.metadata.creationTimestamp | tail -n 12
+kubectl get pods -n aiks --sort-by=.metadata.creationTimestamp | tail -n 12
 ```
 
 For the Makefile quick path, `make mk-smoke` now verifies both the ArangoDB `products` collection and the generated `sales_report_YYYY_MM` collection for `SALES_MONTH`.
@@ -278,17 +278,17 @@ Common forwards:
 
 ```bash
 # Spark Job Service API
-kubectl port-forward -n ksoot svc/spark-job-service 8090:8090
+kubectl port-forward -n aiks svc/spark-job-service 8090:8090
 
 # PostgreSQL
-kubectl port-forward -n ksoot svc/postgres 5432:5432
+kubectl port-forward -n aiks svc/postgres 5432:5432
 
 # Kafka UI
-kubectl port-forward -n ksoot svc/kafka-ui 8100:8100
+kubectl port-forward -n aiks svc/kafka-ui 8100:8100
 
 # Spark UI for currently running driver pod (batch/stream)
-DRIVER_POD=$(kubectl get pods -n ksoot -l spark-role=driver --field-selector=status.phase=Running -o jsonpath='{.items[0].metadata.name}')
-kubectl port-forward -n ksoot pod/${DRIVER_POD} 4040:4040
+DRIVER_POD=$(kubectl get pods -n aiks -l spark-role=driver --field-selector=status.phase=Running -o jsonpath='{.items[0].metadata.name}')
+kubectl port-forward -n aiks pod/${DRIVER_POD} 4040:4040
 ```
 
 Equivalent Make targets:
@@ -303,16 +303,16 @@ make mk-port-forward-spark-ui
 
 Spark UI opens at `http://localhost:4040`.
 
-If the selected driver has already completed, choose another running driver pod from `kubectl get pods -n ksoot -l spark-role=driver`.
+If the selected driver has already completed, choose another running driver pod from `kubectl get pods -n aiks -l spark-role=driver`.
 
 If it fails with exit code `1`:
 
 ```bash
-kubectl get svc -n ksoot spark-job-service
-kubectl get pods -n ksoot -l name=spark-job-service -o wide
+kubectl get svc -n aiks spark-job-service
+kubectl get pods -n aiks -l name=spark-job-service -o wide
 lsof -nP -iTCP:8090 -sTCP:LISTEN
-SPARK_JOB_SERVICE_POD=$(kubectl get pods -n ksoot -l name=spark-job-service -o jsonpath='{.items[0].metadata.name}')
-kubectl port-forward -n ksoot pod/${SPARK_JOB_SERVICE_POD} 8090:8090
+SPARK_JOB_SERVICE_POD=$(kubectl get pods -n aiks -l name=spark-job-service -o jsonpath='{.items[0].metadata.name}')
+kubectl port-forward -n aiks pod/${SPARK_JOB_SERVICE_POD} 8090:8090
 ```
 
 #### 3.2.8 Validate MongoDB Data
@@ -322,13 +322,13 @@ MongoDB runs in-cluster as service `mongo` on port `27017` with no username/pass
 Quick health check:
 
 ```bash
-kubectl exec -n ksoot deployment/mongo -- mongosh --quiet --eval 'db.adminCommand({ ping: 1 })'
+kubectl exec -n aiks deployment/mongo -- mongosh --quiet --eval 'db.adminCommand({ ping: 1 })'
 ```
 
 Open an interactive shell inside the MongoDB pod:
 
 ```bash
-kubectl exec -it -n ksoot deployment/mongo -- mongosh
+kubectl exec -it -n aiks deployment/mongo -- mongosh
 ```
 
 Useful interactive queries:
@@ -343,16 +343,16 @@ db.sales.find().limit(5)
 Run one-shot queries without opening an interactive shell:
 
 ```bash
-kubectl exec -n ksoot deployment/mongo -- mongosh --quiet --eval 'db.adminCommand({ listDatabases: 1 })'
-kubectl exec -n ksoot deployment/mongo -- mongosh --quiet sales_db --eval 'show collections'
-kubectl exec -n ksoot deployment/mongo -- mongosh --quiet sales_db --eval 'db.sales.countDocuments()'
-kubectl exec -n ksoot deployment/mongo -- mongosh --quiet sales_db --eval 'db.sales.find().limit(5).toArray()'
+kubectl exec -n aiks deployment/mongo -- mongosh --quiet --eval 'db.adminCommand({ listDatabases: 1 })'
+kubectl exec -n aiks deployment/mongo -- mongosh --quiet sales_db --eval 'show collections'
+kubectl exec -n aiks deployment/mongo -- mongosh --quiet sales_db --eval 'db.sales.countDocuments()'
+kubectl exec -n aiks deployment/mongo -- mongosh --quiet sales_db --eval 'db.sales.find().limit(5).toArray()'
 ```
 
 Optional host access via port-forward:
 
 ```bash
-kubectl port-forward -n ksoot svc/mongo 27017:27017
+kubectl port-forward -n aiks svc/mongo 27017:27017
 mongosh 'mongodb://localhost:27017'
 ```
 
@@ -377,7 +377,7 @@ Current credentials in the development manifest:
 Quick API check from inside the pod:
 
 ```bash
-kubectl exec -n ksoot deployment/arango -- sh -lc 'wget -qO- http://127.0.0.1:8529/_api/version'
+kubectl exec -n aiks deployment/arango -- sh -lc 'wget -qO- http://127.0.0.1:8529/_api/version'
 ```
 
 Expected result is `401 Unauthorized`, which confirms the ArangoDB server is running and enforcing authentication.
@@ -385,7 +385,7 @@ Expected result is `401 Unauthorized`, which confirms the ArangoDB server is run
 Host access via port-forward:
 
 ```bash
-kubectl port-forward -n ksoot svc/arango 8529:8529
+kubectl port-forward -n aiks svc/arango 8529:8529
 ```
 
 Equivalent Make target:
@@ -456,15 +456,15 @@ kubectl config use-context minikube
 
 ```bash
 kubectl config use-context minikube
-kubectl create namespace ksoot --dry-run=client -o yaml | kubectl apply --validate=false -f -
-kubectl config set-context --current --namespace=ksoot
-kubectl apply -n ksoot --validate=false -f k8s/platform-secrets-dev.yaml
+kubectl create namespace aiks --dry-run=client -o yaml | kubectl apply --validate=false -f -
+kubectl config set-context --current --namespace=aiks
+kubectl apply -n aiks --validate=false -f k8s/platform-secrets-dev.yaml
 ```
 
 ### 4.2 Install or Upgrade Helm Release
 
 ```bash
-helm upgrade --install local-release ./helm -n ksoot -f helm/values-dev.yaml \
+helm upgrade --install local-release ./helm -n aiks -f helm/values-dev.yaml \
   --set platformSecrets.existingSecret=platform-secrets
 ```
 
@@ -477,18 +477,18 @@ make helm-install
 ### 4.3 Verify Helm Components
 
 ```bash
-kubectl rollout status deployment/postgres -n ksoot --timeout=300s
-kubectl rollout status deployment/zookeeper -n ksoot --timeout=300s
-kubectl rollout status deployment/kafka -n ksoot --timeout=300s
-kubectl rollout status deployment/conduktor -n ksoot --timeout=300s
-kubectl get pods -n ksoot -o wide
-kubectl get svc -n ksoot
+kubectl rollout status deployment/postgres -n aiks --timeout=300s
+kubectl rollout status deployment/zookeeper -n aiks --timeout=300s
+kubectl rollout status deployment/kafka -n aiks --timeout=300s
+kubectl rollout status deployment/conduktor -n aiks --timeout=300s
+kubectl get pods -n aiks -o wide
+kubectl get svc -n aiks
 ```
 
 ### 4.4 Access Conduktor
 
 ```bash
-minikube service -n ksoot conduktor --url
+minikube service -n aiks conduktor --url
 ```
 
 Credentials source:
@@ -502,22 +502,22 @@ Credentials source:
 ```bash
 kubectl apply -f k8s/spark-rbac.yml
 kubectl apply -f k8s/deployment.yml
-kubectl rollout status deployment/spark-job-service -n ksoot --timeout=300s
+kubectl rollout status deployment/spark-job-service -n aiks --timeout=300s
 ```
 
 ### 4.6 Helm Smoke Checks
 
 ```bash
-kubectl run kafka-check --rm -i --restart=Never -n ksoot --image=busybox:1.36 -- \
+kubectl run kafka-check --rm -i --restart=Never -n aiks --image=busybox:1.36 -- \
   sh -c 'nc -z kafka 9092 && echo "Kafka reachable"'
 
-kubectl run postgres-check --rm -i --restart=Never -n ksoot --image=postgres:15.15 -- \
+kubectl run postgres-check --rm -i --restart=Never -n aiks --image=postgres:15.15 -- \
   sh -c 'PGPASSWORD=admin psql -h postgres -U conduktor -d conduktor -c "select 1"'
 ```
 
 ### 4.7 Uninstall Helm Release
 
 ```bash
-helm uninstall local-release -n ksoot
-kubectl get all -n ksoot
+helm uninstall local-release -n aiks
+kubectl get all -n aiks
 ```

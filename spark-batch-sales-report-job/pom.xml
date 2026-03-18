@@ -3,12 +3,12 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>com.ksoot.spark</groupId>
+        <groupId>com.aiks.spark</groupId>
         <artifactId>spring-boot-spark-kubernetes</artifactId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
 
-    <!--    <groupId>com.ksoot.spark</groupId>-->
+    <!--    <groupId>com.aiks.spark</groupId>-->
     <artifactId>spark-batch-sales-report-job</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>spark-batch-sales-report-job</name>
@@ -83,7 +83,7 @@
         </dependency>
 
         <dependency>
-            <groupId>com.ksoot.spark</groupId>
+            <groupId>com.aiks.spark</groupId>
             <artifactId>spark-job-commons</artifactId>
             <version>${project.version}</version>
         </dependency>

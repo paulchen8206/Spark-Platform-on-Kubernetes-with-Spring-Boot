@@ -1,13 +1,13 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: ksoot
+  name: aiks
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: mongo
-  namespace: ksoot
+  namespace: aiks
 spec:
   replicas: 1
   selector:
@@ -39,7 +39,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: mongo-pvc
-  namespace: ksoot
+  namespace: aiks
 spec:
   accessModes:
   - ReadWriteOnce
@@ -51,7 +51,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: mongo
-  namespace: ksoot
+  namespace: aiks
 spec:
   type: LoadBalancer
   ports:
@@ -64,7 +64,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: arango
-  namespace: ksoot
+  namespace: aiks
 spec:
   replicas: 1
   selector:
@@ -100,7 +100,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: arango-pvc
-  namespace: ksoot
+  namespace: aiks
 spec:
   accessModes:
   - ReadWriteOnce
@@ -112,7 +112,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: arango
-  namespace: ksoot
+  namespace: aiks
 spec:
   type: LoadBalancer
   ports:
@@ -125,7 +125,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: postgres
-  namespace: ksoot
+  namespace: aiks
 spec:
   replicas: 1
   selector:
@@ -172,7 +172,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: postgres-pvc
-  namespace: ksoot
+  namespace: aiks
 spec:
   accessModes:
   - ReadWriteOnce
@@ -184,7 +184,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: postgres-init
-  namespace: ksoot
+  namespace: aiks
 data:
   #  Create databases on deployment
   init-postgres.sh: |
@@ -208,7 +208,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: postgres
-  namespace: ksoot
+  namespace: aiks
 spec:
   type: LoadBalancer
   ports:
@@ -222,7 +222,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: zookeeper
-  namespace: ksoot
+  namespace: aiks
 spec:
   replicas: 1
   selector:
@@ -265,7 +265,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: zookeeper-data-pvc
-  namespace: ksoot
+  namespace: aiks
 spec:
   accessModes:
   - ReadWriteOnce
@@ -277,7 +277,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: zookeeper-log-pvc
-  namespace: ksoot
+  namespace: aiks
 spec:
   accessModes:
   - ReadWriteOnce
@@ -289,7 +289,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: zookeeper
-  namespace: ksoot
+  namespace: aiks
 spec:
   type: LoadBalancer
   ports:
@@ -303,7 +303,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: kafka
-  namespace: ksoot
+  namespace: aiks
 spec:
   replicas: 1
   selector:
@@ -361,7 +361,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: kafka-pvc
-  namespace: ksoot
+  namespace: aiks
 spec:
   accessModes:
   - ReadWriteOnce
@@ -373,7 +373,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: kafka
-  namespace: ksoot
+  namespace: aiks
 spec:
   type: LoadBalancer
   ports:
@@ -390,7 +390,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: kafka-ui
-  namespace: ksoot
+  namespace: aiks
 spec:
   replicas: 1
   selector:
@@ -438,7 +438,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: kafka-ui
-  namespace: ksoot
+  namespace: aiks
 spec:
   type: LoadBalancer
   ports:

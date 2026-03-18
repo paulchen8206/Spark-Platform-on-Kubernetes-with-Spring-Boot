@@ -5,8 +5,8 @@ This document centralizes common Spring Boot patterns and module-level design pa
 ## 1) Dependency Injection (Constructor-based)
 
 Primary examples:
-- [SparkJobController](../spark-job-service/src/main/java/com/ksoot/spark/api/SparkJobController.java)
-- [SparkPipelineExecutor (stream)](../spark-stream-logs-analysis-job/src/main/java/com/ksoot/spark/loganalysis/SparkPipelineExecutor.java)
+- [SparkJobController](../spark-job-service/src/main/java/com/aiks/spark/api/SparkJobController.java)
+- [SparkPipelineExecutor (stream)](../spark-stream-logs-analysis-job/src/main/java/com/aiks/spark/loganalysis/SparkPipelineExecutor.java)
 
 ```mermaid
 classDiagram
@@ -34,7 +34,7 @@ classDiagram
 ## 2) REST Controller Layer
 
 Primary example:
-- [SparkJobController](../spark-job-service/src/main/java/com/ksoot/spark/api/SparkJobController.java)
+- [SparkJobController](../spark-job-service/src/main/java/com/aiks/spark/api/SparkJobController.java)
 
 ```mermaid
 classDiagram
@@ -55,7 +55,7 @@ classDiagram
 ## 3) Java Config + Bean Factory Methods
 
 Primary example:
-- [SparkJobServiceConfiguration](../spark-job-service/src/main/java/com/ksoot/spark/conf/SparkJobServiceConfiguration.java)
+- [SparkJobServiceConfiguration](../spark-job-service/src/main/java/com/aiks/spark/conf/SparkJobServiceConfiguration.java)
 
 ```mermaid
 classDiagram
@@ -78,7 +78,7 @@ classDiagram
 ## 4) Externalized Type-safe Configuration
 
 Primary example:
-- [ConnectorProperties](../spark-job-commons/src/main/java/com/ksoot/spark/common/config/properties/ConnectorProperties.java)
+- [ConnectorProperties](../spark-job-commons/src/main/java/com/aiks/spark/common/config/properties/ConnectorProperties.java)
 
 ```mermaid
 classDiagram
@@ -109,7 +109,7 @@ classDiagram
 ## 5) Auto-Configuration + Conditional Beans
 
 Primary example:
-- [SparkCommonsConfiguration](../spark-job-commons/src/main/java/com/ksoot/spark/common/config/SparkCommonsConfiguration.java)
+- [SparkCommonsConfiguration](../spark-job-commons/src/main/java/com/aiks/spark/common/config/SparkCommonsConfiguration.java)
 
 ```mermaid
 classDiagram
@@ -138,8 +138,8 @@ classDiagram
 ## 6) Startup Runner Pattern (ApplicationRunner)
 
 Primary examples:
-- [SalesReportJob](../spark-batch-sales-report-job/src/main/java/com/ksoot/spark/sales/SalesReportJob.java)
-- [LogAnalysisJob](../spark-stream-logs-analysis-job/src/main/java/com/ksoot/spark/loganalysis/LogAnalysisJob.java)
+- [SalesReportJob](../spark-batch-sales-report-job/src/main/java/com/aiks/spark/sales/SalesReportJob.java)
+- [LogAnalysisJob](../spark-stream-logs-analysis-job/src/main/java/com/aiks/spark/loganalysis/LogAnalysisJob.java)
 
 ```mermaid
 classDiagram
@@ -177,7 +177,7 @@ classDiagram
 ## 7) Event/Listener-driven Lifecycle Handling
 
 Primary example:
-- [SparkExecutionManager](../spark-job-commons/src/main/java/com/ksoot/spark/common/SparkExecutionManager.java)
+- [SparkExecutionManager](../spark-job-commons/src/main/java/com/aiks/spark/common/SparkExecutionManager.java)
 
 ```mermaid
 classDiagram
@@ -202,9 +202,9 @@ classDiagram
 ## 8) Validation Pipeline (Chain of Responsibility style)
 
 Primary examples:
-- [JobLaunchRequestValidationChain](../spark-job-service/src/main/java/com/ksoot/spark/validation/JobLaunchRequestValidationChain.java)
-- [JobNameValidator](../spark-job-service/src/main/java/com/ksoot/spark/validation/JobNameValidator.java)
-- [CorrelationIdValidator](../spark-job-service/src/main/java/com/ksoot/spark/validation/CorrelationIdValidator.java)
+- [JobLaunchRequestValidationChain](../spark-job-service/src/main/java/com/aiks/spark/validation/JobLaunchRequestValidationChain.java)
+- [JobNameValidator](../spark-job-service/src/main/java/com/aiks/spark/validation/JobNameValidator.java)
+- [CorrelationIdValidator](../spark-job-service/src/main/java/com/aiks/spark/validation/CorrelationIdValidator.java)
 
 ```mermaid
 classDiagram
@@ -234,8 +234,8 @@ classDiagram
 ## 9) Factory Pattern (Module-level)
 
 Primary examples:
-- [ConnectorFactory](../spark-job-commons/src/main/java/com/ksoot/spark/common/connector/ConnectorFactory.java)
-- [ConnectorType](../spark-job-commons/src/main/java/com/ksoot/spark/common/connector/ConnectorType.java)
+- [ConnectorFactory](../spark-job-commons/src/main/java/com/aiks/spark/common/connector/ConnectorFactory.java)
+- [ConnectorType](../spark-job-commons/src/main/java/com/aiks/spark/common/connector/ConnectorType.java)
 
 ```mermaid
 classDiagram
@@ -269,8 +269,8 @@ classDiagram
 ## 10) Template Method Pattern (Module-level)
 
 Primary examples:
-- [SalesReportPipelineTemplate](../spark-batch-sales-report-job/src/main/java/com/ksoot/spark/sales/pipeline/SalesReportPipelineTemplate.java)
-- [SparkPipelineExecutor (batch)](../spark-batch-sales-report-job/src/main/java/com/ksoot/spark/sales/SparkPipelineExecutor.java)
+- [SalesReportPipelineTemplate](../spark-batch-sales-report-job/src/main/java/com/aiks/spark/sales/pipeline/SalesReportPipelineTemplate.java)
+- [SparkPipelineExecutor (batch)](../spark-batch-sales-report-job/src/main/java/com/aiks/spark/sales/SparkPipelineExecutor.java)
 
 ```mermaid
 classDiagram
@@ -304,9 +304,9 @@ classDiagram
 ## 11) Strategy Pattern (Module-level)
 
 Primary examples:
-- [ErrorLogParserStrategy](../spark-stream-logs-analysis-job/src/main/java/com/ksoot/spark/loganalysis/parser/ErrorLogParserStrategy.java)
-- [RegexErrorLogParserStrategy](../spark-stream-logs-analysis-job/src/main/java/com/ksoot/spark/loganalysis/parser/RegexErrorLogParserStrategy.java)
-- [SparkPipelineExecutor (stream)](../spark-stream-logs-analysis-job/src/main/java/com/ksoot/spark/loganalysis/SparkPipelineExecutor.java)
+- [ErrorLogParserStrategy](../spark-stream-logs-analysis-job/src/main/java/com/aiks/spark/loganalysis/parser/ErrorLogParserStrategy.java)
+- [RegexErrorLogParserStrategy](../spark-stream-logs-analysis-job/src/main/java/com/aiks/spark/loganalysis/parser/RegexErrorLogParserStrategy.java)
+- [SparkPipelineExecutor (stream)](../spark-stream-logs-analysis-job/src/main/java/com/aiks/spark/loganalysis/SparkPipelineExecutor.java)
 
 ```mermaid
 classDiagram

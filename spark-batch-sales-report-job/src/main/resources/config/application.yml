@@ -17,8 +17,8 @@ spring:
     exclude: org.springframework.boot.autoconfigure.gson.GsonAutoConfiguration
   cloud:
     task:
-      initialize-enabled: ${ksoot.job.persist}
-      external-execution-id: ${ksoot.job.correlation-id}
+      initialize-enabled: ${aiks.job.persist}
+      external-execution-id: ${aiks.job.correlation-id}
   main:
     log-startup-info: true
 
@@ -129,7 +129,7 @@ spark:
 # ===================================================================
 
 #------------------------- Job configurations -------------------------
-ksoot:
+aiks:
 #  Applicable only while running on Windows machine, replace ${HOME} with your directory
   hadoop-dll: ${HOME}/hadoop-3.0.0/bin/hadoop.dll
   job:

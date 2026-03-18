@@ -8,7 +8,7 @@ Add dependency from sibling modules:
 
 ```xml
 <dependency>
-  <groupId>com.ksoot.spark</groupId>
+  <groupId>com.aiks.spark</groupId>
   <artifactId>spark-job-commons</artifactId>
   <version>${project.version}</version>
 </dependency>
@@ -31,17 +31,17 @@ mvn -pl spark-job-commons -am clean install
 
 ## Connectors
 
-Reusable connectors are provided in [connector](src/main/java/com/ksoot/spark/common/connector):
-- [FileConnector](src/main/java/com/ksoot/spark/common/connector/FileConnector.java)
-- [MongoConnector](src/main/java/com/ksoot/spark/common/connector/MongoConnector.java)
-- [ArangoConnector](src/main/java/com/ksoot/spark/common/connector/ArangoConnector.java)
-- [JdbcConnector](src/main/java/com/ksoot/spark/common/connector/JdbcConnector.java)
-- [KafkaConnector](src/main/java/com/ksoot/spark/common/connector/KafkaConnector.java)
+Reusable connectors are provided in [connector](src/main/java/com/aiks/spark/common/connector):
+- [FileConnector](src/main/java/com/aiks/spark/common/connector/FileConnector.java)
+- [MongoConnector](src/main/java/com/aiks/spark/common/connector/MongoConnector.java)
+- [ArangoConnector](src/main/java/com/aiks/spark/common/connector/ArangoConnector.java)
+- [JdbcConnector](src/main/java/com/aiks/spark/common/connector/JdbcConnector.java)
+- [KafkaConnector](src/main/java/com/aiks/spark/common/connector/KafkaConnector.java)
 
-Base connector config class: [ConnectorProperties](src/main/java/com/ksoot/spark/common/config/properties/ConnectorProperties.java)
+Base connector config class: [ConnectorProperties](src/main/java/com/aiks/spark/common/config/properties/ConnectorProperties.java)
 
 ```yaml
-ksoot:
+aiks:
   connector:
     save-mode: Append
     output-mode: Update
@@ -54,8 +54,8 @@ Common options:
 ## Design Pattern
 
 This module uses the Factory pattern for connector selection:
-- [ConnectorFactory](src/main/java/com/ksoot/spark/common/connector/ConnectorFactory.java) resolves connector instances by type.
-- [ConnectorType](src/main/java/com/ksoot/spark/common/connector/ConnectorType.java) provides supported connector keys.
+- [ConnectorFactory](src/main/java/com/aiks/spark/common/connector/ConnectorFactory.java) resolves connector instances by type.
+- [ConnectorType](src/main/java/com/aiks/spark/common/connector/ConnectorType.java) provides supported connector keys.
 
 This keeps connector creation and runtime availability checks in one place.
 
@@ -95,7 +95,7 @@ classDiagram
 File options:
 
 ```yaml
-ksoot:
+aiks:
   connector:
     file-options:
       format: csv
@@ -107,7 +107,7 @@ ksoot:
 MongoDB options:
 
 ```yaml
-ksoot:
+aiks:
   connector:
     mongo-options:
       url: mongodb://localhost:27017
@@ -117,7 +117,7 @@ ksoot:
 ArangoDB options:
 
 ```yaml
-ksoot:
+aiks:
   connector:
     arango-options:
       endpoints: localhost:8529
@@ -129,7 +129,7 @@ ksoot:
 JDBC options:
 
 ```yaml
-ksoot:
+aiks:
   connector:
     jdbc-options:
       url: jdbc:postgresql://localhost:5432
@@ -143,7 +143,7 @@ ksoot:
 Kafka options:
 
 ```yaml
-ksoot:
+aiks:
   connector:
     kafka-options:
       bootstrap-servers: localhost:9092
@@ -155,7 +155,7 @@ ksoot:
 
 ### Job Listener
 
-[SparkExecutionManager](src/main/java/com/ksoot/spark/common/SparkExecutionManager.java) provides:
+[SparkExecutionManager](src/main/java/com/aiks/spark/common/SparkExecutionManager.java) provides:
 - Lifecycle logging (start/end/duration).
 - Status updates (`Completed`, `Failed`, `Terminated`).
 - Optional stop-signal handling through Kafka topic `job-stop-requests`.
@@ -164,11 +164,11 @@ Stopping is best-effort because Spark jobs may not terminate immediately dependi
 
 ### Stream Launcher
 
-[SparkStreamLauncher](src/main/java/com/ksoot/spark/common/SparkStreamLauncher.java) starts and awaits streaming queries in a dedicated thread and supports retry behavior.
+[SparkStreamLauncher](src/main/java/com/aiks/spark/common/SparkStreamLauncher.java) starts and awaits streaming queries in a dedicated thread and supports retry behavior.
 
 ## Error Handling
 
-Use [JobProblem](src/main/java/com/ksoot/spark/common/error/JobProblem.java) as the common exception type.
+Use [JobProblem](src/main/java/com/aiks/spark/common/error/JobProblem.java) as the common exception type.
 
 ```java
 throw JobProblem.of("IOException while reading file").cause(e).build();
@@ -176,13 +176,13 @@ throw JobProblem.of("IOException while reading file").cause(e).build();
 
 ## Utilities
 
-- [SparkUtils](src/main/java/com/ksoot/spark/common/util/SparkUtils.java)
-- [SparkOptions](src/main/java/com/ksoot/spark/common/util/SparkOptions.java)
-- [StringUtils](src/main/java/com/ksoot/spark/common/util/StringUtils.java)
-- [JobConstants](src/main/java/com/ksoot/spark/common/util/JobConstants.java)
-- [DateTimeUtils](src/main/java/com/ksoot/spark/common/util/DateTimeUtils.java)
-- [DateTimeFormatUtils](src/main/java/com/ksoot/spark/common/util/DateTimeFormatUtils.java)
-- [ExecutionContext](src/main/java/com/ksoot/spark/common/util/ExecutionContext.java)
+- [SparkUtils](src/main/java/com/aiks/spark/common/util/SparkUtils.java)
+- [SparkOptions](src/main/java/com/aiks/spark/common/util/SparkOptions.java)
+- [StringUtils](src/main/java/com/aiks/spark/common/util/StringUtils.java)
+- [JobConstants](src/main/java/com/aiks/spark/common/util/JobConstants.java)
+- [DateTimeUtils](src/main/java/com/aiks/spark/common/util/DateTimeUtils.java)
+- [DateTimeFormatUtils](src/main/java/com/aiks/spark/common/util/DateTimeFormatUtils.java)
+- [ExecutionContext](src/main/java/com/aiks/spark/common/util/ExecutionContext.java)
 
 ## Build and Test
 

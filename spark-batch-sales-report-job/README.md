@@ -4,7 +4,7 @@ Batch Spark job that generates monthly sales reports by combining:
 - Sales transactions from MongoDB.
 - Product reference data from ArangoDB.
 
-Main class: [SalesReportJob](src/main/java/com/ksoot/spark/sales/SalesReportJob.java)
+Main class: [SalesReportJob](src/main/java/com/aiks/spark/sales/SalesReportJob.java)
 
 ## Installation
 
@@ -14,7 +14,7 @@ For prerequisites and infrastructure setup, see [Installation](../README.md#inst
 
 The module Dockerfile is minimal and validated for Spark-on-Kubernetes execution in this project.
 
-- Base image: `ksoot/spark:4.0.0`
+- Base image: `aiks/spark:4.0.0`
 - Artifact copied: `target/spark-batch-sales-report-job-*.jar` to `$SPARK_JOB_APPS_DIR/spark-batch-sales-report-job.jar`
 - Entrypoint: `/opt/entrypoint.sh` (provided by the base image)
 
@@ -38,7 +38,7 @@ make mk-smoke
 
 ## Pipeline Summary
 
-Implementation entry point: [SparkPipelineExecutor](src/main/java/com/ksoot/spark/sales/SparkPipelineExecutor.java)
+Implementation entry point: [SparkPipelineExecutor](src/main/java/com/aiks/spark/sales/SparkPipelineExecutor.java)
 
 Flow:
 1. Read sales data from MongoDB.
@@ -48,13 +48,13 @@ Flow:
 5. Join aggregated sales with product reference data.
 6. Write the result to ArangoDB as `sales_report_YYYY_MM`.
 
-Sample data bootstrap: [DataPopulator](src/main/java/com/ksoot/spark/sales/DataPopulator.java)
+Sample data bootstrap: [DataPopulator](src/main/java/com/aiks/spark/sales/DataPopulator.java)
 
 ## Design Pattern
 
 This module uses the Template Method pattern for pipeline orchestration:
-- Template base: [SalesReportPipelineTemplate](src/main/java/com/ksoot/spark/sales/pipeline/SalesReportPipelineTemplate.java)
-- Concrete pipeline steps: [SparkPipelineExecutor](src/main/java/com/ksoot/spark/sales/SparkPipelineExecutor.java)
+- Template base: [SalesReportPipelineTemplate](src/main/java/com/aiks/spark/sales/pipeline/SalesReportPipelineTemplate.java)
+- Concrete pipeline steps: [SparkPipelineExecutor](src/main/java/com/aiks/spark/sales/SparkPipelineExecutor.java)
 
 The template fixes execution order (load, transform, join, persist) while allowing step customization.
 
@@ -95,11 +95,11 @@ flowchart LR
 Primary file: [application.yml](src/main/resources/config/application.yml)
 
 Frequently used properties:
-- `ksoot.job.month` (env: `STATEMENT_MONTH`): report month in `YYYY-MM`.
-- `ksoot.job.correlation-id` (env: `CORRELATION_ID`): execution tracking id.
-- `ksoot.job.persist` (env: `PERSIST_JOB`): enable Spring Cloud Task persistence.
-- `ksoot.connector.mongo-options.*`: MongoDB connection.
-- `ksoot.connector.arango-options.*`: ArangoDB connection.
+- `aiks.job.month` (env: `STATEMENT_MONTH`): report month in `YYYY-MM`.
+- `aiks.job.correlation-id` (env: `CORRELATION_ID`): execution tracking id.
+- `aiks.job.persist` (env: `PERSIST_JOB`): enable Spring Cloud Task persistence.
+- `aiks.connector.mongo-options.*`: MongoDB connection.
+- `aiks.connector.arango-options.*`: ArangoDB connection.
 
 Connector configuration details are documented in [Connectors](../spark-job-commons/README.md#connectors).
 
@@ -109,7 +109,7 @@ Local overrides: [application-local.yml](src/main/resources/config/application-l
 
 ### IntelliJ
 
-Run [SalesReportJob](src/main/java/com/ksoot/spark/sales/SalesReportJob.java) with VM options:
+Run [SalesReportJob](src/main/java/com/aiks/spark/sales/SalesReportJob.java) with VM options:
 
 ```text
 -Dspring.profiles.active=local

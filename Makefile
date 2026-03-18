@@ -1,14 +1,14 @@
 SHELL := /bin/bash
 .DEFAULT_GOAL := help
 
-NAMESPACE ?= ksoot
+NAMESPACE ?= aiks
 MINIKUBE_PROFILE ?= minikube
 MINIKUBE_CPUS ?= 4
 MINIKUBE_MEMORY ?= 6144
 HELM_RELEASE ?= local-release
 HELM_VALUES ?= helm/values-dev.yaml
 
-SPARK_BASE_IMAGE ?= ksoot/spark:4.0.0
+SPARK_BASE_IMAGE ?= aiks/spark:4.0.0
 SPARK_JOB_SERVICE_IMAGE ?= spark-job-service:0.0.1
 SPARK_BATCH_IMAGE ?= spark-batch-sales-report-job:0.0.1
 SPARK_STREAM_IMAGE ?= spark-stream-logs-analysis-job:0.0.1

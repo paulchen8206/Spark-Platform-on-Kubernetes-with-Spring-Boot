@@ -10,7 +10,7 @@ For prerequisites and repository-level setup, see [Installation](../README.md#in
 
 The module Dockerfile is production-oriented and validated for this repository workflow.
 
-- Base image: `ksoot/spark:4.0.0`
+- Base image: `aiks/spark:4.0.0`
 - Artifact copied: `target/spark-job-service-*.jar` to `/app.jar`
 - Runtime helper copied: `cmd/spark-job-submit.sh` to `$SPARK_HOME/bin`
 - Container user: runs as non-root `spark` after setup
@@ -44,18 +44,18 @@ make mk-submit-logs
 - Exposes job launcher APIs under `/v1/spark-jobs`.
 - Exposes job execution query APIs under `/v1/spark-jobs/executions`.
 - Supports multiple job request DTOs:
-  - [SalesReportJobLaunchRequest](src/main/java/com/ksoot/spark/dto/SalesReportJobLaunchRequest.java)
-  - [LogsAnalysisJobLaunchRequest](src/main/java/com/ksoot/spark/dto/LogsAnalysisJobLaunchRequest.java)
-  - [SparkExampleJobLaunchRequest](src/main/java/com/ksoot/spark/dto/SparkExampleJobLaunchRequest.java)
-- Uses [SparkSubmitJobLauncher](src/main/java/com/ksoot/spark/launcher/SparkSubmitJobLauncher.java) to build and execute `spark-submit` commands.
+  - [SalesReportJobLaunchRequest](src/main/java/com/aiks/spark/dto/SalesReportJobLaunchRequest.java)
+  - [LogsAnalysisJobLaunchRequest](src/main/java/com/aiks/spark/dto/LogsAnalysisJobLaunchRequest.java)
+  - [SparkExampleJobLaunchRequest](src/main/java/com/aiks/spark/dto/SparkExampleJobLaunchRequest.java)
+- Uses [SparkSubmitJobLauncher](src/main/java/com/aiks/spark/launcher/SparkSubmitJobLauncher.java) to build and execute `spark-submit` commands.
 
 ## Design Pattern
 
 This module uses a Chain of Responsibility for request validation before job launch:
-- [JobLaunchRequestValidationChain](src/main/java/com/ksoot/spark/validation/JobLaunchRequestValidationChain.java) executes registered validators.
-- Validator contract: [JobLaunchRequestValidator](src/main/java/com/ksoot/spark/validation/JobLaunchRequestValidator.java).
-- Default handlers: [JobNameValidator](src/main/java/com/ksoot/spark/validation/JobNameValidator.java), [CorrelationIdValidator](src/main/java/com/ksoot/spark/validation/CorrelationIdValidator.java).
-- Applied in controller: [SparkJobController](src/main/java/com/ksoot/spark/api/SparkJobController.java).
+- [JobLaunchRequestValidationChain](src/main/java/com/aiks/spark/validation/JobLaunchRequestValidationChain.java) executes registered validators.
+- Validator contract: [JobLaunchRequestValidator](src/main/java/com/aiks/spark/validation/JobLaunchRequestValidator.java).
+- Default handlers: [JobNameValidator](src/main/java/com/aiks/spark/validation/JobNameValidator.java), [CorrelationIdValidator](src/main/java/com/aiks/spark/validation/CorrelationIdValidator.java).
+- Applied in controller: [SparkJobController](src/main/java/com/aiks/spark/api/SparkJobController.java).
 
 ### Class Diagram
 
@@ -136,7 +136,7 @@ chmod -R +x cmd/*
 mvn spring-boot:run -Dspring-boot.run.profiles=local
 ```
 
-You can also run [SparkJobService.java](src/main/java/com/ksoot/spark/SparkJobService.java) from IDE.
+You can also run [SparkJobService.java](src/main/java/com/aiks/spark/SparkJobService.java) from IDE.
 
 ### Minikube Profile
 

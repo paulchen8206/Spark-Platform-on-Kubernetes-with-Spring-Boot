@@ -9,7 +9,7 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
-    <groupId>com.ksoot.spark</groupId>
+    <groupId>com.aiks.spark</groupId>
     <artifactId>spring-boot-spark-kubernetes</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>spring-boot-spark-kubernetes</name>

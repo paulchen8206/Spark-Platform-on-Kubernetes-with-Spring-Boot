@@ -184,11 +184,11 @@ Notes:
 Deploy infrastructure and RBAC:
 
 ```bash
-kubectl apply -n ksoot -f k8s/platform-secrets-dev.yaml
+kubectl apply -n aiks -f k8s/platform-secrets-dev.yaml
 kubectl apply -f k8s/infra-kubernetes-deploy.yml
 kubectl apply -f k8s/spark-rbac.yml
-kubectl config set-context --current --namespace=ksoot
-kubectl get pods -n ksoot
+kubectl config set-context --current --namespace=aiks
+kubectl get pods -n aiks
 ```
 
 For local access to `LoadBalancer` services on Minikube, run:
@@ -210,7 +210,7 @@ Detailed steps remain in module READMEs:
 
 ## Kubernetes Configuration Files
 
-- [`k8s/infra-kubernetes-deploy.yml`](k8s/infra-kubernetes-deploy.yml): Namespace (`ksoot`) and infra workloads/services (MongoDB, ArangoDB, PostgreSQL, Zookeeper, Kafka, Kafka UI).
+- [`k8s/infra-kubernetes-deploy.yml`](k8s/infra-kubernetes-deploy.yml): Namespace (`aiks`) and infra workloads/services (MongoDB, ArangoDB, PostgreSQL, Zookeeper, Kafka, Kafka UI).
 - [`k8s/spark-rbac.yml`](k8s/spark-rbac.yml): Service account and RBAC bindings required by Spark driver/executor pods.
 - [`k8s/deployment.yml`](k8s/deployment.yml): Deployment for the Spring Boot job launcher service.
 
@@ -226,11 +226,11 @@ helm install my-release ./helm -f helm/values-dev.yaml \
 ### Helm E2E Quick Path
 
 ```bash
-kubectl create namespace ksoot --dry-run=client -o yaml | kubectl apply -f -
-kubectl apply -n ksoot -f k8s/platform-secrets-dev.yaml
-helm upgrade --install local-release ./helm -n ksoot -f helm/values-dev.yaml \
+kubectl create namespace aiks --dry-run=client -o yaml | kubectl apply -f -
+kubectl apply -n aiks -f k8s/platform-secrets-dev.yaml
+helm upgrade --install local-release ./helm -n aiks -f helm/values-dev.yaml \
   --set platformSecrets.existingSecret=platform-secrets
-kubectl get pods -n ksoot -o wide
+kubectl get pods -n aiks -o wide
 ```
 
 Detailed end-to-end Helm operations (verify, access, smoke checks, upgrade, uninstall):

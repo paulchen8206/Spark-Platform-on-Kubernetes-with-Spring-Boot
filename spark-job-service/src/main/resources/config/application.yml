@@ -169,7 +169,7 @@ spark-launcher:
 #    SPARK_OUTPUT_PATH: spark-output
   jobs:
     sales-report-job:
-      main-class-name: com.ksoot.spark.sales.SalesReportJob
+      main-class-name: com.aiks.spark.sales.SalesReportJob
       jar-file: local:///opt/spark/job-apps/spark-batch-sales-report-job.jar
       # This job-specific environment variables
 #      env:
@@ -178,7 +178,7 @@ spark-launcher:
       spark-config:
         spark.kubernetes.container.image: ${SALES_REPORT_JOB_IMAGE:spark-batch-sales-report-job:0.0.1}
     logs-analysis-job:
-      main-class-name: com.ksoot.spark.loganalysis.LogAnalysisJob
+      main-class-name: com.aiks.spark.loganalysis.LogAnalysisJob
       jar-file: local:///opt/spark/job-apps/spark-stream-logs-analysis-job.jar
       # This job-specific environment variables
 #      env:

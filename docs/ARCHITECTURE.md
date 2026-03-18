@@ -42,7 +42,7 @@ flowchart LR
 
 ```mermaid
 flowchart TB
-  subgraph K8s[ksoot namespace]
+  subgraph K8s[aiks namespace]
     SVC[spark-job-service Deployment/Service]
     INFRA[(Kafka, Zookeeper, MongoDB, ArangoDB, PostgreSQL, Kafka UI)]
     RBAC[spark ServiceAccount + RBAC]

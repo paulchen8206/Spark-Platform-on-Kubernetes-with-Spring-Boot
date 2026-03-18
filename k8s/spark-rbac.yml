@@ -1,16 +1,16 @@
 # The Following is required to allow Spark to be able to manage Driver and Executor pods
-# Make sure namespace `ksoot` is already created.
+# Make sure namespace `aiks` is already created.
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: spark
-  namespace: ksoot
+  namespace: aiks
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   name: spark-role
-  namespace: ksoot
+  namespace: aiks
 rules:
 - apiGroups: [""]
   resources: ["pods", "pods/log", "services", "configmaps", "persistentvolumeclaims"]
@@ -26,11 +26,11 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: spark-role-binding
-  namespace: ksoot
+  namespace: aiks
 subjects:
 - kind: ServiceAccount
   name: spark
-  namespace: ksoot
+  namespace: aiks
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role

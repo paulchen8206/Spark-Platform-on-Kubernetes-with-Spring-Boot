@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: spark-job-service
-  namespace: ksoot
+  namespace: aiks
   labels:
     name: spark-job-service
 spec:
@@ -54,7 +54,7 @@ spec:
         - name: SPARK_MASTER
           value: k8s://https://kubernetes.default.svc
         - name: SPARK_KUBERNETES_NAMESPACE
-          value: ksoot
+          value: aiks
         - name: SPARK_KUBERNETES_AUTHENTICATE_DRIVER_SERVICE_ACCOUNT_NAME
           value: spark
         - name: SPARK_KUBERNETES_DRIVER_ENV_SPARK_USER
@@ -97,7 +97,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: spark-job-service
-  namespace: ksoot
+  namespace: aiks
 spec:
   type: ClusterIP
   selector:
