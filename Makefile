@@ -13,6 +13,7 @@ SPARK_JOB_SERVICE_IMAGE ?= spark-job-service:0.0.1
 SPARK_BATCH_IMAGE ?= spark-batch-sales-report-job:0.0.1
 SPARK_STREAM_IMAGE ?= spark-stream-logs-analysis-job:0.0.1
 CURL_IMAGE ?= curlimages/curl:8.10.1
+SPARK_UI_LOCAL_PORT ?= 4040
 
 SALES_MONTH ?= $(shell date +%Y-%m)
 PLATFORM_SECRETS_FILE ?= k8s/platform-secrets-dev.yaml
@@ -182,14 +183,16 @@ mk-port-forward-arango: ## [B] Port-forward arango to localhost:8529
 	$(KNS) port-forward svc/arango 8529:8529
 
 mk-port-forward-spark-ui: ## [B] Port-forward current running Spark driver UI to localhost:4040
-	@DRIVER_POD=$$($(KNS) get pods -l spark-role=driver --field-selector=status.phase=Running -o jsonpath='{.items[0].metadata.name}'); \
+	@DRIVER_POD=$$($(KNS) get pods -l spark-role=driver --field-selector=status.phase=Running -o jsonpath='{range .items[*]}{.metadata.name}{"\n"}{end}' | head -n 1); \
 	if [[ -z "$$DRIVER_POD" ]]; then \
 		echo "No running Spark driver pod found in namespace $(NAMESPACE)."; \
-		echo "Run: make mk-pods"; \
+		echo "Current Spark driver pods:"; \
+		$(KNS) get pods -l spark-role=driver -o custom-columns='NAME:.metadata.name,STATUS:.status.phase,REASON:.status.reason,AGE:.metadata.creationTimestamp' || true; \
+		echo "Submit a job first or inspect failures with: make mk-pods"; \
 		exit 1; \
 	fi; \
-	echo "Forwarding Spark UI for $$DRIVER_POD to http://localhost:4040"; \
-	$(KNS) port-forward pod/$$DRIVER_POD 4040:4040
+	echo "Forwarding Spark UI for $$DRIVER_POD to http://localhost:$(SPARK_UI_LOCAL_PORT)"; \
+	$(KNS) port-forward pod/$$DRIVER_POD $(SPARK_UI_LOCAL_PORT):4040
 
 mk-api-check: ## [B] Check spark-job-service OpenAPI endpoint on localhost:8090
 	curl -s -o /tmp/spark_job_service_response.json -w '%{http_code}' http://localhost:8090/v3/api-docs && echo
