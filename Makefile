@@ -14,6 +14,8 @@ SPARK_BATCH_IMAGE ?= spark-batch-sales-report-job:0.0.1
 SPARK_STREAM_IMAGE ?= spark-stream-logs-analysis-job:0.0.1
 CURL_IMAGE ?= curlimages/curl:8.10.1
 SPARK_UI_LOCAL_PORT ?= 4040
+KAFKA_UI_LOCAL_PORT ?= 8100
+ARANGO_LOCAL_PORT ?= 8529
 
 SALES_MONTH ?= $(shell date +%Y-%m)
 PLATFORM_SECRETS_FILE ?= k8s/platform-secrets-dev.yaml
@@ -176,11 +178,11 @@ mk-port-forward-postgres: ## [B] Port-forward postgres-conduktor:5432 and postgr
 	$(KNS) port-forward svc/postgres-conduktor 5432:5432 &
 	$(KNS) port-forward svc/postgres-spark 5433:5432
 
-mk-port-forward-kafka-ui: ## [B] Port-forward kafka-ui to localhost:8100
-	$(KNS) port-forward svc/kafka-ui 8100:8100
+mk-port-forward-kafka-ui: ## [B] Port-forward kafka-ui to localhost:$(KAFKA_UI_LOCAL_PORT)
+	$(KNS) port-forward svc/kafka-ui $(KAFKA_UI_LOCAL_PORT):8100
 
-mk-port-forward-arango: ## [B] Port-forward arango to localhost:8529
-	$(KNS) port-forward svc/arango 8529:8529
+mk-port-forward-arango: ## [B] Port-forward arango to localhost:$(ARANGO_LOCAL_PORT)
+	$(KNS) port-forward svc/arango $(ARANGO_LOCAL_PORT):8529
 
 mk-port-forward-spark-ui: ## [B] Port-forward current running Spark driver UI to localhost:4040
 	@DRIVER_POD=$$($(KNS) get pods -l spark-role=driver --field-selector=status.phase=Running -o jsonpath='{range .items[*]}{.metadata.name}{"\n"}{end}' | head -n 1); \
