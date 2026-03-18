@@ -2,34 +2,20 @@
 
 This runbook is organized into three distinct end-to-end paths:
 
-- End-to-end A: Docker Compose (local infra + local app runs)
-- End-to-end B: Minikube + Kubernetes manifests
-- End-to-end C: Helm (optional infra path)
+- End-to-end A: Docker Compose (local infra + local app runs).
+- End-to-end B: Minikube + Kubernetes manifests.
+- End-to-end C: Helm (optional infra path).
 
 Choose one path and follow it start-to-finish.
 
-## How to Read These Diagrams
+## Documentation References
 
-- Runtime Dataflow Diagram: shows request and data movement between API, Spark, and storage systems.
-- Configuration Precedence Diagram: shows override order; the right-most source wins when values conflict.
-- Cluster Deployment Diagram: shows Kubernetes runtime topology (service, driver, executors, RBAC, and infra dependencies).
+To keep this runbook operational and concise, high-level design content is centralized in:
 
-## Runtime Dataflow Diagram
-
-```mermaid
-flowchart LR
-  Client[API Client] -->|Start request| SJS[spark-job-service]
-  SJS -->|spark-submit| Driver[Spark Driver Pod]
-  Driver --> Executors[Spark Executor Pods]
-
-  Executors -->|Consume| Kafka[(Kafka error-logs)]
-  Executors -->|Write stream analysis| PgSpark[(PostgreSQL: postgres-spark\nerror_logs_db)]
-  Executors -->|Read batch sales input| Mongo[(MongoDB sales)]
-  Executors -->|Read/write batch reference and reports| Arango[(ArangoDB products and sales_report_YYYY_MM)]
-
-  SJS -->|Persist task metadata| Meta[(PostgreSQL: postgres-spark\nspark_jobs_db)]
-  Client -->|Execution/status APIs| SJS
-```
+- [Architecture](ARCHITECTURE.md) for runtime dataflow, deployment topology, and deploy-mode views.
+- [Spring Boot Framework](SPRING_BOOT_FRAMEWORK.md) for framework-level responsibilities across all modules.
+- [Design Patterns](DESIGN_PATTERNS.md) for class diagrams.
+- [Spark Job Service API](SPARK_JOB_SERVICE_API.md) for endpoint-level examples.
 
 ## Configuration Precedence Diagram
 
@@ -47,9 +33,9 @@ flowchart LR
 
 ## 1. Common Prerequisites
 
-- Java 21
-- Maven (`mvn`)
-- Docker Desktop
+- Java 21.
+- Maven (`mvn`).
+- Docker Desktop.
 - Optional for Kubernetes paths:
   - `kubectl`
   - Minikube
@@ -141,55 +127,7 @@ docker compose -f docker/docker-compose.yml down
 
 Use this path for full Kubernetes execution using the repository manifests.
 
-### 3.0 Cluster Deployment Diagram
-
-```mermaid
-flowchart TB
-  subgraph K8s[aiks namespace]
-    SVC[spark-job-service Deployment]
-    SA[spark ServiceAccount + RBAC]
-    KAPI[kubernetes.default.svc]
-    DRV[Spark Driver Pod]
-    EX1[Spark Executor Pod 1]
-    EX2[Spark Executor Pod 2]
-    EX3[Spark Executor Pod 3]
-    KAFKA[(Kafka)]
-    MONGO[(MongoDB)]
-    ARANGO[(ArangoDB)]
-    PG[(PostgreSQL)]
-  end
-
-  User[REST client or Scheduler] --> SVC
-  Req[SalesReportJobLaunchRequest\nmonth, correlationId, sparkConfigs] --> SVC
-
-  SVC --> Submit[spark-submit\nmaster=k8s://kubernetes.default.svc\ndeployMode=cluster]
-  Submit --> KAPI
-  KAPI --> DRV
-  DRV --> EX1
-  DRV --> EX2
-  DRV --> EX3
-
-  SA --> DRV
-  SA --> EX1
-  SA --> EX2
-  SA --> EX3
-
-  EX1 --> MONGO
-  EX2 --> MONGO
-  EX3 --> MONGO
-
-  EX1 --> ARANGO
-  EX2 --> ARANGO
-  EX3 --> ARANGO
-
-  EX1 --> PG
-  EX2 --> PG
-  EX3 --> PG
-
-  EX1 --> KAFKA
-  EX2 --> KAFKA
-  EX3 --> KAFKA
-```
+Cluster topology diagram reference: [Deployment Diagram](ARCHITECTURE.md#deployment-diagram-mermaid).
 
 ### 3.1 Quick Path (Makefile)
 
@@ -261,7 +199,7 @@ kubectl get pods -n aiks -o wide
 kubectl get svc -n aiks
 ```
 
-#### 3.2.6 Submit Jobs (In-cluster, no port-forward needed)
+#### 3.2.6 Submit Jobs (in-cluster, no port-forward needed)
 
 ```bash
 CURRENT_MONTH=$(date +%Y-%m)

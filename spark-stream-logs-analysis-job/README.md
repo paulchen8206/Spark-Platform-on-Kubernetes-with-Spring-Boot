@@ -46,36 +46,12 @@ Flow:
 
 The stream launcher and retry behavior are provided by commons utilities.
 
-## Design Pattern
+## Framework and Pattern References
 
-This module uses the Strategy pattern for log parsing:
-- Strategy interface: [ErrorLogParserStrategy](src/main/java/com/aiks/spark/loganalysis/parser/ErrorLogParserStrategy.java)
-- Default strategy: [RegexErrorLogParserStrategy](src/main/java/com/aiks/spark/loganalysis/parser/RegexErrorLogParserStrategy.java)
-- Used by pipeline: [SparkPipelineExecutor](src/main/java/com/aiks/spark/loganalysis/SparkPipelineExecutor.java)
+For centralized details, see:
 
-This allows parser logic to be swapped without changing stream orchestration.
-
-### Class Diagram
-
-```mermaid
-classDiagram
-  class SparkPipelineExecutor {
-    -ErrorLogParserStrategy errorLogParserStrategy
-    +execute()
-  }
-
-  class ErrorLogParserStrategy {
-    <<interface>>
-    +parse(logLines)
-  }
-
-  class RegexErrorLogParserStrategy {
-    +parse(logLines)
-  }
-
-  SparkPipelineExecutor --> ErrorLogParserStrategy : uses
-  RegexErrorLogParserStrategy ..|> ErrorLogParserStrategy
-```
+- [Spring Boot Framework](../docs/SPRING_BOOT_FRAMEWORK.md) for streaming-job framework coverage.
+- [Design Patterns](../docs/DESIGN_PATTERNS.md) for the Strategy pattern class diagram used in this module.
 
 ## Dataflow Diagram
 

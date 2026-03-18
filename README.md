@@ -19,9 +19,13 @@ This repository includes:
 - [`spark-batch-sales-report-job`](spark-batch-sales-report-job/README.md): Sample batch pipeline.
 - [`spark-stream-logs-analysis-job`](spark-stream-logs-analysis-job/README.md): Sample streaming pipeline.
 
-## Common Spring Boot Patterns Used in This Project
+## Documentation Map
 
-Detailed pattern notes and class diagrams are documented in [docs/DESIGN_PATTERNS.md](docs/DESIGN_PATTERNS.md).
+To keep module READMEs concise, framework and pattern details are centralized in these docs:
+
+- [docs/SPRING_BOOT_FRAMEWORK.md](docs/SPRING_BOOT_FRAMEWORK.md): high-level frameworks used by all four Spark modules.
+- [docs/DESIGN_PATTERNS.md](docs/DESIGN_PATTERNS.md): class diagrams and module-level design patterns.
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md): deployment and runtime architecture diagrams.
 
 ### Maven Components Organization (Mermaid)
 
@@ -51,9 +55,9 @@ flowchart TB
 
 ### Prerequisites
 
-- Java 21
-- Maven 3.9+
-- Docker and Docker Compose
+- Java 21.
+- Maven 3.9+.
+- Docker and Docker Compose.
 - Optional for Kubernetes workflows:
   - `kubectl`
   - Minikube

@@ -49,43 +49,12 @@ make mk-submit-logs
   - [SparkExampleJobLaunchRequest](src/main/java/com/aiks/spark/dto/SparkExampleJobLaunchRequest.java)
 - Uses [SparkSubmitJobLauncher](src/main/java/com/aiks/spark/launcher/SparkSubmitJobLauncher.java) to build and execute `spark-submit` commands.
 
-## Design Pattern
+## Framework and Pattern References
 
-This module uses a Chain of Responsibility for request validation before job launch:
+For centralized details, see:
 
-- [JobLaunchRequestValidationChain](src/main/java/com/aiks/spark/validation/JobLaunchRequestValidationChain.java) executes registered validators.
-- Validator contract: [JobLaunchRequestValidator](src/main/java/com/aiks/spark/validation/JobLaunchRequestValidator.java).
-- Default handlers: [JobNameValidator](src/main/java/com/aiks/spark/validation/JobNameValidator.java), [CorrelationIdValidator](src/main/java/com/aiks/spark/validation/CorrelationIdValidator.java).
-- Applied in controller: [SparkJobController](src/main/java/com/aiks/spark/api/SparkJobController.java).
-
-### Class Diagram
-
-```mermaid
-classDiagram
-  class SparkJobController {
-    -SparkJobLauncher sparkJobLauncher
-    -JobLaunchRequestValidationChain validationChain
-    +startSparkJob(jobLaunchRequest)
-  }
-
-  class JobLaunchRequestValidationChain {
-    -List~JobLaunchRequestValidator~ validators
-    +validate(jobLaunchRequest)
-  }
-
-  class JobLaunchRequestValidator {
-    <<interface>>
-    +validate(jobLaunchRequest)
-  }
-
-  class JobNameValidator
-  class CorrelationIdValidator
-
-  SparkJobController --> JobLaunchRequestValidationChain : uses
-  JobLaunchRequestValidationChain --> JobLaunchRequestValidator : iterates
-  JobNameValidator ..|> JobLaunchRequestValidator
-  CorrelationIdValidator ..|> JobLaunchRequestValidator
-```
+- [Spring Boot Framework](../docs/SPRING_BOOT_FRAMEWORK.md) for service-layer framework architecture and request flow.
+- [Design Patterns](../docs/DESIGN_PATTERNS.md) for the Chain of Responsibility class diagram used by this module.
 
 ## Dataflow Diagram
 

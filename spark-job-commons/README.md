@@ -51,44 +51,12 @@ Common options:
 - `save-mode`: batch write save mode (`Append`, `Overwrite`, `ErrorIfExists`, `Ignore`).
 - `output-mode`: streaming sink output mode (`Append`, `Complete`, `Update`).
 
-## Design Pattern
+## Framework and Pattern References
 
-This module uses the Factory pattern for connector selection:
-- [ConnectorFactory](src/main/java/com/aiks/spark/common/connector/ConnectorFactory.java) resolves connector instances by type.
-- [ConnectorType](src/main/java/com/aiks/spark/common/connector/ConnectorType.java) provides supported connector keys.
+For centralized details, see:
 
-This keeps connector creation and runtime availability checks in one place.
-
-### Class Diagram
-
-```mermaid
-classDiagram
-  class ConnectorType {
-    <<enumeration>>
-    FILE
-    JDBC
-    MONGO
-    ARANGO
-    KAFKA
-  }
-
-  class ConnectorFactory {
-    +connector(connectorType)
-  }
-
-  class FileConnector
-  class JdbcConnector
-  class MongoConnector
-  class ArangoConnector
-  class KafkaConnector
-
-  ConnectorFactory ..> ConnectorType : selects by
-  ConnectorFactory --> FileConnector : returns
-  ConnectorFactory --> JdbcConnector : returns
-  ConnectorFactory --> MongoConnector : returns
-  ConnectorFactory --> ArangoConnector : returns
-  ConnectorFactory --> KafkaConnector : returns
-```
+- [Spring Boot Framework](../docs/SPRING_BOOT_FRAMEWORK.md) for the commons module framework role (auto-configuration, Spring Kafka listener, Spring Retry).
+- [Design Patterns](../docs/DESIGN_PATTERNS.md) for the Factory pattern class diagram used for connector selection.
 
 ### Connector Configuration Examples
 

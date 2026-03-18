@@ -1,6 +1,12 @@
 # Project Architecture
 
-This document contains the project-level architecture and deployment/dataflow diagrams extracted from the root README.
+This document contains project-level runtime and deployment diagrams.
+
+For complementary details, see:
+
+- [Spring Boot Framework](SPRING_BOOT_FRAMEWORK.md) for module framework coverage, service flow, and Spring annotation usage.
+- [Design Patterns](DESIGN_PATTERNS.md) for class-diagram-focused pattern documentation.
+- [Spark Job Service API](SPARK_JOB_SERVICE_API.md) for endpoint-level behavior.
 
 ## Components Diagram (Mermaid)
 
@@ -79,7 +85,7 @@ sequenceDiagram
   API-->>U: Job accepted/status available
 ```
 
-## Local Deploy View (Mermaid)
+## Local Deployment View (Mermaid)
 
 ```mermaid
 flowchart LR
@@ -128,8 +134,8 @@ flowchart LR
   LocalExec --> Targets[(MongoDB / ArangoDB / PostgreSQL / Kafka)]
   PodExec --> Targets
 
-  note1[Local mode\nFast debug, simpler networking]
-  note2[Cluster mode\nProduction-like scheduling and isolation]
+  note1[local mode\nFast debug, simpler networking]
+  note2[cluster mode\nProduction-like scheduling and isolation]
 
   Local -.-> note1
   Cluster -.-> note2

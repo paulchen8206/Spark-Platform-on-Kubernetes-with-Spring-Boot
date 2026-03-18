@@ -1,7 +1,7 @@
 # Design Patterns Used in This Project
 
 This document centralizes module-level design patterns used across the repository.
-For Spring Boot architecture layers, request flow diagrams, and annotation reference, see [Spring Boot Framework Patterns](SPRING_BOOT_FRAMEWORK.md).
+For Spring Boot architecture layers, request flow diagrams, and annotation reference, see [Spring Boot Framework](SPRING_BOOT_FRAMEWORK.md).
 
 ## 1) Dependency Injection (Constructor-based)
 

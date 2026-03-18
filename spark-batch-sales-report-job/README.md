@@ -50,34 +50,12 @@ Flow:
 
 Sample data bootstrap: [DataPopulator](src/main/java/com/aiks/spark/sales/DataPopulator.java)
 
-## Design Pattern
+## Framework and Pattern References
 
-This module uses the Template Method pattern for pipeline orchestration:
-- Template base: [SalesReportPipelineTemplate](src/main/java/com/aiks/spark/sales/pipeline/SalesReportPipelineTemplate.java)
-- Concrete pipeline steps: [SparkPipelineExecutor](src/main/java/com/aiks/spark/sales/SparkPipelineExecutor.java)
+For centralized details, see:
 
-The template fixes execution order (load, transform, join, persist) while allowing step customization.
-
-### Class Diagram
-
-```mermaid
-classDiagram
-  class SalesReportPipelineTemplate {
-    +run()
-    #loadSales()
-    #aggregateSales(salesDataset)
-    #loadProducts()
-    #buildReport(aggregatedSales, productsDataset)
-    #persist(reportDataset)
-  }
-
-  class SparkPipelineExecutor {
-    -SalesReportPipelineTemplate pipelineTemplate
-    +execute()
-  }
-
-  SparkPipelineExecutor --> SalesReportPipelineTemplate : creates anonymous implementation
-```
+- [Spring Boot Framework](../docs/SPRING_BOOT_FRAMEWORK.md) for batch-job framework coverage.
+- [Design Patterns](../docs/DESIGN_PATTERNS.md) for the Template Method pattern class diagram used in this module.
 
 ## Dataflow Diagram
 

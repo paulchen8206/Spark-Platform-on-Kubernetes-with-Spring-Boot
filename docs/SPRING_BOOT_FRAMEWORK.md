@@ -59,7 +59,7 @@ A Spring Boot web service that accepts REST requests to start and stop Spark job
 - **Spring Cloud Task** — tracks job lifecycle (start, completion, failure) via `TaskExplorer` / `TaskRepository` backed by PostgreSQL
 - **Spring Kafka** — `KafkaTemplate` publishes a stop signal (correlationId) to a Kafka topic when a stop request is received
 - **Springdoc OpenAPI 2.7.0** — auto-generates Swagger UI from `@Tag`, `@Operation`, `@ApiResponses` annotations
-- **spring-boot-problem-handler** — standardised RFC 7807 error responses
+- **spring-boot-problem-handler** — standardized RFC 7807 error responses
 - **`@ConfigurationProperties`** — type-safe binding of all `spark-launcher.*` YAML properties to `SparkLauncherProperties` / `SparkJobProperties`
 
 ### Spring Boot Architecture Layers
@@ -119,7 +119,7 @@ flowchart TB
 
 The diagrams below trace the two primary HTTP flows end-to-end: submitting a job and stopping one.
 
-### Start Job Flow — `POST /v1/spark-jobs/start`
+#### Start Job Flow — `POST /v1/spark-jobs/start`
 
 An HTTP request body is deserialised into a `JobLaunchRequest`, validated, then handed to `SparkSubmitJobLauncher` which builds and runs a `spark-submit` process asynchronously via a cached thread pool. The response is returned immediately as HTTP 202 Accepted while the job runs in the background.
 
@@ -147,7 +147,7 @@ sequenceDiagram
     Spark-->>Exec: exitValue (async)
 ```
 
-### Stop Job Flow — `POST /v1/spark-jobs/stop/{correlationId}`
+#### Stop Job Flow — `POST /v1/spark-jobs/stop/{correlationId}`
 
 Stopping a job is signal-based. The service publishes the `correlationId` to a Kafka topic. Inside the running Spark job, `SparkExecutionManager` consumes that topic and tears down the streaming query or cancels the Spark context.
 
