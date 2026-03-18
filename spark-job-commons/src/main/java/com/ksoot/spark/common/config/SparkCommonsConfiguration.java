@@ -14,6 +14,7 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
+import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.kafka.config.KafkaListenerEndpointRegistry;
 import org.springframework.retry.annotation.Retryable;
@@ -50,6 +51,12 @@ public class SparkCommonsConfiguration {
   @ConditionalOnClass(Retryable.class)
   @Configuration(proxyBeanMethods = false)
   static class SparkStreamLauncherConfiguration {
+
+    @Bean
+    @ConditionalOnMissingBean(TaskExecutor.class)
+    TaskExecutor sparkStreamTaskExecutor() {
+      return new SimpleAsyncTaskExecutor("spark-stream-");
+    }
 
     @Bean
     @ConditionalOnBean(SparkExecutionManager.class)
