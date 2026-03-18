@@ -8,10 +8,10 @@ data:
   default-platform-config.yaml: |
     database:
       type: postgresql
-      host: postgres
+      host: postgres-conduktor
       port: 5432
       name: conduktor
-      username: conduktor
+      username: {{ .Values.postgresql.auth.username }}
       password: ${CONDUKTOR_CONFIG_DB_PASSWORD}
       ssl: false
       userManagement:

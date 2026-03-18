@@ -55,7 +55,7 @@ spark-launcher:
   capture-jobs-logs: true
   persist-jobs: true
   env:
-    POSTGRES_URL: "jdbc:postgresql://postgres:5432/spark_jobs_db"
+    POSTGRES_URL: "jdbc:postgresql://postgres-spark:5432/spark_jobs_db"
     POSTGRES_USER: "${POSTGRES_USERNAME:admin}"
     POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:admin}"
     JDBC_USER: "${POSTGRES_USERNAME:admin}"
@@ -72,6 +72,6 @@ spark-launcher:
     logs-analysis-job:
       jar-file: local:///opt/spark/job-apps/spark-stream-logs-analysis-job.jar
       env:
-        JDBC_URL: "jdbc:postgresql://postgres:5432"
+        JDBC_URL: "jdbc:postgresql://postgres-spark:5432"
       spark-config:
         spark.kubernetes.container.image: spark-stream-logs-analysis-job:0.0.1

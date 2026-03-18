@@ -14,8 +14,8 @@ services:
       CONDUKTOR_PLATFORM_SECURITY_PASSWORD_POLICY_MIN_LENGTH: "8"
       CONDUKTOR_PLATFORM_SECURITY_SESSION_TIMEOUT: "30"
       CONDUKTOR_PLATFORM_SECURITY_AUDIT_ENABLED: "true"
-      DATABASE_URL: "jdbc:postgresql://postgres:5432/conduktor"
-      DATABASE_USERNAME: "conduktor"
+      DATABASE_URL: "jdbc:postgresql://postgres-conduktor:5432/conduktor"
+      DATABASE_USERNAME: "postgres"
       DATABASE_PASSWORD: "${DATABASE_PASSWORD:?Set DATABASE_PASSWORD in your shell or .env}"
       DATABASE_TYPE: "postgresql"
     volumes:
@@ -23,6 +23,7 @@ services:
       - ./default-platform-config.yaml:/opt/conduktor/default-platform-config.yaml:ro
     depends_on:
       - kafka
+      - postgres-conduktor
     networks:
       - mynetwork
   mongo:
@@ -57,18 +58,35 @@ services:
     networks:
       - mynetwork
 
-  postgres:
+  postgres-conduktor:
     image: postgres:15.15
-    hostname: postgres
-    container_name: postgres
+    hostname: postgres-conduktor
+    container_name: postgres-conduktor
     environment:
       POSTGRES_DB: conduktor
-      POSTGRES_USER: conduktor
+      POSTGRES_USER: postgres
       POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in your shell or .env}"
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_conduktor_data:/var/lib/postgresql/data
+    networks:
+      - mynetwork
+
+  postgres-spark:
+    image: postgres:15.15
+    hostname: postgres-spark
+    container_name: postgres-spark
+    environment:
+      POSTGRES_DB: spark_jobs_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in your shell or .env}"
+      POSTGRES_EXTRA_DB: error_logs_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_spark_data:/var/lib/postgresql/data
+      - ./init-spark-postgres.sh:/docker-entrypoint-initdb.d/init-spark-postgres.sh:ro
     networks:
       - mynetwork
 
@@ -134,7 +152,8 @@ volumes:
   mongo_data:
   mongo_config:
   arango_data:
-  postgres_data:
+  postgres_conduktor_data:
+  postgres_spark_data:
 
 networks:
   mynetwork:

@@ -121,27 +121,30 @@ spec:
   selector:
     app: arango
 ---
+# --- PostgreSQL for Conduktor backend ----------------------------------
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: postgres
+  name: postgres-conduktor
   namespace: aiks
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: postgres
+      app: postgres-conduktor
   template:
     metadata:
       labels:
-        app: postgres
+        app: postgres-conduktor
     spec:
       containers:
-      - name: postgres
+      - name: postgres-conduktor
         image: postgres:15.15
         ports:
         - containerPort: 5432
         env:
+        - name: POSTGRES_DB
+          value: conduktor
         - name: POSTGRES_USER
           value: postgres
         - name: POSTGRES_PASSWORD
@@ -151,27 +154,94 @@ spec:
               key: postgres-password
         - name: POSTGRES_HOST_AUTH_METHOD
           value: scram-sha-256
-        #  Create databases on deployment
-        - name: POSTGRES_DATABASES
-          value: spark_jobs_db, error_logs_db
         volumeMounts:
-        - name: postgres-data
+        - name: postgres-conduktor-data
           mountPath: /var/lib/postgresql/data
-        - name: init-script
-          mountPath: /docker-entrypoint-initdb.d/init-postgres.sh
-          subPath: init-postgres.sh
       volumes:
-      - name: postgres-data
+      - name: postgres-conduktor-data
         persistentVolumeClaim:
-          claimName: postgres-pvc
-      - name: init-script
-        configMap:
-          name: postgres-init
+          claimName: postgres-conduktor-pvc
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: postgres-pvc
+  name: postgres-conduktor-pvc
+  namespace: aiks
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 300Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-conduktor
+  namespace: aiks
+spec:
+  type: ClusterIP
+  ports:
+  - port: 5432
+    targetPort: 5432
+    name: postgres-port
+  selector:
+    app: postgres-conduktor
+---
+# --- PostgreSQL for Spark job sink databases ----------------------------
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres-spark
+  namespace: aiks
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres-spark
+  template:
+    metadata:
+      labels:
+        app: postgres-spark
+    spec:
+      containers:
+      - name: postgres-spark
+        image: postgres:15.15
+        ports:
+        - containerPort: 5432
+        env:
+        - name: POSTGRES_DB
+          value: spark_jobs_db
+        - name: POSTGRES_USER
+          value: postgres
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: platform-secrets
+              key: postgres-password
+        - name: POSTGRES_HOST_AUTH_METHOD
+          value: scram-sha-256
+        - name: POSTGRES_EXTRA_DB
+          value: error_logs_db
+        volumeMounts:
+        - name: postgres-spark-data
+          mountPath: /var/lib/postgresql/data
+        - name: init-script
+          mountPath: /docker-entrypoint-initdb.d/init-spark-postgres.sh
+          subPath: init-spark-postgres.sh
+      volumes:
+      - name: postgres-spark-data
+        persistentVolumeClaim:
+          claimName: postgres-spark-pvc
+      - name: init-script
+        configMap:
+          name: postgres-spark-init
+          defaultMode: 0755
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-spark-pvc
   namespace: aiks
 spec:
   accessModes:
@@ -183,31 +253,22 @@ spec:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: postgres-init
+  name: postgres-spark-init
   namespace: aiks
 data:
-  #  Create databases on deployment
-  init-postgres.sh: |
+  init-spark-postgres.sh: |
     #!/bin/bash
-    echo "Inside init-postgres.sh"
     set -e
-
-    if [ -n "$POSTGRES_DATABASES" ]; then
-    echo "Multiple database creation requested: $POSTGRES_DATABASES"
-    for db in $(echo $POSTGRES_DATABASES | tr ',' ' '); do
-    echo "  Creating database '$db' owned by user 'postgres'"
-    psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" <<-EOSQL
-    CREATE DATABASE $db;
-    GRANT ALL PRIVILEGES ON DATABASE $db TO $POSTGRES_USER;
-    EOSQL
-    done
-    echo "Postgres Databases created"
-    fi
+    echo "Creating extra Spark database: $POSTGRES_EXTRA_DB"
+    psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" \
+      -c "CREATE DATABASE $POSTGRES_EXTRA_DB;" \
+      -c "GRANT ALL PRIVILEGES ON DATABASE $POSTGRES_EXTRA_DB TO $POSTGRES_USER;"
+    echo "Done."
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: postgres
+  name: postgres-spark
   namespace: aiks
 spec:
   type: LoadBalancer
@@ -216,7 +277,7 @@ spec:
     targetPort: 5432
     name: postgres-port
   selector:
-    app: postgres
+    app: postgres-spark
 ---
 apiVersion: apps/v1
 kind: Deployment

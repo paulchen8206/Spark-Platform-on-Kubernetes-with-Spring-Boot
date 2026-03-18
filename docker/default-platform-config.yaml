@@ -1,9 +1,9 @@
 database:
   type: postgresql
-  host: postgres
+  host: postgres-conduktor
   port: 5432
   name: conduktor
-  username: conduktor
+  username: postgres
   password: ${DATABASE_PASSWORD}
   ssl: false
   userManagement:

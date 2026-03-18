@@ -137,7 +137,8 @@ mk-deploy-app: mk-k8s-preflight mk-image-job-service ## [B] Build image and appl
 mk-deploy: mk-namespace mk-secrets mk-deploy-infra mk-deploy-rbac mk-deploy-app ## [B] Apply namespace + secrets + infra + rbac + app
 
 mk-rollout-status: mk-k8s-preflight ## [B] Wait for core deployments to be ready
-	$(KNS) rollout status deployment/postgres --timeout=300s
+	$(KNS) rollout status deployment/postgres-conduktor --timeout=300s
+	$(KNS) rollout status deployment/postgres-spark --timeout=300s
 	$(KNS) rollout status deployment/kafka-ui --timeout=300s
 	$(KNS) rollout status deployment/spark-job-service --timeout=300s
 
@@ -155,8 +156,9 @@ mk-kafka-ui-health: ## [B] Check Kafka UI in-cluster health endpoint
 mk-port-forward: ## [B] Port-forward spark-job-service to localhost:8090
 	$(KNS) port-forward svc/spark-job-service 8090:8090
 
-mk-port-forward-postgres: ## [B] Port-forward postgres to localhost:5432
-	$(KNS) port-forward svc/postgres 5432:5432
+mk-port-forward-postgres: ## [B] Port-forward postgres-conduktor:5432 and postgres-spark:5433 to localhost
+	$(KNS) port-forward svc/postgres-conduktor 5432:5432 &
+	$(KNS) port-forward svc/postgres-spark 5433:5432
 
 mk-port-forward-kafka-ui: ## [B] Port-forward kafka-ui to localhost:8100
 	$(KNS) port-forward svc/kafka-ui 8100:8100
@@ -251,7 +253,8 @@ helm-install: ## [C] Install/upgrade Helm chart with existing platform-secrets
 	helm upgrade --install $(HELM_RELEASE) ./helm -n $(NAMESPACE) -f $(HELM_VALUES) --set platformSecrets.existingSecret=platform-secrets
 
 helm-verify: ## [C] Verify Helm-managed deployments
-	$(KNS) rollout status deployment/postgres --timeout=300s
+	$(KNS) rollout status deployment/postgres-conduktor --timeout=300s
+	$(KNS) rollout status deployment/postgres-spark --timeout=300s
 	$(KNS) rollout status deployment/zookeeper --timeout=300s
 	$(KNS) rollout status deployment/kafka --timeout=300s
 	$(KNS) rollout status deployment/conduktor --timeout=300s
@@ -262,7 +265,8 @@ helm-url: ## [C] Print Conduktor URL via minikube service
 
 helm-smoke: ## [C] Smoke check Kafka and Postgres from temporary pods
 	$(KNS) run kafka-check --rm -i --restart=Never --image=busybox:1.36 -- sh -c 'nc -z kafka 9092 && echo "Kafka reachable"'
-	$(KNS) run postgres-check --rm -i --restart=Never --image=postgres:15.15 -- sh -c 'PGPASSWORD=admin psql -h postgres -U conduktor -d conduktor -c "select 1"'
+	$(KNS) run postgres-conduktor-check --rm -i --restart=Never --image=postgres:15.15 -- sh -c 'PGPASSWORD=$$PGPASSWORD psql -h postgres-conduktor -U postgres -d conduktor -c "select 1"'
+	$(KNS) run postgres-spark-check --rm -i --restart=Never --image=postgres:15.15 -- sh -c 'PGPASSWORD=$$PGPASSWORD psql -h postgres-spark -U postgres -d spark_jobs_db -c "select 1"'
 
 helm-uninstall: ## [C] Uninstall Helm release
 	helm uninstall $(HELM_RELEASE) -n $(NAMESPACE)

@@ -33,7 +33,7 @@ spec:
         args:
         - "--spark.executor.instances=1"
         - "--spark.default.parallelism=8"
-        - "--spark-launcher.env.POSTGRES_URL=jdbc:postgresql://postgres:5432/spark_jobs_db"
+        - "--spark-launcher.env.POSTGRES_URL=jdbc:postgresql://postgres-spark:5432/spark_jobs_db"
         - "--spark-launcher.env.POSTGRES_USER=${POSTGRES_USERNAME}"
         - "--spark-launcher.env.POSTGRES_PASSWORD=${POSTGRES_PASSWORD}"
         - "--spark-launcher.env.KAFKA_BOOTSTRAP_SERVERS=kafka:9092"
@@ -41,7 +41,7 @@ spec:
         - "--spark-launcher.jobs.sales-report-job.env.ARANGODB_URL=arango:8529"
         - "--spark-launcher.jobs.sales-report-job.spark-config.spark.driver.userClassPathFirst=true"
         - "--spark-launcher.jobs.sales-report-job.spark-config.spark.executor.userClassPathFirst=true"
-        - "--spark-launcher.jobs.logs-analysis-job.env.JDBC_URL=jdbc:postgresql://postgres:5432"
+        - "--spark-launcher.jobs.logs-analysis-job.env.JDBC_URL=jdbc:postgresql://postgres-spark:5432"
         - "--spark-launcher.env.JDBC_USER=${POSTGRES_USERNAME}"
         - "--spark-launcher.env.JDBC_PASSWORD=${POSTGRES_PASSWORD}"
         env:
@@ -64,7 +64,7 @@ spec:
         - name: KAFKA_BOOTSTRAP_SERVERS
           value: kafka:9092
         - name: POSTGRES_URL
-          value: jdbc:postgresql://postgres:5432/spark_jobs_db
+          value: jdbc:postgresql://postgres-spark:5432/spark_jobs_db
         - name: POSTGRES_USERNAME
           value: postgres
         - name: POSTGRES_PASSWORD
@@ -87,7 +87,7 @@ spec:
               name: platform-secrets
               key: postgres-password
         - name: JDBC_URL
-          value: jdbc:postgresql://postgres:5432
+          value: jdbc:postgresql://postgres-spark:5432
         - name: PERSIST_JOBS
           value: "true"
         - name: CAPTURE_JOBS_LOGS

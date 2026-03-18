@@ -23,11 +23,11 @@ flowchart LR
   Driver --> Executors[Spark Executor Pods]
 
   Executors -->|Consume| Kafka[(Kafka error-logs)]
-  Executors -->|Write stream analysis| Pg[(PostgreSQL error_logs)]
+  Executors -->|Write stream analysis| PgSpark[(PostgreSQL: postgres-spark\nerror_logs_db)]
   Executors -->|Read batch sales input| Mongo[(MongoDB sales)]
   Executors -->|Read/write batch reference and reports| Arango[(ArangoDB products and sales_report_YYYY_MM)]
 
-  SJS -->|Persist task metadata| Meta[(PostgreSQL task metadata)]
+  SJS -->|Persist task metadata| Meta[(PostgreSQL: postgres-spark\nspark_jobs_db)]
   Client -->|Execution/status APIs| SJS
 ```
 
@@ -243,7 +243,8 @@ kubectl apply -f k8s/deployment.yml
 #### 3.2.5 Verify Rollout
 
 ```bash
-kubectl rollout status deployment/postgres -n aiks --timeout=300s
+kubectl rollout status deployment/postgres-conduktor -n aiks --timeout=300s
+kubectl rollout status deployment/postgres-spark -n aiks --timeout=300s
 kubectl rollout status deployment/kafka-ui -n aiks --timeout=300s
 kubectl rollout status deployment/spark-job-service -n aiks --timeout=300s
 kubectl get pods -n aiks -o wide
@@ -280,8 +281,11 @@ Common forwards:
 # Spark Job Service API
 kubectl port-forward -n aiks svc/spark-job-service 8090:8090
 
-# PostgreSQL
-kubectl port-forward -n aiks svc/postgres 5432:5432
+# PostgreSQL – Conduktor backend
+kubectl port-forward -n aiks svc/postgres-conduktor 5432:5432
+
+# PostgreSQL – Spark job sink databases (spark_jobs_db / error_logs_db)
+kubectl port-forward -n aiks svc/postgres-spark 5433:5432
 
 # Kafka UI
 kubectl port-forward -n aiks svc/kafka-ui 8100:8100
@@ -477,7 +481,8 @@ make helm-install
 ### 4.3 Verify Helm Components
 
 ```bash
-kubectl rollout status deployment/postgres -n aiks --timeout=300s
+kubectl rollout status deployment/postgres-conduktor -n aiks --timeout=300s
+kubectl rollout status deployment/postgres-spark -n aiks --timeout=300s
 kubectl rollout status deployment/zookeeper -n aiks --timeout=300s
 kubectl rollout status deployment/kafka -n aiks --timeout=300s
 kubectl rollout status deployment/conduktor -n aiks --timeout=300s
@@ -511,8 +516,11 @@ kubectl rollout status deployment/spark-job-service -n aiks --timeout=300s
 kubectl run kafka-check --rm -i --restart=Never -n aiks --image=busybox:1.36 -- \
   sh -c 'nc -z kafka 9092 && echo "Kafka reachable"'
 
-kubectl run postgres-check --rm -i --restart=Never -n aiks --image=postgres:15.15 -- \
-  sh -c 'PGPASSWORD=admin psql -h postgres -U conduktor -d conduktor -c "select 1"'
+kubectl run postgres-conduktor-check --rm -i --restart=Never -n aiks --image=postgres:15.15 -- \
+  sh -c 'PGPASSWORD=$PGPASSWORD psql -h postgres-conduktor -U postgres -d conduktor -c "select 1"'
+
+kubectl run postgres-spark-check --rm -i --restart=Never -n aiks --image=postgres:15.15 -- \
+  sh -c 'PGPASSWORD=$PGPASSWORD psql -h postgres-spark -U postgres -d spark_jobs_db -c "select 1"'
 ```
 
 ### 4.7 Uninstall Helm Release

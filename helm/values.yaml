@@ -26,11 +26,17 @@ postgresql:
     repository: postgres
     tag: 15.15
   auth:
-    username: conduktor
+    username: postgres
     password: ""
+  conduktor:
     database: conduktor
-  service:
-    port: 5432
+    service:
+      port: 5432
+  spark:
+    database: spark_jobs_db
+    extraDatabase: error_logs_db
+    service:
+      port: 5432
 kafka:
   enabled: true
   image:

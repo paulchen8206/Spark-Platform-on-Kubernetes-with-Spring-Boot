@@ -39,9 +39,9 @@ spec:
                   name: {{ $platformSecretName }}
                   key: cdk-admin-password
             - name: DATABASE_URL
-              value: "jdbc:postgresql://postgres:5432/conduktor"
+              value: "jdbc:postgresql://postgres-conduktor:5432/conduktor"
             - name: DATABASE_USERNAME
-              value: "conduktor"
+              value: {{ .Values.postgresql.auth.username | quote }}
             - name: DATABASE_PASSWORD
               valueFrom:
                 secretKeyRef:

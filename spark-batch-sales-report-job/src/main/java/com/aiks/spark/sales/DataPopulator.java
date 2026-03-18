@@ -1,10 +1,10 @@
 package com.aiks.spark.sales;
 
+import com.aiks.spark.common.config.properties.ArangoOptions;
+import com.aiks.spark.common.config.properties.ConnectorProperties;
 import com.arangodb.ArangoCollection;
 import com.arangodb.ArangoDB;
 import com.arangodb.ArangoDatabase;
-import com.aiks.spark.common.config.properties.ArangoOptions;
-import com.aiks.spark.common.config.properties.ConnectorProperties;
 import com.mongodb.client.MongoCollection;
 import java.time.*;
 import java.util.*;
