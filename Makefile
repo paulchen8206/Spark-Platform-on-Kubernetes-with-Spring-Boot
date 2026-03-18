@@ -33,7 +33,7 @@ MK_DOCKER_ENV = eval "$$($(MINIKUBE) -p $(MINIKUBE_PROFILE) docker-env)"
 
 .PHONY: help \
 	dc-env-check dc-up dc-ps dc-down dc-e2e \
-	mk-start mk-stop mk-delete mk-tunnel mk-docker-env mk-print-docker-env mk-build mk-image-spark-base mk-image-job-service mk-image-batch mk-image-stream mk-images mk-k8s-preflight mk-namespace mk-secrets mk-deploy-infra mk-deploy-rbac mk-deploy-app mk-deploy mk-rollout-status mk-verify mk-pods mk-services mk-kafka-ui-health mk-port-forward mk-port-forward-postgres mk-port-forward-kafka-ui mk-port-forward-spark-ui mk-api-check mk-clean-job-pods mk-submit-sales mk-submit-logs mk-show-recent-pods mk-smoke mk-service-logs mk-events mk-cleanup mk-cleanup-all mk-e2e \
+	mk-start mk-stop mk-delete mk-tunnel mk-docker-env mk-print-docker-env mk-build mk-image-spark-base mk-image-job-service mk-image-batch mk-image-stream mk-images mk-k8s-preflight mk-namespace mk-secrets mk-deploy-infra mk-deploy-rbac mk-deploy-app mk-deploy mk-rollout-status mk-verify mk-pods mk-services mk-kafka-ui-health mk-port-forward mk-port-forward-postgres mk-port-forward-kafka-ui mk-port-forward-arango mk-port-forward-spark-ui mk-api-check mk-clean-job-pods mk-submit-sales mk-submit-logs mk-show-recent-pods mk-smoke mk-service-logs mk-events mk-cleanup mk-cleanup-all mk-e2e \
 	helm-prepare helm-install helm-verify helm-url helm-smoke helm-uninstall helm-e2e
 
 help: ## Show runbook-compatible targets
@@ -160,6 +160,9 @@ mk-port-forward-postgres: ## [B] Port-forward postgres to localhost:5432
 
 mk-port-forward-kafka-ui: ## [B] Port-forward kafka-ui to localhost:8100
 	$(KNS) port-forward svc/kafka-ui 8100:8100
+
+mk-port-forward-arango: ## [B] Port-forward arango to localhost:8529
+	$(KNS) port-forward svc/arango 8529:8529
 
 mk-port-forward-spark-ui: ## [B] Port-forward current running Spark driver UI to localhost:4040
 	@DRIVER_POD=$$($(KNS) get pods -l spark-role=driver --field-selector=status.phase=Running -o jsonpath='{.items[0].metadata.name}'); \

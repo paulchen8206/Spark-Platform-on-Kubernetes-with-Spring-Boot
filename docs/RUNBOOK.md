@@ -287,6 +287,7 @@ Equivalent Make targets:
 make mk-port-forward
 make mk-port-forward-postgres
 make mk-port-forward-kafka-ui
+make mk-port-forward-arango
 make mk-port-forward-spark-ui
 ```
 
@@ -304,7 +305,119 @@ SPARK_JOB_SERVICE_POD=$(kubectl get pods -n ksoot -l name=spark-job-service -o j
 kubectl port-forward -n ksoot pod/${SPARK_JOB_SERVICE_POD} 8090:8090
 ```
 
-#### 3.2.8 Cleanup Minikube Path
+#### 3.2.8 Validate MongoDB Data
+
+MongoDB runs in-cluster as service `mongo` on port `27017` with no username/password configured in the Kubernetes manifest.
+
+Quick health check:
+
+```bash
+kubectl exec -n ksoot deployment/mongo -- mongosh --quiet --eval 'db.adminCommand({ ping: 1 })'
+```
+
+Open an interactive shell inside the MongoDB pod:
+
+```bash
+kubectl exec -it -n ksoot deployment/mongo -- mongosh
+```
+
+Useful interactive queries:
+
+```javascript
+show dbs
+use sales_db
+show collections
+db.sales.find().limit(5)
+```
+
+Run one-shot queries without opening an interactive shell:
+
+```bash
+kubectl exec -n ksoot deployment/mongo -- mongosh --quiet --eval 'db.adminCommand({ listDatabases: 1 })'
+kubectl exec -n ksoot deployment/mongo -- mongosh --quiet sales_db --eval 'show collections'
+kubectl exec -n ksoot deployment/mongo -- mongosh --quiet sales_db --eval 'db.sales.countDocuments()'
+kubectl exec -n ksoot deployment/mongo -- mongosh --quiet sales_db --eval 'db.sales.find().limit(5).toArray()'
+```
+
+Optional host access via port-forward:
+
+```bash
+kubectl port-forward -n ksoot svc/mongo 27017:27017
+mongosh 'mongodb://localhost:27017'
+```
+
+Then run locally in `mongosh`:
+
+```javascript
+show dbs
+use sales_db
+show collections
+db.sales.find().limit(5)
+```
+
+#### 3.2.9 Validate ArangoDB Data
+
+ArangoDB runs in-cluster as service `arango` on port `8529` with authentication enabled.
+
+Current credentials in the development manifest:
+
+- Username: `root`
+- Password: `admin`
+
+Quick API check from inside the pod:
+
+```bash
+kubectl exec -n ksoot deployment/arango -- sh -lc 'wget -qO- http://127.0.0.1:8529/_api/version'
+```
+
+Expected result is `401 Unauthorized`, which confirms the ArangoDB server is running and enforcing authentication.
+
+Host access via port-forward:
+
+```bash
+kubectl port-forward -n ksoot svc/arango 8529:8529
+```
+
+Equivalent Make target:
+
+```bash
+make mk-port-forward-arango
+```
+
+Open the ArangoDB web UI:
+
+```text
+http://localhost:8529
+```
+
+Login with:
+
+- Username: `root`
+- Password: `admin`
+
+Query with `arangosh` from your machine:
+
+```bash
+arangosh --server.endpoint http+tcp://127.0.0.1:8529 --server.username root --server.password
+```
+
+Useful queries in `arangosh`:
+
+```javascript
+db._databases()
+db._useDatabase("products_db")
+db._collections().map(c => c.name())
+db._query("FOR d IN your_collection LIMIT 5 RETURN d").toArray()
+db._query("FOR d IN your_collection COLLECT WITH COUNT INTO n RETURN n").toArray()
+```
+
+If `kubectl port-forward` exits immediately with code `1`, check whether port `8529` is already in use:
+
+```bash
+lsof -nP -iTCP:8529 -sTCP:LISTEN
+```
+
+#### 3.2.10 Cleanup Minikube Path
 
 ```bash
 make mk-cleanup
