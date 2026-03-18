@@ -3,6 +3,7 @@
 End-to-end reference project for launching and managing Apache Spark jobs from Spring Boot, with local development and Kubernetes deployment support.
 
 This repository includes:
+
 - A Spark job launcher service (`spark-job-service`) with REST APIs to start, stop, and track jobs.
 - Two sample Spark jobs:
   - Batch: `spark-batch-sales-report-job`
@@ -174,7 +175,6 @@ Notes:
 
 ### Run Services and Jobs
 
-
 - Run the job launcher service from [`spark-job-service`](spark-job-service/README.md#running-locally), either on the host or with `make dc-up-app`.
 - Run sample jobs directly from IDE or module-specific instructions:
   - [`spark-batch-sales-report-job`](spark-batch-sales-report-job/README.md)
@@ -209,6 +209,7 @@ minikube tunnel
 - Deploy `spark-job-service` using [`k8s/deployment.yml`](k8s/deployment.yml) and use its REST APIs.
 
 Detailed steps remain in module READMEs:
+
 - [`spark-job-service`](spark-job-service/README.md)
 - [`spark-batch-sales-report-job`](spark-batch-sales-report-job/README.md)
 - [`spark-stream-logs-analysis-job`](spark-stream-logs-analysis-job/README.md)
@@ -242,6 +243,7 @@ Detailed end-to-end Helm operations (verify, access, smoke checks, upgrade, unin
 [`docs/RUNBOOK.md` section 10](docs/RUNBOOK.md#10-helm-alternative-optional).
 
 Environment-specific values files:
+
 - [`helm/values-dev.yaml`](helm/values-dev.yaml)
 - [`helm/values-qa.yaml`](helm/values-qa.yaml)
 - [`helm/values-stg.yaml`](helm/values-stg.yaml)
@@ -252,12 +254,14 @@ Environment-specific values files:
 Workflow: [`.github/workflows/ci-cd.yml`](.github/workflows/ci-cd.yml)
 
 Current behavior in workflow:
+
 - Triggers on pushes to `dev`, `testing`, and `stg`.
 - Triggers on pull requests targeting `prd`.
 - Runs Maven build/tests per environment.
 - Contains placeholders/comments for multi-image build/push and deployment expansion.
 
 Required GitHub Environment Secrets (for `qa`, `stg`, and `prd` deployments):
+
 - `PLATFORM_POSTGRES_PASSWORD`
 - `PLATFORM_ARANGO_ROOT_PASSWORD`
 - `PLATFORM_CDK_ADMIN_PASSWORD`
@@ -299,9 +303,11 @@ done
 ## Configuration Precedence Order
 
 At the project level, configuration precedence follows standard Spring Boot external configuration rules:
-- https://docs.spring.io/spring-boot/reference/features/external-config.html
+
+- [https://docs.spring.io/spring-boot/reference/features/external-config.html](https://docs.spring.io/spring-boot/reference/features/external-config.html)
 
 For job launching specifically:
+
 1. Request-level `sparkConfigs` passed to `spark-job-service` APIs (highest precedence)
 2. `spark-job-service` deployment/runtime overrides
 3. `spark-job-service` application configuration
@@ -324,15 +330,15 @@ flowchart LR
 ## Architecture and Diagrams
 
 Project-level architecture diagrams were extracted into:
-- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
 
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
 
 ## References
 
-- Apache Spark: https://spark.apache.org/docs/4.0.0
-- Running Spark on Kubernetes: https://spark.apache.org/docs/4.0.0/running-on-kubernetes.html
-- Spark Submit: https://spark.apache.org/docs/4.0.0/submitting-applications.html
-- Spark Configuration: https://spark.apache.org/docs/4.0.0/configuration.html
-- Spark Structured Streaming + Kafka: https://spark.apache.org/docs/4.0.0/structured-streaming-kafka-integration.html
-- Spring Boot docs: https://docs.spring.io/spring-boot/index.html
-- Spring Externalized Configuration: https://docs.spring.io/spring-boot/reference/features/external-config.html
+- Apache Spark: [https://spark.apache.org/docs/4.0.0](https://spark.apache.org/docs/4.0.0)
+- Running Spark on Kubernetes: [https://spark.apache.org/docs/4.0.0/running-on-kubernetes.html](https://spark.apache.org/docs/4.0.0/running-on-kubernetes.html)
+- Spark Submit: [https://spark.apache.org/docs/4.0.0/submitting-applications.html](https://spark.apache.org/docs/4.0.0/submitting-applications.html)
+- Spark Configuration: [https://spark.apache.org/docs/4.0.0/configuration.html](https://spark.apache.org/docs/4.0.0/configuration.html)
+- Spark Structured Streaming + Kafka: [https://spark.apache.org/docs/4.0.0/structured-streaming-kafka-integration.html](https://spark.apache.org/docs/4.0.0/structured-streaming-kafka-integration.html)
+- Spring Boot docs: [https://docs.spring.io/spring-boot/index.html](https://docs.spring.io/spring-boot/index.html)
+- Spring Externalized Configuration: [https://docs.spring.io/spring-boot/reference/features/external-config.html](https://docs.spring.io/spring-boot/reference/features/external-config.html)

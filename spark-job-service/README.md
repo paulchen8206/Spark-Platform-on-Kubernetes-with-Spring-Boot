@@ -52,6 +52,7 @@ make mk-submit-logs
 ## Design Pattern
 
 This module uses a Chain of Responsibility for request validation before job launch:
+
 - [JobLaunchRequestValidationChain](src/main/java/com/aiks/spark/validation/JobLaunchRequestValidationChain.java) executes registered validators.
 - Validator contract: [JobLaunchRequestValidator](src/main/java/com/aiks/spark/validation/JobLaunchRequestValidator.java).
 - Default handlers: [JobNameValidator](src/main/java/com/aiks/spark/validation/JobNameValidator.java), [CorrelationIdValidator](src/main/java/com/aiks/spark/validation/CorrelationIdValidator.java).
@@ -106,11 +107,13 @@ flowchart LR
 ## Configuration
 
 Primary config files:
+
 - [application.yml](src/main/resources/config/application.yml)
 - [application-local.yml](src/main/resources/config/application-local.yml)
 - [application-minikube.yml](src/main/resources/config/application-minikube.yml)
 
 Key properties:
+
 - `spark.*`: common Spark runtime settings.
 - `spark-launcher.persist-jobs`: enables/disables execution history APIs.
 - `spark-launcher.capture-jobs-logs`: streams child job logs into this service logs.
@@ -237,8 +240,7 @@ mvn test
 
 ## References
 
-- Apache Spark 4.0 docs: https://spark.apache.org/docs/4.0.0
-- Running Spark on Kubernetes: https://spark.apache.org/docs/4.0.0/running-on-kubernetes.html
-- Spark submit: https://spark.apache.org/docs/4.0.0/submitting-applications.html
-- Spring Boot: https://docs.spring.io/spring-boot/index.html
-
+- Apache Spark 4.0 docs: [https://spark.apache.org/docs/4.0.0](https://spark.apache.org/docs/4.0.0)
+- Running Spark on Kubernetes: [https://spark.apache.org/docs/4.0.0/running-on-kubernetes.html](https://spark.apache.org/docs/4.0.0/running-on-kubernetes.html)
+- Spark submit: [https://spark.apache.org/docs/4.0.0/submitting-applications.html](https://spark.apache.org/docs/4.0.0/submitting-applications.html)
+- Spring Boot: [https://docs.spring.io/spring-boot/index.html](https://docs.spring.io/spring-boot/index.html)
