@@ -95,5 +95,18 @@ public class ArangoConnector {
         .trim();
   }
 
-  // TODO: Implement any other reader methods with Schema arguments and writer methods
+  public void write(final Dataset<Row> dataset, final String collection) {
+    Assert.hasText(collection, "ArangoDB collection name required");
+    log.info(
+        "Writing to ArangoDB >> database: {}, collection: {}",
+        this.properties.getArangoOptions().getDatabase(),
+        collection);
+    dataset
+        .write()
+        .format(SparkOptions.Arango.FORMAT)
+        .mode(this.properties.getSaveMode())
+        .options(this.properties.getArangoOptions().options())
+        .option(SparkOptions.Arango.TABLE, collection)
+        .save();
+  }
 }

@@ -126,7 +126,7 @@ make mk-namespace mk-secrets
 make mk-deploy mk-rollout-status
 make mk-pods mk-services
 
-# Submit smoke jobs (in-cluster)
+# Submit smoke jobs (in-cluster) and verify Arango batch output
 make mk-smoke
 
 # Host access via port-forward (each in its own terminal)

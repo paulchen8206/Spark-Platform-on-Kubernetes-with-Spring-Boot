@@ -2,7 +2,7 @@
 
 Batch Spark job that generates monthly sales reports by combining:
 - Sales transactions from MongoDB.
-- Product reference data from an in-memory lookup dataset.
+- Product reference data from ArangoDB.
 
 Main class: [SalesReportJob](src/main/java/com/ksoot/spark/sales/SalesReportJob.java)
 
@@ -43,9 +43,10 @@ Implementation entry point: [SparkPipelineExecutor](src/main/java/com/ksoot/spar
 Flow:
 1. Read sales data from MongoDB.
 2. Filter records by the target month.
-3. Join with in-memory product reference data.
+3. Load product reference data from ArangoDB.
 4. Aggregate daily sales.
-5. Write the result back to MongoDB as `sales_report_YYYY_MM`.
+5. Join aggregated sales with product reference data.
+6. Write the result to ArangoDB as `sales_report_YYYY_MM`.
 
 Sample data bootstrap: [DataPopulator](src/main/java/com/ksoot/spark/sales/DataPopulator.java)
 
@@ -83,10 +84,10 @@ classDiagram
 ```mermaid
 flowchart LR
   Input[(MongoDB sales transactions)] --> Read[Read by month]
-  Ref[(In-memory product reference)] --> Join[Join with product data]
+  Ref[(ArangoDB products)] --> Join[Join with product data]
   Read --> Join
   Join --> Agg[Aggregate daily sales]
-  Agg --> Out[(MongoDB sales_report_YYYY_MM)]
+  Agg --> Out[(ArangoDB sales_report_YYYY_MM)]
 ```
 
 ## Configuration
@@ -98,6 +99,7 @@ Frequently used properties:
 - `ksoot.job.correlation-id` (env: `CORRELATION_ID`): execution tracking id.
 - `ksoot.job.persist` (env: `PERSIST_JOB`): enable Spring Cloud Task persistence.
 - `ksoot.connector.mongo-options.*`: MongoDB connection.
+- `ksoot.connector.arango-options.*`: ArangoDB connection.
 
 Connector configuration details are documented in [Connectors](../spark-job-commons/README.md#connectors).
 

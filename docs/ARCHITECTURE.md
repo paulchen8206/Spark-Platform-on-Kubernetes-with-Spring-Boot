@@ -11,9 +11,9 @@ flowchart LR
   B --> D[spark-batch-sales-report-job]
   B --> E[spark-stream-logs-analysis-job]
 
-  D --> F[(MongoDB)]
+  D --> F[(MongoDB sales input)]
   D --> G[(PostgreSQL)]
-  D --> P[(In-memory product reference)]
+  D --> P[(ArangoDB products and reports)]
 
   E --> I[(Kafka error-logs topic)]
   E --> G
@@ -30,7 +30,8 @@ flowchart LR
   API -->|spark-submit| DRV[Spark Driver Pod]
   DRV --> EXE[Spark Executor Pods]
 
-  EXE -->|Batch output| MONGO[(MongoDB monthly_sales_statements_yyyy_mm)]
+  EXE -->|Batch sales input| MONGO[(MongoDB sales)]
+  EXE -->|Batch reference/output| ARANGO[(ArangoDB products and sales_report_YYYY_MM)]
   EXE -->|Structured streaming sink| PG[(PostgreSQL error_logs)]
   EXE -->|Consume stream| KAFKA[(Kafka error-logs topic)]
 
@@ -107,7 +108,8 @@ flowchart LR
   SS --> EX
   JAR --> SS
 
-  EX --> Mongo[(MongoDB sales_report_YYYY_MM)]
+  EX --> Mongo[(MongoDB sales)]
+  EX --> Arango[(ArangoDB products and sales_report_YYYY_MM)]
   EX --> Postgres[(PostgreSQL task metadata)]
 ```
 
@@ -123,7 +125,7 @@ flowchart LR
   Local --> LocalExec[Local executors/threads]
   Cluster --> PodExec[Executor pods]
 
-  LocalExec --> Targets[(MongoDB / PostgreSQL / Kafka)]
+  LocalExec --> Targets[(MongoDB / ArangoDB / PostgreSQL / Kafka)]
   PodExec --> Targets
 
   note1[Local mode\nFast debug, simpler networking]

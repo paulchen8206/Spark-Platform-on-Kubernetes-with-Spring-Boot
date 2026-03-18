@@ -95,7 +95,8 @@ flowchart LR
   Launcher -->|spark-submit| Driver[Spark Driver Pod]
   Driver --> Exec[Spark Executor Pods]
 
-  Exec -->|Batch write| Mongo[(MongoDB monthly_sales_statements_yyyy_mm)]
+  Exec -->|Batch sales input| Mongo[(MongoDB sales)]
+  Exec -->|Batch report/reference| Arango[(ArangoDB products and sales_report_YYYY_MM)]
   Exec -->|Stream write| Pg[(PostgreSQL error_logs)]
   Exec -->|Read stream| Kafka[(Kafka error-logs topic)]
 

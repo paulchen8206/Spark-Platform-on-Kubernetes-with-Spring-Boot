@@ -24,7 +24,8 @@ flowchart LR
 
   Executors -->|Consume| Kafka[(Kafka error-logs)]
   Executors -->|Write stream analysis| Pg[(PostgreSQL error_logs)]
-  Executors -->|Write batch statements| Mongo[(MongoDB monthly_sales_statements_yyyy_mm)]
+  Executors -->|Read batch sales input| Mongo[(MongoDB sales)]
+  Executors -->|Read/write batch reference and reports| Arango[(ArangoDB products and sales_report_YYYY_MM)]
 
   SJS -->|Persist task metadata| Meta[(PostgreSQL task metadata)]
   Client -->|Execution/status APIs| SJS
@@ -144,6 +145,7 @@ flowchart TB
     EX3[Spark Executor Pod 3]
     KAFKA[(Kafka)]
     MONGO[(MongoDB)]
+    ARANGO[(ArangoDB)]
     PG[(PostgreSQL)]
   end
 
@@ -165,6 +167,10 @@ flowchart TB
   EX1 --> MONGO
   EX2 --> MONGO
   EX3 --> MONGO
+
+  EX1 --> ARANGO
+  EX2 --> ARANGO
+  EX3 --> ARANGO
 
   EX1 --> PG
   EX2 --> PG
@@ -247,10 +253,12 @@ kubectl get svc -n ksoot
 #### 3.2.6 Submit Jobs (In-cluster, no port-forward needed)
 
 ```bash
+CURRENT_MONTH=$(date +%Y-%m)
+
 kubectl run sales-submit --rm -i --restart=Never -n ksoot --image=curlimages/curl:8.10.1 -- \
   -sS -X POST http://spark-job-service:8090/v1/spark-jobs/start \
   -H 'Content-Type: application/json' \
-  -d '{"jobName":"sales-report-job","jobArguments":{"month":"2024-08"}}'
+  -d '{"jobName":"sales-report-job","jobArguments":{"month":"'"$$CURRENT_MONTH"'"}}'
 
 kubectl run logs-submit --rm -i --restart=Never -n ksoot --image=curlimages/curl:8.10.1 -- \
   -sS -X POST http://spark-job-service:8090/v1/spark-jobs/start \
@@ -259,6 +267,8 @@ kubectl run logs-submit --rm -i --restart=Never -n ksoot --image=curlimages/curl
 
 kubectl get pods -n ksoot --sort-by=.metadata.creationTimestamp | tail -n 12
 ```
+
+For the Makefile quick path, `make mk-smoke` now verifies both the ArangoDB `products` collection and the generated `sales_report_YYYY_MM` collection for `SALES_MONTH`.
 
 #### 3.2.7 Host Access via Port Forward (Optional)
 

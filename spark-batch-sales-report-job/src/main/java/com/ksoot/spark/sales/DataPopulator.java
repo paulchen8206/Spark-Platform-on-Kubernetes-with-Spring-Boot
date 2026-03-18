@@ -1,5 +1,10 @@
 package com.ksoot.spark.sales;
 
+import com.arangodb.ArangoCollection;
+import com.arangodb.ArangoDB;
+import com.arangodb.ArangoDatabase;
+import com.ksoot.spark.common.config.properties.ArangoOptions;
+import com.ksoot.spark.common.config.properties.ConnectorProperties;
 import com.mongodb.client.MongoCollection;
 import java.time.*;
 import java.util.*;
@@ -26,17 +31,17 @@ public class DataPopulator {
     "1001", "1002", "1003", "1004", "1005", "1006", "1007", "1008", "1009", "1010"
   };
 
-  // Total number of Credit card accounts to be created
-  // For each account upto 10 transactions are created for each day of last 3 months
-  private static final int SALES_COUNT = 1000;
-
   // Number of records to be created in a batch
   private static final int BATCH_SIZE = 1000;
 
   private static final int NO_OF_MONTHS_TO_GENERATE_DATA_FOR = 12;
 
+  private static final String PRODUCTS_COLLECTION = "products";
   private static final String SALES_COLLECTION = "sales";
+
   private final MongoOperations mongoOperations;
+
+  private final ConnectorProperties connectorProperties;
 
   public void populateData() {
     this.createProductsData();
@@ -45,7 +50,85 @@ public class DataPopulator {
   }
 
   private void createProductsData() {
-    log.info("Using in-memory products reference data");
+    log.info("Ensuring ArangoDB product reference data");
+    final ArangoOptions arangoOptions = this.connectorProperties.getArangoOptions();
+    final ArangoDB arangoDB = this.arangoDB(arangoOptions);
+    try {
+      if (!arangodbDatabase(arangoDB, arangoOptions).exists()) {
+        arangoDB.createDatabase(arangoOptions.getDatabase());
+        log.info("Created ArangoDB database: {}", arangoOptions.getDatabase());
+      }
+
+      final ArangoDatabase arangoDatabase = arangodbDatabase(arangoDB, arangoOptions);
+      final ArangoCollection productsCollection = arangoDatabase.collection(PRODUCTS_COLLECTION);
+      if (!productsCollection.exists()) {
+        arangoDatabase.createCollection(PRODUCTS_COLLECTION);
+        log.info("Created ArangoDB collection: {}", PRODUCTS_COLLECTION);
+      }
+
+      final ArangoCollection existingProductsCollection =
+          arangoDatabase.collection(PRODUCTS_COLLECTION);
+      final long existingCount =
+          Optional.ofNullable(existingProductsCollection.count().getCount()).orElse(0L);
+      if (existingCount == 0L) {
+        existingProductsCollection.insertDocuments(this.productsData());
+        log.info(
+            "Inserted {} product reference documents into {}",
+            products.length,
+            PRODUCTS_COLLECTION);
+      } else {
+        log.info(
+            "Product reference data already exists in {} with {} documents",
+            PRODUCTS_COLLECTION,
+            existingCount);
+      }
+    } finally {
+      arangoDB.shutdown();
+    }
+  }
+
+  private ArangoDB arangoDB(final ArangoOptions arangoOptions) {
+    final ArangoDB.Builder builder =
+        new ArangoDB.Builder()
+            .user(arangoOptions.getUsername())
+            .password(arangoOptions.getPassword())
+            .useSsl(arangoOptions.isSslEnabled());
+
+    for (String endpoint : arangoOptions.getEndpoints()) {
+      final String[] hostParts =
+          endpoint.trim().replace("http://", "").replace("https://", "").split(":", 2);
+      final String host = hostParts[0];
+      final int port = hostParts.length > 1 ? Integer.parseInt(hostParts[1]) : 8529;
+      builder.host(host, port);
+    }
+    return builder.build();
+  }
+
+  private ArangoDatabase arangodbDatabase(
+      final ArangoDB arangoDB, final ArangoOptions arangoOptions) {
+    return arangoDB.db(arangoOptions.getDatabase());
+  }
+
+  private List<Map<String, Object>> productsData() {
+    return List.of(
+        this.productDocument("1001", "TV"),
+        this.productDocument("1002", "Mobile"),
+        this.productDocument("1003", "Table"),
+        this.productDocument("1004", "Chair"),
+        this.productDocument("1005", "Sofa"),
+        this.productDocument("1006", "AC"),
+        this.productDocument("1007", "Bed"),
+        this.productDocument("1008", "Charger"),
+        this.productDocument("1009", "Laptop"),
+        this.productDocument("1010", "Tablet"));
+  }
+
+  private Map<String, Object> productDocument(final String productId, final String productName) {
+    final Map<String, Object> document = new LinkedHashMap<>();
+    document.put("_key", productId);
+    document.put("product_id", productId);
+    document.put("product_name", productName);
+    return document;
   }
 
   private void createSalesSchema() {

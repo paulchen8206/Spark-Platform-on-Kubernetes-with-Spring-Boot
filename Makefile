@@ -14,7 +14,7 @@ SPARK_BATCH_IMAGE ?= spark-batch-sales-report-job:0.0.1
 SPARK_STREAM_IMAGE ?= spark-stream-logs-analysis-job:0.0.1
 CURL_IMAGE ?= curlimages/curl:8.10.1
 
-SALES_MONTH ?= 2024-08
+SALES_MONTH ?= $(shell date +%Y-%m)
 PLATFORM_SECRETS_FILE ?= k8s/platform-secrets-dev.yaml
 ENV_FILE ?= .env
 COMPOSE_REQUIRED_VARS ?= CDK_ADMIN_PASSWORD CDK_ANALYST_PASSWORD DATABASE_PASSWORD POSTGRES_PASSWORD ARANGO_ROOT_PASSWORD
@@ -33,7 +33,7 @@ MK_DOCKER_ENV = eval "$$($(MINIKUBE) -p $(MINIKUBE_PROFILE) docker-env)"
 
 .PHONY: help \
 	dc-env-check dc-up dc-ps dc-down dc-e2e \
-	mk-start mk-stop mk-delete mk-tunnel mk-docker-env mk-print-docker-env mk-build mk-image-spark-base mk-image-job-service mk-image-batch mk-image-stream mk-images mk-k8s-preflight mk-namespace mk-secrets mk-deploy-infra mk-deploy-rbac mk-deploy-app mk-deploy mk-rollout-status mk-verify mk-pods mk-services mk-kafka-ui-health mk-port-forward mk-port-forward-postgres mk-port-forward-kafka-ui mk-port-forward-arango mk-port-forward-spark-ui mk-api-check mk-clean-job-pods mk-submit-sales mk-submit-logs mk-show-recent-pods mk-smoke mk-service-logs mk-events mk-cleanup mk-cleanup-all mk-e2e \
+	mk-start mk-stop mk-delete mk-tunnel mk-docker-env mk-print-docker-env mk-build mk-image-spark-base mk-image-job-service mk-image-batch mk-image-stream mk-images mk-k8s-preflight mk-namespace mk-secrets mk-deploy-infra mk-deploy-rbac mk-deploy-app mk-deploy mk-rollout-status mk-verify mk-pods mk-services mk-kafka-ui-health mk-port-forward mk-port-forward-postgres mk-port-forward-kafka-ui mk-port-forward-arango mk-port-forward-spark-ui mk-api-check mk-clean-job-pods mk-submit-sales mk-verify-sales-arango mk-submit-logs mk-show-recent-pods mk-smoke mk-service-logs mk-events mk-cleanup mk-cleanup-all mk-e2e \
 	helm-prepare helm-install helm-verify helm-url helm-smoke helm-uninstall helm-e2e
 
 help: ## Show runbook-compatible targets
@@ -189,6 +189,32 @@ mk-submit-sales: ## [B] Submit sales-report batch job
 	  -H 'Content-Type: application/json' \
 	  -d '{"jobName":"sales-report-job","jobArguments":{"month":"$(SALES_MONTH)"}}'
 
+mk-verify-sales-arango: mk-k8s-preflight ## [B] Verify sales smoke data in ArangoDB for SALES_MONTH
+	@report_collection=$$(printf 'sales_report_%s' "$(SALES_MONTH)" | tr '-' '_'); \
+	products_json=$$($(KNS) exec deployment/arango -- sh -lc 'wget --user=root --password="$$ARANGO_ROOT_PASSWORD" -qO- http://127.0.0.1:8529/_db/products_db/_api/collection/products/count'); \
+	products_count=$$(printf '%s' "$$products_json" | sed -n 's/.*"count":\([0-9][0-9]*\).*/\1/p'); \
+	if [[ -z "$$products_count" || "$$products_count" -lt 10 ]]; then \
+		echo "Unexpected Arango products collection state: $$products_json"; \
+		exit 1; \
+	fi; \
+	report_json=''; \
+	report_count=''; \
+	for attempt in $$(seq 1 30); do \
+		report_json=$$($(KNS) exec deployment/arango -- sh -lc "wget --user=root --password=\"\$$ARANGO_ROOT_PASSWORD\" -qO- http://127.0.0.1:8529/_db/products_db/_api/collection/$$report_collection/count 2>/dev/null || true"); \
+		report_count=$$(printf '%s' "$$report_json" | sed -n 's/.*"count":\([0-9][0-9]*\).*/\1/p'); \
+		if [[ -n "$$report_count" && "$$report_count" -gt 0 ]]; then \
+			echo "Verified Arango report collection $$report_collection with $$report_count documents"; \
+			break; \
+		fi; \
+		sleep 2; \
+	done; \
+	if [[ -z "$$report_count" || "$$report_count" -le 0 ]]; then \
+		echo "Arango report verification failed for $$report_collection"; \
+		echo "Last response: $$report_json"; \
+		exit 1; \
+	fi; \
+	echo "Verified Arango products collection with $$products_count documents"
+
 mk-submit-logs: ## [B] Submit logs-analysis streaming job
 	$(KNS) run logs-submit --rm -i --restart=Never --image=$(CURL_IMAGE) -- \
 	  -sS -X POST http://spark-job-service:8090/v1/spark-jobs/start \
@@ -198,7 +224,7 @@ mk-submit-logs: ## [B] Submit logs-analysis streaming job
 mk-show-recent-pods: ## [B] Show most recent pods in namespace
 	$(KNS) get pods --sort-by=.metadata.creationTimestamp | tail -n 12
 
-mk-smoke: mk-clean-job-pods mk-submit-sales mk-submit-logs mk-show-recent-pods ## [B] Clean old pods, submit jobs, and show latest pods
+mk-smoke: mk-clean-job-pods mk-submit-sales mk-verify-sales-arango mk-submit-logs mk-show-recent-pods ## [B] Clean old pods, submit jobs, verify Arango batch output, and show latest pods
 
 mk-service-logs: ## [B] Tail spark-job-service logs
 	$(KNS) logs deployment/spark-job-service -f
