@@ -7,6 +7,7 @@ services:
     container_name: spark-job-service
     ports:
       - "8090:8090"
+      - "4040:4040"
     environment:
       SPRING_PROFILES_ACTIVE: "docker"
       POSTGRES_URL: "jdbc:postgresql://postgres-spark:5432/spark_jobs_db"

@@ -175,56 +175,13 @@ Swagger UI:
 
 ## API Reference
 
-### Start Spark Job
+For a detailed endpoint reference with full examples, see [Spark Job Service API Documentation](../docs/SPARK_JOB_SERVICE_API.md).
 
-```http
-POST /v1/spark-jobs/start
-```
+Quick summary:
 
-Example:
-
-```bash
-curl -X POST 'http://localhost:8090/v1/spark-jobs/start' \
-  -H 'Content-Type: application/json' \
-  -d '{
-    "jobName": "sales-report-job",
-    "jobArguments": {
-      "month": "2024-11"
-    }
-  }'
-```
-
-`correlationId` can be provided optionally; if omitted, the service generates one.
-
-### Stop Spark Job
-
-```http
-POST /v1/spark-jobs/stop/{correlationId}
-```
-
-Example:
-
-```bash
-curl -X POST 'http://localhost:8090/v1/spark-jobs/stop/71643ba2-1177-4e10-a43b-a21177de1022'
-```
-
-### Job Execution Query APIs
-
-These endpoints are enabled only when `spark-launcher.persist-jobs=true`.
-
-```http
-GET /v1/spark-jobs/executions
-GET /v1/spark-jobs/executions/{jobName}
-GET /v1/spark-jobs/executions/{jobName}/running
-GET /v1/spark-jobs/executions/{jobName}/latest
-GET /v1/spark-jobs/executions/latest?jobNames=sales-report-job&jobNames=logs-analysis-job
-GET /v1/spark-jobs/executions/job-names
-GET /v1/spark-jobs/executions/count
-GET /v1/spark-jobs/executions/count/{jobName}
-GET /v1/spark-jobs/executions/count-running
-GET /v1/spark-jobs/executions/count-by-correlation-id/{correlationId}
-GET /v1/spark-jobs/executions/by-correlation-id/{correlationId}
-```
+- Start endpoint: `POST /v1/spark-jobs/start`
+- Stop endpoint: `POST /v1/spark-jobs/stop/{correlationId}`
+- Execution endpoints are enabled when `spark-launcher.persist-jobs=true`
 
 ## Build
 

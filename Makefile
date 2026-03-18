@@ -83,7 +83,7 @@ dc-logs-app: dc-env-check ## [A] Tail spark-job-service container logs
 dc-stop-app: dc-env-check ## [A] Stop spark-job-service container
 	$(COMPOSE_APP_CMD) stop spark-job-service
 
-dc-e2e: dc-up dc-ps ## [A] Run Docker Compose end-to-end startup
+dc-e2e: dc-up-app dc-ps ## [A] Run Docker Compose end-to-end startup
 
 mk-start: ## [B] Start minikube with runbook defaults
 	$(MINIKUBE) start --driver=docker --cpus=$(MINIKUBE_CPUS) --memory=$(MINIKUBE_MEMORY) -p $(MINIKUBE_PROFILE)

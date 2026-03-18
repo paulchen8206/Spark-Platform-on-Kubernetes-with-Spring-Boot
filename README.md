@@ -14,6 +14,7 @@ This repository includes:
 ## Project Modules
 
 - [`spark-job-service`](spark-job-service/README.md): REST API service that builds and runs `spark-submit` commands.
+- [`Spark Job Service API Documentation`](docs/SPARK_JOB_SERVICE_API.md): Detailed endpoint reference with request/response examples.
 - [`spark-job-commons`](spark-job-commons/README.md): Shared components used by Spark jobs.
 - [`spark-batch-sales-report-job`](spark-batch-sales-report-job/README.md): Sample batch pipeline.
 - [`spark-stream-logs-analysis-job`](spark-stream-logs-analysis-job/README.md): Sample streaming pipeline.
@@ -32,30 +33,6 @@ flowchart TB
   Service["spark-job-service\npom.xml"]
   Batch["spark-batch-sales-report-job\npom.xml"]
   Stream["spark-stream-logs-analysis-job\npom.xml"]
-
-  Root --> Commons
-  Root --> Service
-  Root --> Batch
-  Root --> Stream
-
-  Commons --> Service
-  Commons --> Batch
-  Commons --> Stream
-
-  Service --> Batch
-  Service --> Stream
-```
-
-### Maven Components Organization (Left-to-Right)
-
-```mermaid
-flowchart LR
-  Root["root pom.xml"]
-
-  Commons["spark-job-commons"]
-  Service["spark-job-service"]
-  Batch["spark-batch-sales-report-job"]
-  Stream["spark-stream-logs-analysis-job"]
 
   Root --> Commons
   Root --> Service
