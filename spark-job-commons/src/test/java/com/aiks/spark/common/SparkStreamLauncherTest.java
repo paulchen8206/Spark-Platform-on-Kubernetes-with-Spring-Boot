@@ -1,7 +1,5 @@
 package com.aiks.spark.common;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 import org.apache.spark.sql.streaming.DataStreamWriter;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;

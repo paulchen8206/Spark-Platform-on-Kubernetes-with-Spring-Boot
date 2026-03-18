@@ -3,6 +3,7 @@ package com.aiks.spark.util.pagination;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.Schema.RequiredMode;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -34,7 +35,7 @@ public class PaginationData extends RepresentationModel<PaginationData> {
 
   @Schema(
       description = "Total number of records available, matching given filters",
-      required = true,
+      requiredMode = RequiredMode.REQUIRED,
       example = "145")
   @Setter(value = AccessLevel.NONE)
   private long totalRecords;

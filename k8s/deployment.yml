@@ -27,6 +27,13 @@ spec:
       - name: spark-job-service
         image: spark-job-service:0.0.1
         imagePullPolicy: IfNotPresent
+        resources:
+          requests:
+            cpu: "250m"
+            memory: "512Mi"
+          limits:
+            cpu: "1000m"
+            memory: "1Gi"
         ports:
         - containerPort: 8090
           #              The configs not defined as in application.yml can be passed in args as follows

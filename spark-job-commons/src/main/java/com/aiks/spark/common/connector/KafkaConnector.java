@@ -90,7 +90,6 @@ public class KafkaConnector {
     return streamWriter;
   }
 
-  @SuppressWarnings("unchecked")
   private void applyStreamOptions(
       final DataStreamWriter<Row> streamWriter, final Map<String, String> options) {
     ((WriteConfigMethods<DataStreamWriter<Row>>) streamWriter).options(options);

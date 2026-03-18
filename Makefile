@@ -20,6 +20,7 @@ ENV_FILE ?= .env
 COMPOSE_REQUIRED_VARS ?= CDK_ADMIN_PASSWORD CDK_ANALYST_PASSWORD DATABASE_PASSWORD POSTGRES_PASSWORD ARANGO_ROOT_PASSWORD
 DOCKER_COMPOSE_FILE ?= docker/docker-compose.yml
 COMPOSE_CMD = docker compose --env-file $(ENV_FILE) -f $(DOCKER_COMPOSE_FILE)
+COMPOSE_APP_CMD = docker compose --env-file $(ENV_FILE) -f $(DOCKER_COMPOSE_FILE) --profile app
 K8S_DIR ?= k8s
 INFRA_MANIFEST ?= $(K8S_DIR)/infra-kubernetes-deploy.yml
 RBAC_MANIFEST ?= $(K8S_DIR)/spark-rbac.yml
@@ -32,7 +33,7 @@ KNS := $(KUBECTL) -n $(NAMESPACE)
 MK_DOCKER_ENV = eval "$$($(MINIKUBE) -p $(MINIKUBE_PROFILE) docker-env)"
 
 .PHONY: help \
-	dc-env-check dc-up dc-ps dc-down dc-e2e \
+	dc-env-check dc-up dc-ps dc-down dc-build-app dc-up-app dc-logs-app dc-stop-app dc-e2e \
 	mk-start mk-stop mk-delete mk-tunnel mk-docker-env mk-print-docker-env mk-build mk-image-spark-base mk-image-job-service mk-image-batch mk-image-stream mk-images mk-k8s-preflight mk-namespace mk-secrets mk-deploy-infra mk-deploy-rbac mk-deploy-app mk-deploy mk-rollout-status mk-verify mk-pods mk-services mk-kafka-ui-health mk-port-forward mk-port-forward-postgres mk-port-forward-kafka-ui mk-port-forward-arango mk-port-forward-spark-ui mk-api-check mk-clean-job-pods mk-submit-sales mk-verify-sales-arango mk-submit-logs mk-show-recent-pods mk-smoke mk-service-logs mk-events mk-cleanup mk-cleanup-all mk-e2e \
 	helm-prepare helm-install helm-verify helm-url helm-smoke helm-uninstall helm-shutdown helm-e2e
 
@@ -62,6 +63,20 @@ dc-ps: dc-env-check ## [A] Show Docker Compose services
 
 dc-down: dc-env-check ## [A] Stop Docker Compose infrastructure
 	$(COMPOSE_CMD) down
+
+dc-build-app: dc-env-check ## [A] Build job artifacts and spark-job-service Docker image for Compose app profile
+	mvn -pl spark-job-service,spark-batch-sales-report-job,spark-stream-logs-analysis-job -am package -DskipTests
+	docker build -t $(SPARK_BASE_IMAGE) -f docker/Dockerfile docker
+	$(COMPOSE_APP_CMD) build spark-job-service
+
+dc-up-app: dc-build-app ## [A] Start spark-job-service container on the Docker Compose network
+	$(COMPOSE_APP_CMD) up -d spark-job-service
+
+dc-logs-app: dc-env-check ## [A] Tail spark-job-service container logs
+	$(COMPOSE_APP_CMD) logs -f spark-job-service
+
+dc-stop-app: dc-env-check ## [A] Stop spark-job-service container
+	$(COMPOSE_APP_CMD) stop spark-job-service
 
 dc-e2e: dc-up dc-ps ## [A] Run Docker Compose end-to-end startup
 

@@ -157,20 +157,25 @@ docker compose -f docker/docker-compose.yml ps
 Default local values are provided in [.env](.env). Update this file before running in shared environments.
 
 Main local endpoints from [`docker/docker-compose.yml`](docker/docker-compose.yml):
-- Conduktor UI: http://localhost:8081
-- Kafka UI: http://localhost:8100
+
+- Spark Job Service (optional app profile): [http://localhost:8090](http://localhost:8090)
+- Conduktor UI: [http://localhost:8081](http://localhost:8081)
+- Kafka UI: [http://localhost:8100](http://localhost:8100)
 - Kafka broker (host): `localhost:9092`
-- PostgreSQL: `localhost:5432`
+- PostgreSQL (Conduktor): `localhost:5432`
+- PostgreSQL (Spark jobs): `localhost:5433`
 - MongoDB: `localhost:27017`
 - ArangoDB: `localhost:8529`
 
 Notes:
-- If required by your workflow, create databases `spark_jobs_db` and `error_logs_db` and Kafka topics `job-stop-requests` and `error-logs`.
+
+- `docker compose up -d` starts infra only. To run `spark-job-service` in Docker on the same network, use `make dc-up-app`.
 - Ensure required ports are available before running Compose.
 
 ### Run Services and Jobs
 
-- Run the job launcher service from [`spark-job-service`](spark-job-service/README.md#running-locally).
+
+- Run the job launcher service from [`spark-job-service`](spark-job-service/README.md#running-locally), either on the host or with `make dc-up-app`.
 - Run sample jobs directly from IDE or module-specific instructions:
   - [`spark-batch-sales-report-job`](spark-batch-sales-report-job/README.md)
   - [`spark-stream-logs-analysis-job`](spark-stream-logs-analysis-job/README.md)

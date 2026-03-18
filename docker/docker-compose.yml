@@ -1,4 +1,39 @@
 services:
+  spark-job-service:
+    profiles: ["app"]
+    build:
+      context: ../spark-job-service
+    image: spark-job-service:0.0.1
+    container_name: spark-job-service
+    ports:
+      - "8090:8090"
+    environment:
+      SPRING_PROFILES_ACTIVE: "docker"
+      POSTGRES_URL: "jdbc:postgresql://postgres-spark:5432/spark_jobs_db"
+      POSTGRES_USERNAME: "postgres"
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in your shell or .env}"
+      JDBC_URL: "jdbc:postgresql://postgres-spark:5432"
+      JDBC_USER: "postgres"
+      JDBC_PASSWORD: "${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in your shell or .env}"
+      KAFKA_BOOTSTRAP_SERVERS: "kafka:9092"
+      MONGODB_URL: "mongodb://mongo:27017"
+      ARANGODB_URL: "arango:8529"
+      ARANGO_ROOT_PASSWORD: "${ARANGO_ROOT_PASSWORD:?Set ARANGO_ROOT_PASSWORD in your shell or .env}"
+      CAPTURE_JOBS_LOGS: "true"
+      PERSIST_JOBS: "false"
+    volumes:
+      - ../spark-batch-sales-report-job/target/spark-batch-sales-report-job-0.0.1-SNAPSHOT.jar:/opt/spark/job-apps/spark-batch-sales-report-job.jar:ro
+      - ../spark-stream-logs-analysis-job/target/spark-stream-logs-analysis-job-0.0.1-SNAPSHOT.jar:/opt/spark/job-apps/spark-stream-logs-analysis-job.jar:ro
+      - ../spark-job-service/logs:/home/spark/logs
+    depends_on:
+      - kafka
+      - mongo
+      - arango
+      - postgres-spark
+    networks:
+      - mynetwork
+
   conduktor:
     image: conduktor/conduktor-console:1.28.0
     container_name: conduktor

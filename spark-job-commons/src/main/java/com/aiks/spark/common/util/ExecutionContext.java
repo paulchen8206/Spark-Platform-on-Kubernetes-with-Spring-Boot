@@ -54,6 +54,7 @@ public class ExecutionContext {
    * @param resource instance. If <code>null</code>, the mapping will be removed
    * @return Previous bound instance, if any
    */
+  @SuppressWarnings("unchecked")
   public <T> T put(final String key, final T resource) {
     Assert.hasText(key, "key must be not null");
 
@@ -75,6 +76,7 @@ public class ExecutionContext {
    * @return
    * @param <T>
    */
+  @SuppressWarnings("unchecked")
   public <T> T computeIfAbsent(String key, Function<String, T> mappingFunction) {
     return (T) this.resources.computeIfAbsent(key, mappingFunction);
   }
@@ -87,6 +89,7 @@ public class ExecutionContext {
    * @return Previous value, or <code>null</code> if no value was bound and the new instance it's
    *     been mapped to the key
    */
+  @SuppressWarnings("unchecked")
   public <T> T putIfAbsent(final String key, final T resource) {
     Assert.hasText(key, "Resource key must be not null");
     if (resource != null) {

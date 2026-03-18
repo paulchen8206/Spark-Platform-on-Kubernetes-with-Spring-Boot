@@ -122,7 +122,7 @@ public class JobProblem extends NestedRuntimeException {
     }
 
     @Override
-    public Builder<JobProblem> args(@Nullable final Object[] args) {
+    public Builder<JobProblem> args(@Nullable final Object... args) {
       this.args = args;
       return this;
     }

@@ -34,7 +34,7 @@ class SparkJobServiceConfiguration {
       final List<String> sparkPropertyNames =
           propertySources.stream()
               .filter(propertySource -> propertySource instanceof EnumerablePropertySource)
-              .map(propertySource -> (EnumerablePropertySource) propertySource)
+              .map(propertySource -> (EnumerablePropertySource<?>) propertySource)
               .map(EnumerablePropertySource::getPropertyNames)
               .flatMap(Arrays::stream)
               .distinct()

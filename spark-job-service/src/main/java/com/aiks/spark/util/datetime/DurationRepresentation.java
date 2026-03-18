@@ -119,7 +119,9 @@ public class DurationRepresentation {
       for (int i = 0; i < format.length(); i++) {
         final char ch = format.charAt(i);
         if (inLiteral && ch != '\'') {
-          buffer.append(ch); // buffer can't be null if inLiteral is true
+          if (buffer != null) {
+            buffer.append(ch);
+          }
           continue;
         }
         Object value = null;

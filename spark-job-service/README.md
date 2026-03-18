@@ -138,6 +138,24 @@ mvn spring-boot:run -Dspring-boot.run.profiles=local
 
 You can also run [SparkJobService.java](src/main/java/com/aiks/spark/SparkJobService.java) from IDE.
 
+### Docker Compose App Profile
+
+Use this path when you want `spark-job-service` itself to run in a Docker container on the same Compose network as Kafka, MongoDB, ArangoDB, and PostgreSQL.
+
+```bash
+make dc-up
+make dc-up-app
+```
+
+This packages the service and Spark job jars, builds the `spark-job-service` image, and starts the container with the `docker` Spring profile. The container still launches child Spark jobs in local mode, while those jobs connect to Compose services using container hostnames (`mongo`, `arango`, `kafka`, `postgres-spark`).
+
+Useful follow-up commands:
+
+```bash
+make dc-logs-app
+make dc-stop-app
+```
+
 ### Minikube Profile
 
 1. Prepare Minikube infra as documented in [Preparing for Minikube](../README.md#preparing-for-minikube).
@@ -149,7 +167,8 @@ mvn spring-boot:run -Dspring-boot.run.profiles=minikube
 ```
 
 Swagger UI:
-- http://localhost:8090/swagger-ui/index.html?urls.primaryName=Spark+Jobs
+
+- [http://localhost:8090/swagger-ui/index.html?urls.primaryName=Spark+Jobs](http://localhost:8090/swagger-ui/index.html?urls.primaryName=Spark+Jobs)
 
 ## API Reference
 

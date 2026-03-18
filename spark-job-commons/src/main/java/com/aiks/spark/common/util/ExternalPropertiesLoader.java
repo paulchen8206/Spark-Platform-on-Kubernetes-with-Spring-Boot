@@ -2,6 +2,7 @@ package com.aiks.spark.common.util;
 
 import com.google.common.io.Files;
 import java.io.IOException;
+import java.util.Objects;
 import java.util.Properties;
 import lombok.experimental.UtilityClass;
 import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
@@ -27,13 +28,15 @@ public class ExternalPropertiesLoader {
 
   private static final YamlPropertySourceLoader ymlLoader = new YamlPropertySourceLoader();
 
+  @SuppressWarnings("null")
   public static PropertySource<?> loadPropertySource(final String prefix, final String filename)
       throws IOException {
     Assert.hasLength(filename, "Resource file must not be null");
     Resource path = new ClassPathResource(filename);
     Assert.isTrue(path.exists(), "Resource " + path + " does not exist");
-    String fileNameWithoutExtension = Files.getNameWithoutExtension(filename);
-    String extension = Files.getFileExtension(filename);
+    String fileNameWithoutExtension =
+        Objects.requireNonNull(Files.getNameWithoutExtension(filename));
+    String extension = Objects.requireNonNull(Files.getFileExtension(filename));
     if (extension.contentEquals(PROPERTY_FILE_EXTENSION)
         || extension.contentEquals(CONF_FILE_EXTENSION)
         || extension.contentEquals(XML_FILE_EXTENSION)) {
@@ -47,12 +50,14 @@ public class ExternalPropertiesLoader {
     }
   }
 
+  @SuppressWarnings("null")
   public static PropertySource<?> loadPropertySource(final String sourceName, final Resource file)
       throws IOException {
     Assert.hasLength(sourceName, "String sourceName must not be null");
     Assert.notNull(file, "Resource file must not be null");
     Assert.isTrue(file.exists(), "Resource " + file + " does not exist");
-    String extension = Files.getFileExtension(file.getFilename());
+    String extension =
+        Objects.requireNonNull(Files.getFileExtension(Objects.requireNonNull(file.getFilename())));
     if (extension.contentEquals(PROPERTY_FILE_EXTENSION)
         || extension.contentEquals(XML_FILE_EXTENSION)) {
       return propLoader.load(sourceName, file).get(0);
@@ -81,10 +86,12 @@ public class ExternalPropertiesLoader {
     return propLoader.load(sourceName, file).get(0);
   }
 
+  @SuppressWarnings("null")
   public static Properties loadProperties(final Resource file) throws IOException {
     Assert.notNull(file, "Resource file must not be null");
     Assert.isTrue(file.exists(), "Resource " + file + " does not exist");
-    String extension = Files.getFileExtension(file.getFilename());
+    String extension =
+        Objects.requireNonNull(Files.getFileExtension(Objects.requireNonNull(file.getFilename())));
     if (extension.contentEquals(PROPERTY_FILE_EXTENSION)
         || extension.contentEquals(CONF_FILE_EXTENSION)
         || extension.contentEquals(XML_FILE_EXTENSION)) {

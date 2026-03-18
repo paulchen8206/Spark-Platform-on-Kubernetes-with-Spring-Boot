@@ -1,0 +1,58 @@
+logging:
+  logback:
+    rollingpolicy:
+      clean-history-on-start: true
+  file:
+    path: ${LOGGING_FILE_PATH:/home/spark/logs}
+    name: ${logging.file.path}/application.log
+  level:
+    ROOT: info
+debug: false
+#------------------------- Spark configurations -------------------------
+spark:
+  master: local[*]
+  executor:
+    instances: 1
+    memory: 2g
+    cores: 1
+  driver:
+    memory: 1g
+    cores: 1
+    host: 127.0.0.1
+    bindAddress: 127.0.0.1
+    extraJavaOptions: >
+      -Dspring.profiles.active=local
+
+  submit.deployMode: client
+# ===================================================================
+# Application specific properties
+# Add your own application properties here
+# ===================================================================
+
+#------------------------- Spark Job Launcher configurations -------------------------
+spark-launcher:
+  capture-jobs-logs: true
+  persist-jobs: false
+  jobs:
+    sales-report-job:
+      jar-file: /opt/spark/job-apps/spark-batch-sales-report-job.jar
+      spark-config:
+        spark.kubernetes.namespace:
+        spark.kubernetes.container.image:
+        spark.kubernetes.authenticate.driver.serviceAccountName:
+        spark.kubernetes.driverEnv.SPARK_USER:
+    logs-analysis-job:
+      jar-file: /opt/spark/job-apps/spark-stream-logs-analysis-job.jar
+      spark-config:
+        spark.kubernetes.namespace:
+        spark.kubernetes.container.image:
+        spark.kubernetes.authenticate.driver.serviceAccountName:
+        spark.kubernetes.driverEnv.SPARK_USER:
+    spark-example:
+      main-class-name: org.apache.spark.examples.SparkPi
+      jar-file: ${SPARK_HOME}/examples/jars/spark-examples_2.12-3.5.3.jar
+      spark-config:
+        spark.kubernetes.namespace:
+        spark.kubernetes.container.image:
+        spark.kubernetes.authenticate.driver.serviceAccountName:
+        spark.kubernetes.driverEnv.SPARK_USER:

@@ -84,12 +84,22 @@ Default local values are in `.env`. Update `.env` before running in shared envir
 mvn clean package -DskipTests
 ```
 
-### 2.3 Run Spark Job Service Locally
+### 2.3 Run Spark Job Service
+
+Option A: run from your host JVM.
 
 ```bash
 cd spark-job-service
 mvn spring-boot:run -Dspring-boot.run.profiles=local
 ```
+
+Option B: run as a Docker container on the Compose network.
+
+```bash
+make dc-up-app
+```
+
+This starts `spark-job-service` with the `docker` profile while keeping Spark job execution in local mode inside the container.
 
 ### 2.4 Verify API Availability
 
