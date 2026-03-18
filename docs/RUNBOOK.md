@@ -529,3 +529,24 @@ kubectl run postgres-spark-check --rm -i --restart=Never -n aiks --image=postgre
 helm uninstall local-release -n aiks
 kubectl get all -n aiks
 ```
+
+Equivalent target:
+
+```bash
+make helm-uninstall
+```
+
+### 4.8 Full Helm + Minikube Shutdown
+
+Use this when you want to remove the Helm release and delete the Minikube profile in one step.
+
+```bash
+make helm-shutdown
+```
+
+Equivalent manual commands:
+
+```bash
+helm uninstall local-release -n aiks
+minikube -p minikube delete
+```

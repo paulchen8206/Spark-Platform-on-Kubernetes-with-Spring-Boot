@@ -34,7 +34,7 @@ MK_DOCKER_ENV = eval "$$($(MINIKUBE) -p $(MINIKUBE_PROFILE) docker-env)"
 .PHONY: help \
 	dc-env-check dc-up dc-ps dc-down dc-e2e \
 	mk-start mk-stop mk-delete mk-tunnel mk-docker-env mk-print-docker-env mk-build mk-image-spark-base mk-image-job-service mk-image-batch mk-image-stream mk-images mk-k8s-preflight mk-namespace mk-secrets mk-deploy-infra mk-deploy-rbac mk-deploy-app mk-deploy mk-rollout-status mk-verify mk-pods mk-services mk-kafka-ui-health mk-port-forward mk-port-forward-postgres mk-port-forward-kafka-ui mk-port-forward-arango mk-port-forward-spark-ui mk-api-check mk-clean-job-pods mk-submit-sales mk-verify-sales-arango mk-submit-logs mk-show-recent-pods mk-smoke mk-service-logs mk-events mk-cleanup mk-cleanup-all mk-e2e \
-	helm-prepare helm-install helm-verify helm-url helm-smoke helm-uninstall helm-e2e
+	helm-prepare helm-install helm-verify helm-url helm-smoke helm-uninstall helm-shutdown helm-e2e
 
 help: ## Show runbook-compatible targets
 	@awk 'BEGIN {FS = ":.*##"; printf "Runbook-compatible targets:\n"} /^[a-zA-Z0-9_.-]+:.*##/ {printf "  make %-25s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
@@ -193,10 +193,18 @@ mk-submit-sales: ## [B] Submit sales-report batch job
 
 mk-verify-sales-arango: mk-k8s-preflight ## [B] Verify sales smoke data in ArangoDB for SALES_MONTH
 	@report_collection=$$(printf 'sales_report_%s' "$(SALES_MONTH)" | tr '-' '_'); \
-	products_json=$$($(KNS) exec deployment/arango -- sh -lc 'wget --user=root --password="$$ARANGO_ROOT_PASSWORD" -qO- http://127.0.0.1:8529/_db/products_db/_api/collection/products/count'); \
-	products_count=$$(printf '%s' "$$products_json" | sed -n 's/.*"count":\([0-9][0-9]*\).*/\1/p'); \
+	products_json=''; \
+	products_count=''; \
+	for attempt in $$(seq 1 30); do \
+		products_json=$$($(KNS) exec deployment/arango -- sh -lc 'wget --user=root --password="$$ARANGO_ROOT_PASSWORD" -qO- http://127.0.0.1:8529/_db/products_db/_api/collection/products/count 2>/dev/null || true'); \
+		products_count=$$(printf '%s' "$$products_json" | sed -n 's/.*"count":\([0-9][0-9]*\).*/\1/p'); \
+		if [[ -n "$$products_count" && "$$products_count" -ge 10 ]]; then \
+			break; \
+		fi; \
+		sleep 2; \
+	done; \
 	if [[ -z "$$products_count" || "$$products_count" -lt 10 ]]; then \
-		echo "Unexpected Arango products collection state: $$products_json"; \
+		echo "Unexpected Arango products collection state after retries: $$products_json"; \
 		exit 1; \
 	fi; \
 	report_json=''; \
@@ -271,4 +279,8 @@ helm-smoke: ## [C] Smoke check Kafka and Postgres from temporary pods
 helm-uninstall: ## [C] Uninstall Helm release
 	helm uninstall $(HELM_RELEASE) -n $(NAMESPACE)
 
-helm-e2e: helm-prepare helm-install helm-verify helm-url ## [C] Run Helm end-to-end infra flow
+helm-shutdown: ## [C] Uninstall Helm release and delete minikube profile
+	-helm uninstall $(HELM_RELEASE) -n $(NAMESPACE)
+	$(MINIKUBE) -p $(MINIKUBE_PROFILE) delete
+
+helm-e2e: mk-start helm-prepare helm-install helm-verify helm-url ## [C] Run Helm end-to-end infra flow
