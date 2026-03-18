@@ -1,8 +1,68 @@
 # Spring Boot Framework
 
-This document covers the Spring Boot architecture layers and request flow as implemented across this project. Each section maps directly to concrete classes and annotations in use.
+This document describes the high-level frameworks and Spring Boot capabilities used by each of the four modules in this project. All modules share a common Spring Boot 3.4.0 parent and Apache Spark 4.0.0 (Scala 2.13).
 
-## Spring Boot Architecture Layers
+---
+
+## Module Overview
+
+```mermaid
+flowchart LR
+    SJS["spark-job-service\nREST API · Actuator\nSpring Kafka producer\nSpring Cloud Task"]
+    SJC["spark-job-commons\nShared auto-config library\nSpark session · AOP\nSpring Kafka consumer\nSpring Retry"]
+    SALES["spark-batch-sales-report-job\nBatch Spark job\nSpring Cloud Task\nSpring Data MongoDB"]
+    STREAM["spark-stream-logs-analysis-job\nStreaming Spark job\nSpring Cloud Task\nSpring Kafka · Spring Retry"]
+    SJS -->|"spark-submit\n(REST trigger)"| SALES
+    SJS -->|"spark-submit\n(REST trigger)"| STREAM
+    SALES -->|depends on| SJC
+    STREAM -->|depends on| SJC
+    SJS -->|"Kafka stop signal"| SJC
+```
+
+---
+
+## Framework Summary by Module
+
+| Framework / Library | spark-job-service | spark-job-commons | spark-batch-sales-report-job | spark-stream-logs-analysis-job |
+|---|:---:|:---:|:---:|:---:|
+| Spring Boot 3.4.0 | ✓ | ✓ | ✓ | ✓ |
+| Spring Boot Web (Tomcat) | ✓ | | | |
+| Spring Boot Actuator | ✓ | | | |
+| Spring Boot Validation (JSR-303) | ✓ | | ✓ | ✓ |
+| Spring Boot HATEOAS | ✓ | | | |
+| Spring Boot Log4j2 | | ✓ | ✓ | ✓ |
+| Spring Boot AOP | | ✓ | | |
+| Spring Cloud Task 3.x | ✓ | ✓ | ✓ | ✓ |
+| Spring Kafka | ✓ (producer) | ✓ (consumer) | | ✓ (consumer) |
+| Spring Retry | | ✓ | | ✓ |
+| Spring Data MongoDB | | | ✓ | |
+| Springdoc OpenAPI 2.7.0 | ✓ | | | |
+| Apache Spark Core + SQL 4.0 | | ✓ (provided) | ✓ (provided) | ✓ (provided) |
+| Spark SQL–Kafka Connector | | ✓ | | ✓ |
+| MongoDB Spark Connector | | ✓ | ✓ | |
+| ArangoDB Spark Datasource | | ✓ | ✓ | ✓ |
+| PostgreSQL JDBC | ✓ | ✓ | ✓ | ✓ |
+| Lombok | ✓ | ✓ | ✓ | ✓ |
+| maven-shade-plugin (uber JAR) | | | ✓ | ✓ |
+
+---
+
+## spark-job-service
+
+A Spring Boot web service that accepts REST requests to start and stop Spark jobs by invoking `spark-submit` as an external process. It does not run Spark itself — it is a thin orchestration layer.
+
+**Key frameworks:**
+- **Spring Boot Web** — exposes `POST /v1/spark-jobs/start` and `POST /v1/spark-jobs/stop/{correlationId}` via `@RestController`
+- **Spring Boot Actuator** — health and metrics endpoint at `/actuator/health`
+- **Spring Boot Validation** — JSR-303 bean validation on `JobLaunchRequest` request bodies
+- **Spring Boot HATEOAS** — paginated response assembly for execution history endpoints
+- **Spring Cloud Task** — tracks job lifecycle (start, completion, failure) via `TaskExplorer` / `TaskRepository` backed by PostgreSQL
+- **Spring Kafka** — `KafkaTemplate` publishes a stop signal (correlationId) to a Kafka topic when a stop request is received
+- **Springdoc OpenAPI 2.7.0** — auto-generates Swagger UI from `@Tag`, `@Operation`, `@ApiResponses` annotations
+- **spring-boot-problem-handler** — standardised RFC 7807 error responses
+- **`@ConfigurationProperties`** — type-safe binding of all `spark-launcher.*` YAML properties to `SparkLauncherProperties` / `SparkJobProperties`
+
+### Spring Boot Architecture Layers
 
 The service is structured into four horizontal layers. Each layer has a single responsibility and communicates only with the layer immediately below it.
 
@@ -55,7 +115,7 @@ flowchart TB
 
 ---
 
-## Spring Boot Flow Architecture
+### Spring Boot Flow Architecture
 
 The diagrams below trace the two primary HTTP flows end-to-end: submitting a job and stopping one.
 
@@ -112,7 +172,7 @@ sequenceDiagram
 
 ---
 
-## Key Spring Boot Annotations in Use
+### Key Spring Boot Annotations in Use
 
 | Annotation | Location | Purpose |
 |---|---|---|
@@ -125,3 +185,112 @@ sequenceDiagram
 | `@PreDestroy` | `SparkSubmitJobLauncher` | Shutdown the cached thread pool cleanly on application stop |
 | `@Tag`, `@Operation`, `@ApiResponses` | Both controllers | Auto-generate OpenAPI 3 documentation via Springdoc |
 | `@Component` | `JobLaunchRequestValidationChain`, validators | Register as Spring-managed beans; list auto-collected by Spring for the chain |
+
+---
+
+## spark-job-commons
+
+A shared Spring Boot auto-configuration library consumed by both Spark job modules. It provides Spark session management, connector abstractions, execution lifecycle hooks, and the Kafka consumer that handles job stop signals.
+
+**Key frameworks:**
+- **Spring Boot Auto-configuration** — `SparkCommonsConfiguration` is registered as an auto-configuration class; consumers receive `SparkSession`, connectors, and execution management beans without explicit wiring
+- **Spring Boot AOP (`spring-boot-starter-aop`)** — aspect-oriented hooks for cross-cutting concerns such as execution logging and retry advice
+- **Spring Cloud Task** — `SpringCloudTaskConfiguration` integrates task lifecycle; `SparkExecutionManager` implements `TaskExecutionListener` to react to job start, completion, and failure events
+- **Spring Kafka** — `@KafkaListener` in `SparkExecutionManager` subscribes to the stop topic; on receiving the correlationId it stops the active `StreamingQuery` or cancels all Spark jobs
+- **Spring Retry** — `@Retryable` applied to stream restart logic in `SparkStreamLauncher`; retries on `StreamRetryableException` with configurable back-off
+- **`@ConfigurationProperties`** — `ConnectorProperties` and its nested option classes (`JdbcOptions`, `MongoOptions`, `ArangoOptions`, `KafkaOptions`, `FileOptions`) bind connector config from YAML
+- **`@ConditionalOnProperty` / `@ConditionalOnClass`** — sub-configurations (`SparkExecutionManagerConfiguration`, `SparkStreamLauncherConfiguration`) activate only when the required beans and properties are present
+
+```mermaid
+flowchart TB
+    subgraph AUTO["Auto-configuration (SparkCommonsConfiguration)"]
+        SS["SparkSessionConfiguration\nCreates SparkSession bean"]
+        SC["SparkConnectorConfiguration\nConnectorFactory + typed connectors"]
+        SEC["SparkExecutionManagerConfiguration\nSparkExecutionManager\n@KafkaListener stop handler"]
+        SLC["SparkStreamLauncherConfiguration\nSparkStreamLauncher\n@Retryable stream restart"]
+    end
+    SS --> SC
+    SEC --> SS
+    SLC --> SEC
+```
+
+---
+
+## spark-batch-sales-report-job
+
+A Spring Boot application packaged as a `spark-submit`-compatible uber JAR (via maven-shade-plugin). It reads sales and product data, aggregates them with Spark SQL, and writes a report to MongoDB and ArangoDB.
+
+**Key frameworks:**
+- **Spring Boot (no web layer)** — started via `spring-cloud-starter-task`; no embedded HTTP server; the application exits after the job completes
+- **Spring Cloud Task** — registers the run as a task execution; updates status in PostgreSQL via `TaskRepository`; an `ApplicationRunner` bean drives the pipeline
+- **Spring Boot Validation** — `@ConfigurationProperties` with `@Validated` on `JobProperties` ensures all parameters are present at startup
+- **Spring Boot Log4j2** — replaces default Logback; Log4j2 configuration in `log4j2.properties`
+- **Spring Data MongoDB** — `MongoTemplate` used to seed and persist data during the `DataPopulator` pre-processing step
+- **Apache Spark Core + SQL** (provided by Spark runtime) — `SparkSession`, Dataset/DataFrame APIs for batch transformations
+- **MongoDB Spark Connector** — Spark DataFrameReader/Writer format `mongodb` for bulk reads and writes
+- **ArangoDB Spark Datasource** — Spark DataFrameWriter format `arangodb` for persisting the final report
+- **maven-shade-plugin** — produces a fat JAR with all dependencies (except Spark provided scope) for `spark-submit`
+
+```mermaid
+sequenceDiagram
+    participant SparkSubmit as spark-submit
+    participant SRJ as SalesReportJob
+    participant Runner as SparkStatementJobRunner
+    participant Pipeline as SalesReportPipelineTemplate
+    participant Spark as SparkSession
+
+    SparkSubmit->>SRJ: main()
+    SRJ->>Runner: run(args)
+    Runner->>Pipeline: run()
+    Pipeline->>Spark: loadSales() DataFrame
+    Pipeline->>Spark: loadProducts() DataFrame
+    Pipeline->>Spark: aggregateSales() DataFrame
+    Pipeline->>Spark: buildReport() DataFrame
+    Pipeline->>Spark: persist() to MongoDB + ArangoDB
+    Runner-->>SRJ: complete — Spring Cloud Task records SUCCESS
+```
+
+---
+
+## spark-stream-logs-analysis-job
+
+A Spring Boot application packaged as a `spark-submit`-compatible uber JAR. It runs a Spark Structured Streaming query that reads log lines from Kafka, parses error patterns with a regex strategy, and writes results to ArangoDB in micro-batch mode. It runs continuously until a stop signal is received via Kafka.
+
+**Key frameworks:**
+- **Spring Boot (no web layer)** — started via `spring-cloud-starter-task`; no embedded HTTP server
+- **Spring Cloud Task** — task lifecycle management identical to the batch job; status persisted to PostgreSQL
+- **Spring Boot Validation** — `@Validated` on `JobProperties` for startup-time config validation
+- **Spring Boot Log4j2** — asynchronous appenders for high-throughput logging during streaming
+- **Spring Kafka** — `KafkaTemplate` in `LogsGenerator` publishes sample log events to the input topic; `@KafkaListener` in `SparkExecutionManager` (from commons) handles stop signals
+- **Spring Retry** — `@Retryable` in `SparkStreamLauncher` (from commons) restarts the streaming query on transient `StreamRetryableException`
+- **Apache Spark Core + SQL** (provided) — `SparkSession` in local or cluster mode
+- **Spark SQL–Kafka Connector** — provides a Kafka source (`readStream().format("kafka")`) for Structured Streaming
+- **ArangoDB Spark Datasource** — micro-batch `foreachBatch` sink writes parsed error records to ArangoDB
+- **maven-shade-plugin** — uber JAR for `spark-submit`
+
+```mermaid
+sequenceDiagram
+    participant SparkSubmit as spark-submit
+    participant LAJ as LogAnalysisJob
+    participant Runner as LogAnalysisJobRunner
+    participant Executor as SparkPipelineExecutor
+    participant Spark as SparkSession
+    participant KSource as Kafka Source Topic
+    participant Strategy as RegexErrorLogParserStrategy
+    participant ASink as ArangoDB Sink
+    participant StopKafka as Kafka Stop Topic
+    participant Manager as SparkExecutionManager
+
+    SparkSubmit->>LAJ: main()
+    LAJ->>Runner: run(args)
+    Runner->>Executor: execute()
+    Executor->>Spark: readStream().format("kafka")
+    KSource-->>Spark: log lines (micro-batch)
+    Spark->>Strategy: parse(logLines)
+    Strategy-->>Spark: parsed error records
+    Spark->>ASink: foreachBatch to ArangoDB
+    Note over Runner,Spark: streaming loop runs until stop signal
+    StopKafka-->>Manager: correlationId
+    Manager->>Spark: streamingQuery.stop()
+    Runner-->>LAJ: complete — Spring Cloud Task records SUCCESS
+```
