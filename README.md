@@ -24,6 +24,7 @@ This repository includes:
 To keep module READMEs concise, framework and pattern details are centralized in these docs:
 
 - [docs/SPRING_BOOT_FRAMEWORK.md](docs/SPRING_BOOT_FRAMEWORK.md): high-level frameworks used by all four Spark modules.
+- [docs/SPRING_APPLICATION_LIFECYCLE.md](docs/SPRING_APPLICATION_LIFECYCLE.md): startup, runtime, and shutdown lifecycle across service and Spark jobs.
 - [docs/DESIGN_PATTERNS.md](docs/DESIGN_PATTERNS.md): class diagrams and module-level design patterns.
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md): deployment and runtime architecture diagrams.
 
