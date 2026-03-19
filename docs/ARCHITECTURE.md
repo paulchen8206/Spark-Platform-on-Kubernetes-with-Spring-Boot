@@ -66,6 +66,142 @@ flowchart TB
   RBAC --> EX2
 ```
 
+## Spring Boot on Spark Platform on Kubernetes (Pods)
+
+```mermaid
+flowchart TB
+  Client["Client or Scheduler"] --> Ingress["Kubernetes Service\nspark-job-service"]
+
+  subgraph NS["Kubernetes Namespace: aiks"]
+    subgraph SpringBoot["Spring Boot Application Pod"]
+      SvcPod["spark-job-service Pod\nSpring Boot REST API"]
+    end
+
+    subgraph SparkControl["Spark Control Plane"]
+      Submit["spark-submit process\ninside service pod"]
+      Driver["Spark Driver Pod"]
+      Exec1["Spark Executor Pod 1"]
+      Exec2["Spark Executor Pod 2"]
+    end
+
+    subgraph DataPods["Platform Data and Messaging Pods"]
+      Kafka["Kafka Pod"]
+      Pg["PostgreSQL Pod"]
+      Mongo["MongoDB Pod"]
+      Arango["ArangoDB Pod"]
+      Zoo["Zookeeper Pod"]
+    end
+
+    subgraph Ops["Cluster Operations"]
+      RBAC["ServiceAccount and RBAC"]
+      KubeAPI["Kubernetes API Server"]
+    end
+  end
+
+  Ingress --> SvcPod
+  SvcPod --> Submit
+  Submit --> KubeAPI
+  KubeAPI --> Driver
+  Driver --> Exec1
+  Driver --> Exec2
+  RBAC --> Driver
+  RBAC --> Exec1
+  RBAC --> Exec2
+
+  Driver --> Kafka
+  Driver --> Pg
+  Driver --> Mongo
+  Driver --> Arango
+  Driver --> Zoo
+  Exec1 --> Kafka
+  Exec1 --> Pg
+  Exec1 --> Mongo
+  Exec1 --> Arango
+  Exec2 --> Kafka
+  Exec2 --> Pg
+  Exec2 --> Mongo
+  Exec2 --> Arango
+```
+
+## Spring Boot and Spark Pods Request Lifecycle (Sequence)
+
+```mermaid
+sequenceDiagram
+  participant Client as Client/Scheduler
+  participant Svc as spark-job-service Pod
+  participant Submit as spark-submit
+  participant K8sAPI as Kubernetes API
+  participant Driver as Spark Driver Pod
+  participant Exec as Spark Executor Pods
+  participant Infra as Kafka/PostgreSQL/MongoDB/ArangoDB
+  participant StopTopic as Kafka stop topic
+
+  Client->>Svc: POST /v1/spark-jobs/start
+  Svc->>Svc: Validate request and resolve configs
+  Svc->>Submit: Build command and execute
+  Submit->>K8sAPI: Create SparkApplication runtime resources
+  K8sAPI->>Driver: Start driver pod
+  Driver->>Exec: Start executor pods
+  Driver->>Infra: Read/write data and metadata
+  Exec->>Infra: Process partitions and IO
+  Svc-->>Client: HTTP 202 Accepted
+
+  alt stop requested
+    Client->>Svc: POST /v1/spark-jobs/stop/{correlationId}
+    Svc->>StopTopic: Publish correlationId
+    StopTopic->>Driver: Stop signal consumed by job runtime
+    Driver->>Exec: Cancel/stop execution
+  end
+```
+
+## Production Variant (Separated Namespaces and Ingress)
+
+```mermaid
+flowchart TB
+  Internet["Client or External Scheduler"] --> Ingress["Ingress Controller"]
+  Ingress --> AppSvc["Service: spark-job-service"]
+
+  subgraph AppNS["Namespace: app-runtime"]
+    AppPod["Pod: spark-job-service"]
+    SubmitProc["spark-submit process"]
+    DriverPod["Spark Driver Pod"]
+    ExecPodA["Spark Executor Pod A"]
+    ExecPodB["Spark Executor Pod B"]
+    AppSA["ServiceAccount + RBAC"]
+  end
+
+  subgraph InfraNS["Namespace: platform-infra"]
+    KafkaS["Kafka Service/Pods"]
+    PgS["PostgreSQL Service/Pods"]
+    MongoS["MongoDB Service/Pods"]
+    ArangoS["ArangoDB Service/Pods"]
+    ZooS["Zookeeper Service/Pods"]
+  end
+
+  AppSvc --> AppPod
+  AppPod --> SubmitProc
+  SubmitProc --> DriverPod
+  DriverPod --> ExecPodA
+  DriverPod --> ExecPodB
+  AppSA --> DriverPod
+  AppSA --> ExecPodA
+  AppSA --> ExecPodB
+
+  DriverPod --> KafkaS
+  DriverPod --> PgS
+  DriverPod --> MongoS
+  DriverPod --> ArangoS
+  DriverPod --> ZooS
+  ExecPodA --> KafkaS
+  ExecPodA --> PgS
+  ExecPodA --> MongoS
+  ExecPodA --> ArangoS
+  ExecPodB --> KafkaS
+  ExecPodB --> PgS
+  ExecPodB --> MongoS
+  ExecPodB --> ArangoS
+```
+
 ## End-to-End Architecture Flow (Mermaid)
 
 ```mermaid
