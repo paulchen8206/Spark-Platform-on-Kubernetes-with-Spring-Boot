@@ -25,6 +25,8 @@ To keep module READMEs concise, framework and pattern details are centralized in
 
 - [docs/SPRING_BOOT_FRAMEWORK.md](docs/SPRING_BOOT_FRAMEWORK.md): high-level frameworks used by all four Spark modules.
 - [docs/SPRING_APPLICATION_LIFECYCLE.md](docs/SPRING_APPLICATION_LIFECYCLE.md): startup, runtime, and shutdown lifecycle across service and Spark jobs.
+- [docs/ADR-001-spring-boot-spark-kubernetes.md](docs/ADR-001-spring-boot-spark-kubernetes.md): formal architecture decision for Spring Boot control plane with Spark on Kubernetes.
+- [docs/ADR-002-kafka-correlation-stop-control.md](docs/ADR-002-kafka-correlation-stop-control.md): formal architecture decision for asynchronous stop control using Kafka and correlation id.
 - [docs/DESIGN_PATTERNS.md](docs/DESIGN_PATTERNS.md): class diagrams and module-level design patterns.
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md): deployment and runtime architecture diagrams.
 

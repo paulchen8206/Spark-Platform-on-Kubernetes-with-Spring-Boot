@@ -4,6 +4,7 @@ This document explains the Spring application lifecycle across the full platform
 
 For framework inventory and module details, see [Spring Boot Framework](SPRING_BOOT_FRAMEWORK.md).
 For deployment/runtime topology, see [Architecture](ARCHITECTURE.md).
+For stop-control rationale and trade-offs, see [ADR-002: Kafka Correlation-ID Stop Control](ADR-002-kafka-correlation-stop-control.md).
 
 ## End-to-End Lifecycle (Platform View)
 

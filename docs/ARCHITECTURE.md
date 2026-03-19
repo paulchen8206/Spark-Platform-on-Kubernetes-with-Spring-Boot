@@ -7,6 +7,7 @@ For complementary details, see:
 - [Spring Boot Framework](SPRING_BOOT_FRAMEWORK.md) for module framework coverage, service flow, and Spring annotation usage.
 - [Design Patterns](DESIGN_PATTERNS.md) for class-diagram-focused pattern documentation.
 - [Spark Job Service API](SPARK_JOB_SERVICE_API.md) for endpoint-level behavior.
+- [ADR-001: Spring Boot Control Plane with Spark on Kubernetes](ADR-001-spring-boot-spark-kubernetes.md) for architecture rationale and trade-offs.
 
 ## Components Diagram (Mermaid)
 
