@@ -92,49 +92,49 @@ sequenceDiagram
 
 ```mermaid
 flowchart TD
-    A[main -> SpringApplication.run] --> B[Create Spring context]
-    B --> C[Bind spark-launcher and spark.* properties]
-    C --> D[Expose REST endpoints]
-    D --> E[Start request: validate + startJob]
-    E --> F[Build and execute spark-submit]
-    D --> G[Stop request: publish correlationId to Kafka]
-    F --> H[Async process completion log]
-    B --> I[Shutdown hook]
-    I --> J[@PreDestroy shutdown executor]
+    A["main to SpringApplication.run"] --> B["Create Spring context"]
+    B --> C["Bind spark-launcher and spark properties"]
+    C --> D["Expose REST endpoints"]
+    D --> E["Start request validate and start job"]
+    E --> F["Build and execute spark-submit"]
+    D --> G["Stop request publish correlation id to Kafka"]
+    F --> H["Async process completion log"]
+    B --> I["Shutdown hook"]
+    I --> J["PreDestroy shutdown executor"]
 ```
 
 ### spark-batch-sales-report-job Lifecycle
 
 ```mermaid
 flowchart TD
-    A[main -> SpringApplication.run] --> B[Create Spring context]
-    B --> C[@PostConstruct init]
-    C --> D[Optional hadoop dll load on Windows]
-    C --> E[DataPopulator seed data]
-    B --> F[ApplicationRunner.run]
-    F --> G[SparkPipelineExecutor.execute]
-    G --> H[Template pipeline run once]
-    H --> I[Task lifecycle updates: BeforeTask/AfterTask/FailedTask]
-    I --> J[Application exits]
+    A["main to SpringApplication.run"] --> B["Create Spring context"]
+    B --> C["PostConstruct init"]
+    C --> D["Optional Hadoop DLL load on Windows"]
+    C --> E["DataPopulator seed data"]
+    B --> F["ApplicationRunner run"]
+    F --> G["SparkPipelineExecutor execute"]
+    G --> H["Template pipeline run once"]
+    H --> I["Task lifecycle updates"]
+    I --> J["Application exits"]
 ```
 
 ### spark-stream-logs-analysis-job Lifecycle
 
 ```mermaid
 flowchart TD
-    A[main -> SpringApplication.run] --> B[Create Spring context]
-    B --> C[@PostConstruct init]
-    B --> D[ApplicationRunner.run]
-    D --> E[SparkPipelineExecutor.execute]
-    E --> F[SparkStreamLauncher.startStream]
-    F --> G[startAndAwaitRetryableStream]
-    G --> H[Register StreamingQuery in SparkExecutionManager]
-    H --> I[Continuous micro-batch processing]
-    I --> J{Stop signal received?}
+    A["main to SpringApplication.run"] --> B["Create Spring context"]
+    B --> C["PostConstruct init"]
+    B --> D["ApplicationRunner run"]
+    D --> E["SparkPipelineExecutor execute"]
+    E --> F["SparkStreamLauncher startStream"]
+    F --> G["startAndAwaitRetryableStream"]
+    G --> H["Register StreamingQuery in SparkExecutionManager"]
+    H --> I["Continuous micro-batch processing"]
+    I --> J{"Stop signal received"}
     J -->|No| I
-    J -->|Yes| K[@KafkaListener onJobStopRequest]
-    K --> L[Stop query and SparkContext]
-    L --> M[AfterTask or FailedTask final status]
+    J -->|Yes| K["KafkaListener onJobStopRequest"]
+    K --> L["Stop query and SparkContext"]
+    L --> M["AfterTask or FailedTask final status"]
 ```
 
 ## Spring Lifecycle Hooks Used
