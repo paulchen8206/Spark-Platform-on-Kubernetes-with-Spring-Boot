@@ -47,6 +47,49 @@ flowchart LR
 
 ---
 
+## Common Configuration Binding Mechanism
+
+All modules follow the same Spring Boot configuration pattern:
+- Define typed configuration classes with `@ConfigurationProperties`.
+- Register them with `@EnableConfigurationProperties` in module configuration.
+- Inject them into runtime components using constructor injection.
+
+Primary examples:
+- [spark-job-service/src/main/java/com/aiks/spark/conf/SparkLauncherProperties.java](../spark-job-service/src/main/java/com/aiks/spark/conf/SparkLauncherProperties.java)
+- [spark-job-service/src/main/java/com/aiks/spark/conf/SparkJobServiceConfiguration.java](../spark-job-service/src/main/java/com/aiks/spark/conf/SparkJobServiceConfiguration.java)
+- [spark-job-service/src/main/java/com/aiks/spark/launcher/SparkSubmitJobLauncher.java](../spark-job-service/src/main/java/com/aiks/spark/launcher/SparkSubmitJobLauncher.java)
+- [spark-job-commons/src/main/java/com/aiks/spark/common/config/properties/ConnectorProperties.java](../spark-job-commons/src/main/java/com/aiks/spark/common/config/properties/ConnectorProperties.java)
+- [spark-job-commons/src/main/java/com/aiks/spark/common/config/SparkConnectorConfiguration.java](../spark-job-commons/src/main/java/com/aiks/spark/common/config/SparkConnectorConfiguration.java)
+- [spark-batch-sales-report-job/src/main/java/com/aiks/spark/sales/conf/JobProperties.java](../spark-batch-sales-report-job/src/main/java/com/aiks/spark/sales/conf/JobProperties.java)
+- [spark-batch-sales-report-job/src/main/java/com/aiks/spark/sales/conf/JobConfiguration.java](../spark-batch-sales-report-job/src/main/java/com/aiks/spark/sales/conf/JobConfiguration.java)
+- [spark-stream-logs-analysis-job/src/main/java/com/aiks/spark/loganalysis/conf/JobProperties.java](../spark-stream-logs-analysis-job/src/main/java/com/aiks/spark/loganalysis/conf/JobProperties.java)
+- [spark-stream-logs-analysis-job/src/main/java/com/aiks/spark/loganalysis/conf/JobConfiguration.java](../spark-stream-logs-analysis-job/src/main/java/com/aiks/spark/loganalysis/conf/JobConfiguration.java)
+
+```mermaid
+flowchart LR
+    EXT["application.yml / profile YAML / env vars"] --> BIND["@ConfigurationProperties\nTyped properties objects"]
+    BIND --> REG["@EnableConfigurationProperties\nRegister as Spring beans"]
+    REG --> INJ["Constructor injection\ninto services/executors/connectors"]
+```
+
+This mechanism is intentionally consistent across modules to make configuration behavior predictable during local runs, Docker, and Kubernetes deployments.
+
+### Troubleshooting Configuration Binding
+
+Common symptoms and checks:
+- Symptom: App fails at startup with property validation errors.
+    Check: `@Validated` constraints in properties classes and required YAML keys for the active profile.
+- Symptom: Properties bean exists but values are null/default.
+    Check: `@EnableConfigurationProperties(...)` is present in module config and prefix names exactly match YAML keys.
+- Symptom: Profile-specific values are not applied.
+    Check: active profile (`spring.profiles.active`) and file naming (`application-<profile>.yml`).
+- Symptom: Environment variable overrides do not take effect.
+    Check: variable naming/format and whether the process runtime actually received those env vars.
+- Symptom: Runtime bean still uses old values.
+    Check: constructor injection target type is the expected properties class and no duplicate bean wiring path is used.
+
+---
+
 ## spark-job-service
 
 A Spring Boot web service that accepts REST requests to start and stop Spark jobs by invoking `spark-submit` as an external process. It does not run Spark itself — it is a thin orchestration layer.
