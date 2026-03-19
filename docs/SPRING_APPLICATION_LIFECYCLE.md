@@ -71,7 +71,7 @@ sequenceDiagram
     participant Pipe as Pipeline
     participant Task as Task Listener
     participant Stop as Kafka Stop Signal
-    participant End as Shutdown
+    participant ShutdownFlow as Shutdown
 
     Main->>Ctx: SpringApplication.run
     Ctx->>Bean: instantiate + dependency injection
@@ -83,7 +83,7 @@ sequenceDiagram
         Stop->>Bean: @KafkaListener onJobStopRequest
     end
     Task->>Task: @AfterTask or @FailedTask
-    End->>Bean: @PreDestroy
+    ShutdownFlow->>Bean: @PreDestroy
 ```
 
 ## Module Lifecycle Details
